@@ -9,6 +9,10 @@
     System.Windows.Forms.dll
 <END_REFS>
 
+'$. @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+'$. Currently unfinished.              @
+'$. @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
 C# - namespace Kronosta.Games.Y1_SelfModifyingChess {
 
   @[State
