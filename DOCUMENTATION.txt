@@ -225,3 +225,25 @@ Defines a single-line expression macro with the specified name and the specified
   Ends an exception block.
 
 By convention, the area inside of exception blocks not including the starting and ending instructions themselves should be indented, although it doesn't have to be.
+
+==Preprocessor==
+The preprocessor uses lines starting with a question mark.
+
+Some directives take a block as an argument. These are always ended by a line containing a single question mark.
+Inside of a preprocessor block, "?!" is replaced by "?". This of course means that "?!!" is replaced by just "?!", allowing you to nest preprocessor blocks
+when that is necessary.
+
+"?Define" <name>
+<block>
+?
+  Defines the long macro with the name as the block. On each line, everything preceding the first colon is considered a comment.
+  When called, ?n? will be replaced with the nth argument.
+  For example:
+    ?Define Print
+      Print the line :C# - Console.WriteLine("?!1?!")
+    ?
+
+"?Call" <name> !!arg1!!arg2!!arg3!!etc.
+  Calls the long macro with the name.
+
+There are more, I'll get to documenting them later. For now you can look at the code in Preprocess() in Program.cs.
