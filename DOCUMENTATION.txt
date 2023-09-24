@@ -1,20 +1,43 @@
 Y1 is a proof-of-concept programming language made to show off a brand new paradigm known as Type-Oriented Programming.
 
 ==Name==
-The name was created while looking for good names that weren't already taken. A lot of the best names are already used. I recalled probably the worst misspeech I'd ever come across, that being saying "Where one?" instead of "Where is it?". Then the thought process began as follows: "Where one" -> "Why one" -> "Y1". Y1 appeared to be untaken, and also sounded cool, so I went with it.
+The name was created while looking for good names that weren't already taken.
+A lot of the best names are already used. I recalled probably the worst misspeech I'd ever come across, 
+that being saying "Where one?" instead of "Where is it?". Then the thought process began as follows: "Where one" -> "Why one" -> "Y1". 
+Y1 appeared to be untaken, and also sounded cool, so I went with it.
 
 ==Type-oriented programming==
-Type-orientation is a derivative of Object-orientation, but instead of focusing on objects, it focuses on types/classes. Types have a link to all their instances, and objects are only accessible from their types. While typically subclasses have a link to their superclass, in type-oriented programming, superclasses have a link to their subclasses, and subclasses are only accessible from their superclass. Type-oriented programming also focuses on defining types dynamically for small differences in storage, rather than generic types or fields.
+Type-orientation is a derivative of Object-orientation, but instead of focusing on objects, it focuses on types/classes. 
+Types have a link to all their instances, and objects are only accessible from their types. 
+While typically subclasses have a link to their superclass, in type-oriented programming, 
+superclasses have a link to their subclasses, and subclasses are only accessible from their superclass. 
+Type-oriented programming also focuses on defining types dynamically for small differences in storage, 
+rather than generic types or fields.
 
 ==Y1 Syntax and Semantics==
 A newline sequence is one of: Linefeed, Carriage Return, Form Feed, Vertical Tab.
-Each command is normally on its own line, although they can be split across multiple lines in most circumstances if the line ends with the line continuation ",,".
-Blank lines are completely ignored in the source code. Windows line sequences composed of both a Carriage Return and a Linefeed are treated as having a blank line in the middle, but blank lines are pretty much removed from the stored-in-memory source-code before it is even processed into C# by the compiler.
+Each command is normally on its own line, although they can be split across multiple lines in most circumstances 
+if the line ends with the line continuation ",,". Blank lines are completely ignored in the source code. 
+Windows line sequences composed of both a Carriage Return and a Linefeed are treated as having a blank line in the middle, 
+but blank lines are pretty much removed from the stored-in-memory source-code before it is even processed into C# by the compiler.
 
 ===Imports===
-The namespaces System, System.Reflection, and System.Reflection.Emit namespaces are imported automatically, and there is no way to stop this.
+The namespaces System, System.Reflection, and System.Reflection.Emit namespaces are imported automatically, 
+and there is no way to stop this.
 
-Custom imports can be defined as long as the first non-blank line is exactly "<IMPORTS>", case-sensitive, although it may have whitespace before or after it. All lines until the line "<END_IMPORTS>" are the namespaces to import, each on its own line. None of this supports line continuations.
+==Starting Lines==
+There is a natural progression of beginning sections (although this only applies after the preprocessor is run). All elements are optional.
+
+1. A line containing "<ATTRIBUTES>" denotes some special content until a line containing "<END_ATTRIBUTES>".
+Inside "Framework:", "Platform:", or "SDK:" followed by something denote the corresponding info in the .csproj file
+(There is currently no .y1proj, the compiler creates a .csproj from the Y1 source code)
+
+2. A line containing "<REFS>" denotes a list of .dll references until "<END_REFS>".
+
+3. A line containing "<IMPORTS>" denotes a list of C# using statements without the "using" or the semicolon, until "<END_IMPORTS>".
+
+4. A line containing "<STANDARD_Y1_LIBS>" denotes a list of standard Y1 libraries to include until "<END_STANDARD_Y1_LIBS>". 
+This is currently only used for the KeyListener class which is required for the ListenForKeys statement.
 
 ==Direct C# Calls==
 A line beginning with optional whitespace followed by "C# - " directly compiles to the C# code following it. Anything that can be expressed in C# can be used here.
@@ -163,6 +186,9 @@ Defines a single-line expression macro with the specified name and the specified
 
 "DefineComplexType" <name>
   Followed by a line containing the superclass as an expression evaluating to a Type. Followed by a line containing the interfaces as an expression evaluating to a Type[]. Followed by a line containing type attributes (public, abstract, sealed, and/or interface). Defines a type with the name.
+
+"ListenForKeys"
+  Followed by a list of blocks separated by "KeyCase" <ConsoleKeyInfo expression> lines. The first block will be run for every key, the rest will be run for the respective ConsoleKeyInfo. See KeyListenerTest.y1.
 
 ====Methodbuilding mode====
 "\\/"
