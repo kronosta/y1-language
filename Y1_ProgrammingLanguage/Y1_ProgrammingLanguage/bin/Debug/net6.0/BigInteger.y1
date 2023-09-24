@@ -1,0 +1,15 @@
+<REFS>
+  C:\Program Files\dotnet\shared\Microsoft.NETCore.App\6.0.8\System.Numerics.dll
+<END_REFS>
+
+<IMPORTS>
+  System.Numerics
+<END_IMPORTS>
+
+@[BigIntegerTest
+  |/Main
+    C# - System.Numerics.BigInteger bi = ,,
+     new System.Numerics.BigInteger(23);
+    C# - Console.WriteLine(bi);
+  \|
+]@

@@ -1,0 +1,10 @@
+<IMPORTS>
+  System.Collections.Generic
+  System.IO
+  System.Linq
+<END_IMPORTS>
+
+@[ImportTest
+|/Main
+\|
+]@

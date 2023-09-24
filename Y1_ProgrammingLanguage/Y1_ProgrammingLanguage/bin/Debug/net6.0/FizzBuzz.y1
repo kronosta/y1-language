@@ -1,0 +1,104 @@
+@[FizzBuzz
+
+[# 
+This is a comment.
+#]
+
+|/Main
+  PushNew
+  DefineType T
+    DefineField result typeof(int)
+    DefineParamMethod Modulo moduloMethod
+    new Type[] {typeof(int), typeof(int)}
+      \Ldarg_0
+      \Ldarg_1
+      \Ldarg_1
+      \Ldarg_2
+      \Div
+      \Ldarg_2
+      \Mul
+      \Sub
+      \Stfld, result
+      \Ret
+    \/
+    DefineMethod M mainMethod
+      _!!int
+      ->Start
+      ->Fizz
+      ->Buzz
+      ->FizzBuzz
+      ->End
+      \Ldc_I4_0
+      \Stloc_0
+
+
+      -->Start
+      \Ldloc_0
+      \Ldc_I4_1
+      \Add
+      \Stloc_0
+      \Ldloc_0
+      \Ldc_I4, 100
+      \Beq, End
+
+      \Ldarg_0
+      \Ldloc_0
+      \Ldc_I4, 15
+      \Call, moduloMethod
+      \Ldarg_0
+      \Ldfld, result
+      \Ldc_I4_0
+      \Beq, FizzBuzz
+
+      \Ldarg_0
+      \Ldloc_0
+      \Ldc_I4, 3
+      \Call, moduloMethod
+      \Ldarg_0
+      \Ldfld, result
+      \Ldc_I4_0
+      \Beq, Fizz
+
+      \Ldarg_0
+      \Ldloc_0
+      \Ldc_I4, 5
+      \Call, moduloMethod
+      \Ldarg_0
+      \Ldfld, result
+      \Ldc_I4_0
+      \Beq, Buzz
+
+      \Ldloc_0
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(int)})
+      \Br, Start
+
+
+      -->Fizz
+      \Ldstr, "Fizz"
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+      \Br, Start
+
+
+      -->Buzz
+      \Ldstr, "Buzz"
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+      \Br, Start
+
+
+      -->FizzBuzz
+      \Ldstr, "FizzBuzz"
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+      \Br, Start
+
+
+      -->End
+      \Call, typeof(Console).GetMethod("ReadKey", new Type[]{})	
+      \Pop
+      \Ret
+    \/
+  FinishType
+  CreateObject o
+  CallMethod M o
+\|
+
+]@

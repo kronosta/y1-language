@@ -1,0 +1,7 @@
+?DefineShort ShortMacro $"Hello {?1?}"
+
+@[PreprocessorTest
+	|/Main
+		C# - Console.WriteLine( [[ShortMacro !!Console.ReadLine()]] );
+	\|
+]@

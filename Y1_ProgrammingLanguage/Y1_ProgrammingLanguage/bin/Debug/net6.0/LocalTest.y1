@@ -1,0 +1,19 @@
+@[LocalTest
+
+|/Main
+  PushNew
+  DefineType T
+    DefineMethod M m
+      _!!int
+      \Ldc_I4, 2023
+      \Stloc_0
+      \Ldloc_0
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{ typeof(int) })
+      \Ret
+    \/
+  FinishType
+  CreateObject o
+  CallMethod M o
+\|
+
+]@

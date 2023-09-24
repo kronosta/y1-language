@@ -1,0 +1,21 @@
+@[ConditionalInMethod
+	|/Main
+		DefineVariable x 3
+		DefineVariable i 0
+		PushNew
+		DefineType Test
+			DefineMethod M Test_M
+				Condition x > 2
+					While i < 10
+						\Ldc_I4, i
+						\Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(int)})
+						C# - i++;
+					EndWhile
+				EndCondition
+				\Ret
+			\/
+		FinishType
+		CreateObject obj
+		CallMethod M obj
+	\|
+]@

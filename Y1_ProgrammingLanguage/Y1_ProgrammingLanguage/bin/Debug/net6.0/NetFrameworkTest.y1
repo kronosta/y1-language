@@ -1,0 +1,11 @@
+<ATTRIBUTES>
+	Framework:net48
+	Platform:x64
+	SDK:Microsoft.Net.Sdk
+<END_ATTRIBUTES>
+
+@[Program
+	|/Main
+		C# - Console.WriteLine(".net framework appears to be working");
+	\|
+]@

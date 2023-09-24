@@ -1,0 +1,18 @@
+@[DLL
+
+|/PrintHello
+  C# - MethodInfo cwr = typeof(Console).GetMethod("WriteLine", ,,
+                        new Type[]{typeof(string)});
+  PushNew
+  DefineType Dummy
+    DefineMethod M Dummy_M
+      \Ldstr, "Hello"
+      \Call, cwr
+      \Ret
+    \/
+  FinishType
+  CreateObject d
+  CallMethod Dummy_M d
+\|
+
+]@

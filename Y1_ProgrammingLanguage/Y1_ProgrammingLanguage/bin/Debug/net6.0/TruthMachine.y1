@@ -1,0 +1,31 @@
+@[TruthMachine
+
+|/Main
+  PushNew
+  DefineType T
+    DefineMethod M m
+      ->IfZero
+      ->IfNonZero
+      \Call, typeof(Console).GetMethod("ReadLine")
+      \Call, typeof(Int32).GetMethod("Parse", new Type[]{ typeof(string) })
+      \Dup
+      \Ldc_I4_0
+      \Beq, IfZero
+      \Dup
+      \Ldc_I4_0
+      \Bne_Un, IfNonZero
+      -->IfZero
+      \Call, typeof(Console).GetMethod("Write", new Type[] { typeof(int) })
+      \Ret
+      -->IfNonZero
+      \Dup
+      \Call, typeof(Console).GetMethod("Write", new Type[] { typeof(int) })
+      \Br, IfNonZero
+      \Ret
+    \/
+  FinishType
+  CreateObject o
+  CallMethod M o
+\|
+
+]@

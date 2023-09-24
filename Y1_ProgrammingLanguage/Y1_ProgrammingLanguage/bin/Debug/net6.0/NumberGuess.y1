@@ -1,0 +1,96 @@
+@[NumberGuess
+
+|/Main
+  PushNew
+  DefineType Game
+    DefineField Game_correct typeof(int)
+    DefineField Game_guess typeof(int)
+    DefineField Game_guessString typeof(string)
+    DefineMethod GameLoop Game_GameLoop
+      _!!Random
+      _!!DateTime
+      ->Start
+      ->Guess
+      ->GuessParse_Leave
+      ->GuessHigher
+      ->GuessLower
+      ->GuessEqual
+      ->End
+      \Call, typeof(DateTime).GetMethod("get_UtcNow")
+      \Stloc_1
+      \Ldloca, 1
+      \Call, typeof(DateTime).GetMethod("get_Ticks")
+      \Conv_I4
+      \Newobj, typeof(Random).GetConstructor(new Type[]{typeof(int)})
+      \Stloc_0
+
+      -->Start
+      \Ldarg_0
+      \Ldloc_0
+      \Ldc_I4, 100
+      \Call, typeof(Random).GetMethod("Next", new Type[]{typeof(int)})
+      \Stfld, Game_correct
+
+      -->Guess
+      \Ldarg_0
+      \Call, typeof(Console).GetMethod("ReadLine")
+      \Stfld, Game_guessString
+      \Ldarg_0
+      \Ldfld, Game_guessString
+      \Ldstr, "stop"
+      \Call, typeof(string).GetMethod("Equals", new Type[]{typeof(string)})
+      \Brtrue, End
+      <TRY> GuessParse
+        \Ldarg_0
+        \Dup
+        \Ldfld, Game_guessString
+        \Call, typeof(int).GetMethod("Parse", new Type[]{typeof(string)})
+        \Stfld, Game_guess
+        \Leave, GuessParse_Leave
+      <CATCH> Exception
+        \Ldstr, "You typed in an invalid number. Try again."
+        \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+        \Leave, Guess
+      <END>
+
+      -->GuessParse_Leave
+      \Ldarg_0
+      \Ldfld, Game_guess
+      \Ldarg_0
+      \Ldfld, Game_correct
+      \Bgt, GuessHigher
+      \Ldarg_0
+      \Ldfld, Game_guess
+      \Ldarg_0
+      \Ldfld, Game_correct
+      \Blt, GuessLower
+      \Br, GuessEqual
+
+      -->GuessHigher
+      \Ldstr, "Lower. Guess again!"
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+      \Br, Guess
+
+      -->GuessLower
+      \Ldstr, "Higher. Guess again!"
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+      \Br, Guess
+
+      -->GuessEqual
+      \Ldstr, "Congratulations, you guessed the number! Do you want to play again? y/n"
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+      \Call, typeof(Console).GetMethod("ReadLine")
+      \Ldstr, "y"
+      \Call, typeof(string).GetMethod("Equals", new Type[]{typeof(string)})
+      \Brtrue, Start
+      \Br, End
+
+      -->End
+      \Ret
+    \/
+  FinishType
+  CreateObject gameObject
+  CallMethod GameLoop gameObject
+\|
+
+]@

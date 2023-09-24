@@ -1,0 +1,14 @@
+@[NestedSummation
+  |/Main
+    Summation 1 10 I
+      Summation 1 10 J
+        C# - Console.WriteLine($"I,J: {I},{J}.");
+        C# - return J;
+      EndSummation
+      C# - Console.WriteLine($"J-Result: {y1__result_1}");
+      C# - Console.WriteLine($"I: {I}");
+      C# - return I;
+    EndSummation
+    C# - Console.WriteLine($"I-Result: {y1__result_0}");
+  \|
+]@

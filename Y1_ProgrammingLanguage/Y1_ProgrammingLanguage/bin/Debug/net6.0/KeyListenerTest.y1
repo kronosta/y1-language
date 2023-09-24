@@ -1,0 +1,18 @@
+<STANDARD_Y1_LIBS>
+    KeyListener
+<END_STANDARD_Y1_LIBS>
+
+@[Program
+    |/Main
+        ListenForKeys
+                C# - Console.WriteLine("You pressed a key!");
+            KeyCase new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false)
+                C# - Console.WriteLine("a is for apple");
+            KeyCase new ConsoleKeyInfo('b', ConsoleKey.B, false, false, false)
+                C# - Console.WriteLine("b is for blackberries");
+            KeyCase new ConsoleKeyInfo('c', ConsoleKey.C, false, false, false)
+                C# - Console.WriteLine("c is for CUT IT OUT! I'm leaving.");
+                C# - Y1.KeyListener.ShouldContinue = false;
+        EndListenForKeys
+    \|
+]@

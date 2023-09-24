@@ -1,0 +1,20 @@
+@[Subclass
+
+|/Main
+  LoadType Exception
+  Subclass MyException MyException
+    DefineSubclassMethod MyException M MyException_M
+     Type.EmptyTypes
+     typeof(void)
+     public
+      \Ldstr, "H"
+      \Call, typeof(Console).GetMethod("WriteLine", ,,
+               new Type[]{typeof(string)})
+      \Ret
+    \/
+  FinishSubclass MyException
+  CreateSubclassObject myObject MyException
+  CallSubclassMethod M myObject MyException
+\|
+
+]@

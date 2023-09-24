@@ -1,0 +1,9 @@
+@[SummationTest
+  |/Main
+    Summation 1 10 i
+      C# - Console.WriteLine($"Stage {i}: {i * 5}");
+      C# - return i * 5;
+    EndSummation  
+    C# - Console.WriteLine($"Result: {y1__result_0}");    
+  \|
+]@

@@ -1,0 +1,24 @@
+@[FieldTest
+
+|/Main
+  C# - int argument = 19;
+  PushNew
+  DefineType T
+    DefineField TestField typeof(int)
+    DefineMethod SetTestField m1
+      \Ldc_I4, argument
+      \Stfld, TestField
+      \Ret
+    \/
+    DefineMethod PrintField m2
+      \Ldfld, TestField
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(int)})
+      \Ret
+    \/
+  FinishType
+  CreateObject o
+  CallMethod SetTestField o
+  CallMethod PrintField o
+\|
+
+]@

@@ -1,0 +1,11 @@
+@[VariableTest
+  |/Main
+    DefineVariable myNumber 0;
+    While myNumber < 20
+      C# - myNumber++;
+      Condition myNumber % 2 == 0
+        C# - Console.WriteLine(myNumber);
+      EndCondition
+    EndWhile
+  \|
+]@

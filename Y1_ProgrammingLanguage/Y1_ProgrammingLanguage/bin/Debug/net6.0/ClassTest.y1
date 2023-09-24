@@ -1,0 +1,22 @@
+@[ClassTest
+
+|/Main
+  LoadType Referenced
+  LoadField f field
+  PushNew
+  DefineType T
+    DefineMethod M m1
+      \Ldsfld, field
+      \Call, typeof(Console).GetMethod("Write", new Type[] {typeof(int)})
+      \Ret
+    \/
+  FinishType
+  CreateObject o
+  CallMethod M o
+\|
+
+]@
+
+@[Referenced
+  C# - public static int f = 602;
+]@

@@ -1,0 +1,29 @@
+@[DynamicClass
+
+|/Main
+  C# - string input = Console.ReadLine();
+  PushNew
+  DefineType DynamicType
+    DefineMethod DynamicMethod dynamicMethod
+      \Ldstr, input.Replace("foo", "bar")
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+      \Nop); ,,
+        if (input.StartsWith("h")) ,,
+        { ,,
+          y1__il.Emit(OpCodes.Ldstr, "Your input starts with 'h'."); ,,
+          y1__il.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})) ; ,,
+        } ,,
+        else ,,
+        { ,,
+          y1__il.Emit(OpCodes.Ldstr, "Your input dpes not start with 'h'."); ,,
+          y1__il.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})); ,,
+        } ,,
+        Console.Write(""
+      \Ret
+    \/
+  FinishType
+  CreateObject objectWithDynamicType
+  CallMethod DynamicMethod objectWithDynamicType
+\|
+
+]@

@@ -1,0 +1,30 @@
+@[SubclassFieldTest
+  |/Main
+    LoadType Exception
+    Subclass Custom Custom
+      DefineSubclassField Custom F typeof(int)
+          public
+      DefineSubclassMethod Custom SetF Exception_Custom_SetF
+          Type.EmptyTypes
+          null
+          public
+        \Ldarg_0
+        \Ldc_I4_5
+        \Stfld, F
+        \Ret
+      \/
+      DefineSubclassMethod Custom M Exception_Custom_M
+          Type.EmptyTypes
+          null
+          public
+        \Ldarg_0
+        \Ldfld, F
+        \Call, typeof(Console).GetMethod("Write", new Type[]{typeof(int)})
+        \Ret
+      \/
+    FinishSubclass Custom
+    CreateSubclassObject o Custom
+    CallSubclassMethod SetF o Custom
+    CallSubclassMethod M o Custom
+  \|
+]@

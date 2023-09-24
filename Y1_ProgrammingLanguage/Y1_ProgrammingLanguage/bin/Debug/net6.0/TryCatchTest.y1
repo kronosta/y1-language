@@ -1,0 +1,26 @@
+@[TryCatchTest
+
+|/Main
+  PushNew
+  DefineType T
+    DefineMethod M T_M
+      \Add
+    \/
+    DefineMethod CatchClause T_CatchClause
+      \Ldstr, "Problem with method M."
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+      \Ldc_I4_1
+      \Call, typeof(Environment).GetMethod("Exit", new Type[]{typeof(int)})
+      \Ret
+    \/
+  FinishType
+  CreateObject o
+  C# - try {
+    CallMethod M o
+  C# - }
+  C# - catch {
+    CallMethod CatchClause o
+  C# - }
+\|
+
+]@

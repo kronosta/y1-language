@@ -1,0 +1,41 @@
+@[ComplexMethods
+
+|/Main
+  C# - MethodInfo cwl = typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)});
+  C# - MethodInfo cwli = typeof(Console).GetMethod("WriteLine", new Type[]{typeof(int)});
+  PushNew
+  DefineType T
+    DefineComplexField T_privateField typeof(int)
+    private
+    DefineComplexField T_staticField typeof(int)
+    public static
+    DefineComplexMethod PS T_PS
+    new Type[]{typeof(int)}
+    typeof(int)
+    private static
+      _!!int
+      \Ldstr, "Private static method."
+      \Call, cwl
+      \Ldsfld, T_staticField
+      \Ldarg_0
+      \Add
+      \Ret
+    \/
+    DefineMethod M T_M
+      \Ldarg_0
+      \Ldc_I4, 9000
+      \Stfld, T_privateField
+      \Ldc_I4, 20
+      \Stsfld, T_staticField
+      \Ldarg_0
+      \Ldfld, T_privateField
+      \Call, T_PS
+      \Call, cwli
+      \Ret
+    \/
+  FinishType
+  CreateObject o
+  CallMethod M o
+\|
+
+]@

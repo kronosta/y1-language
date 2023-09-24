@@ -1,0 +1,14 @@
+@[MethodCsCall
+
+|/Main
+  PushNew
+  DefineType T
+    DefineMethod M T_M
+      \Nop
+      C# - Console.WriteLine("C# calls in methods are now fully supported.");
+      \Nop
+    \/
+  FinishType
+\|
+
+]@

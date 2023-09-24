@@ -1,0 +1,18 @@
+@[MethodParams
+
+|/Main
+  LoadType List<int>
+  CreateObject l1
+  LoadType List<List<int>>
+  CreateObject l2
+  MethodParams
+    Add
+    new Type[]{typeof(List<int>)}
+    l2
+    new object[] {,,
+      stack[stack.Count - 2].Item2["l1"],,
+    }
+  C# - Console.WriteLine("no errors");
+\|
+
+]@

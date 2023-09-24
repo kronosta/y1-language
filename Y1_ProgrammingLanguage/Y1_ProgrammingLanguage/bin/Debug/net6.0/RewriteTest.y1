@@ -1,0 +1,16 @@
+@[Program
+    |/Main
+        ?Rewrite Out
+            @[Program
+                |/Main
+                    DefineVariable Line ""
+                    While (Line = Console.ReadLine()) != null
+                        C# - Console.WriteLine(Line.Replace("hello", "Greetings, mortal!"));
+                    EndWhile
+                \|
+            ]@
+        ?
+            C# - Console.WriteLine("hello");
+        ?
+    \|
+]@

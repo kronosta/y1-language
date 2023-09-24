@@ -1,0 +1,28 @@
+@[ExceptionTest
+
+|/Main
+  PushNew
+  DefineType T
+    DefineMethod M m
+      ->OutsideTheBlock
+      <TRY> TryBlock
+        \Ldc_I4, 2000000000
+        \Dup
+        \Add_Ovf
+        \Ldstr, "Try"
+        \Call, typeof(Console).GetMethod("Write", new Type[] { typeof(string) })
+        \Leave, OutsideTheBlock
+      <CATCH> Exception
+        \Ldstr, "Catch"
+        \Call, typeof(Console).GetMethod("Write", new Type[] { typeof(string) })
+        \Leave, OutsideTheBlock
+      <END>
+      -->OutsideTheBlock
+      \Ret
+      \/
+  FinishType
+  CreateObject o
+  CallMethod M o
+\|
+
+]@

@@ -1,0 +1,486 @@
+<REFS>
+    System.IO.dll
+<END_REFS>
+
+<IMPORTS>
+    System.IO
+<END_IMPORTS>
+
+[#
+Warning: 
+This interpreter makes no attempt to filter out invalid characters.
+These will most likely be treated as no-ops, but this interpreter
+isn't fully compliant.
+#]
+
+Namespace Kronosta.Esolangs.Sugueziume
+    @[Program
+        C# - public static void Main(string[] args) {
+            [#}
+            #]
+            PushNew
+            DefineType SugueziumeInterpreter
+                DefineComplexMethod InterleaveStrings SugueziumeInterpreter_InterleaveStrings
+                        new Type[]{typeof(string[])}
+                        string
+                        public static
+                    '$. The total string.
+                    _!!string
+                    '$. The current character index
+                    _!!int
+                    '$. The current array index
+                    _!!int
+                    '$. The count of array elements with no more characters
+                    _!!int
+
+                    ->CharacterLoopStart
+                    ->CharacterLoopPrepare
+                    ->CharacterLoopEnd
+                    ->ArrayLoopStart
+                    ->ArrayLoopPrepare
+                    ->ArrayLoopEnd
+                    ->ArrayLoopReturnSpace
+
+                    \Ldstr, ""
+                    \Stloc_0
+
+                    \Ldc_I4_0
+                    \Stloc_1
+
+                    -->CharacterLoopStart
+
+                        \Ldc_I4_0
+                        \Stloc_2
+
+                        \Ldc_I4_0
+                        \Stloc_3
+                        
+                        -->ArrayLoopStart
+                        \Ldarg_0
+                        \Ldlen
+                        \Ldloc_2
+                        \Ble, ArrayLoopEnd
+
+                            '$. Check if out of bounds of string. If so, return space.
+                            \Ldarg_0
+                            \Ldloc_2
+                            \Ldelem
+                            \Call, typeof(string).GetMethod("get_Count")
+                            \Ldloc_1
+                            \Ble, ArrayLoopReturnSpace
+                        
+                            '$. Concatenate the character to the total string.
+                            \Ldloc_0
+                            \Ldarg_0
+                            \Ldloc_2
+                            \Ldelem
+                            \Ldloc_1
+                            \Call, typeof(string).GetMethod("get_Chars", new Type[]{typeof(int)})
+                            \Stloc_3
+                            \Call, typeof(string).GetMethod("Concat", new Type[]{typeof(object), typeof(object)})
+                            \Br, ArrayLoopPrepare
+
+                            -->ArrayLoopReturnSpace
+                            '$. Concatenate space to the total string.
+                            \Ldloc_0
+                            \Ldstr, " "
+                            \Call, typeof(string).GetMethod("Concat", new Type[]{typeof(string), typeof(string)})
+                            \Stloc_0
+                            '$. Add one to a counter that measures how many strings were out of bounds.
+                            \Ldloc_3
+                            \Ldc_I4_1
+                            \Add
+                            \Stloc_3
+                            \Br, ArrayLoopPrepare	
+
+                        -->ArrayLoopPrepare
+                        '$. Add one to index.
+                        \Ldloc_2
+                        \Ldc_I4_1
+                        \Add
+                        \Stloc_2
+                        \Br, ArrayLoopStart
+
+                        -->ArrayLoopEnd
+
+                    -->CharacterLoopPrepare
+                    '$. Add one to index.
+                    \Ldloc_1
+                    \Ldc_I4_1
+                    \Add
+                    \Stloc_1
+
+                    '$. Check if all strings are out of bounds.
+                    \Ldarg_0
+                    \Ldlen
+                    \Ldloc_S, 4
+                    \Beq, CharacterLoopEnd
+                    \Br, CharacterLoopStart
+
+
+                    -->CharacterLoopEnd
+                    \Ldloc_0
+                    \Ret
+                \/
+
+
+                DefineParamMethod Interpret SugueziumeInterpreter_Interpret
+                        new Type[] {typeof(string[])
+                    '$. The Sugueziume queue.
+                    _!!Queue<string>
+                    '$. The currently executing code.
+                    _!!string
+                    '$. The index in the code.
+                    _!!int
+                    '$. The currently executing character.
+                    _!!char
+                    '$. Arguments for commands.
+                    _!!string
+                    _!!string
+                    _!!string
+                    _!!string
+                    _!!string
+                    _!!string
+                    '$. Used as an argument for the interleave method.
+                    _!!string[]
+                    ->QueueExecutionLoopStart
+                    ->QueueExecutionLoopEnd
+                    ->CodeExecutionLoopStart
+                    ->CodeExecutionLoopPrepare
+                    ->CodeExecutionLoopEnd
+                    ->Command_A
+                    ->Command_B
+                    ->Command_C
+                    ->Command_D
+                    ->Command_E
+                    ->Command_F
+                    ->Command_G
+                    ->Command_H
+                    ->Command_I
+                        ->Command_I_LoopStart
+                        ->Command_I_LoopPrepare
+                        ->Command_I_LoopEnd
+                    ->Command_J
+                    ->Command_K
+                    ->Command_L
+                    ->Command_M
+                    ->Command_N
+                    ->Command_O
+                    ->Command_P
+                    ->Command_Q
+                    ->Command_R
+                    \Ldarg_1
+                    \Newobj, typeof(Queue<string>).GetConstructor(new Type[typeof(string[])])
+                    \Stloc_0
+                    
+                    -->QueueExecutionLoopStart
+                    '$. Check if the queue is empty. If yes, end the loop.
+                    \Ldloc_0
+                    \Call, typeof(Queue<string>).GetMethod("get_Count")
+                    \Brfalse, QueueExecutionLoopEnd
+
+                        '$. Get the code string.
+                        \Ldloc_0
+                        \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                        \Stloc_1
+
+                        '$. Store zero into the index.
+                        \Ldc_I4_0
+                        \Stloc_2
+                        
+                        -->CodeExecutionLoopStart
+                        '$. Exit the loop if the index is out of bounds.
+                        \Ldloc_1
+                        \Call, typeof(string).GetMethod("get_Count")
+                        \Ldloc_2
+                        \Ble, CodeExecutionLoopEnd
+
+                            '$. Obtain the character at the index.
+                            \Ldloc_1
+                            \Ldloc_2
+                            \Call, typeof(string).GetMethod("get_Chars", new Type[]{typeof(int)})
+                            \Stloc_3
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 65
+                            \Beq, Command_A
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 66
+                            \Beq, Command_B
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 67
+                            \Beq, Command_C
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 68
+                            \Beq, Command_D
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 69
+                            \Beq, Command_E
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 70
+                            \Beq, Command_F
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 71
+                            \Beq, Command_G
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 72
+                            \Beq, Command_H
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 73
+                            \Beq, Command_I
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 74
+                            \Beq, Command_J
+                            
+                            \Ldloc_3
+                            \Ldc_I4_S, 75
+                            \Beq, Command_K
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 76
+                            \Beq, Command_L
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 77
+                            \Beq, Command_M
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 78
+                            \Beq, Command_N
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 79
+                            \Beq, Command_O
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 80
+                            \Beq, Command_P
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 81
+                            \Beq, Command_Q
+
+                            \Ldloc_3
+                            \Ldc_I4_S, 82
+                            \Beq, Command_R
+
+                            '$. Dequeue and discard an element from the queue.
+                            -->Command_A
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Pop
+                            \Br, CodeExecutionLoopPrepare
+
+                            '$. Dequeue and enqueue and element from the queue.
+                            -->Command_B
+                            \Ldloc_0
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Call, typeof(Queue<string>).GetMethod("Enqueue", new Type[]{typeof(string)})
+                            \Br, CodeExecutionLoopPrepare
+
+                            '$. Enqueue everything after the C and don't interpret it.
+                            -->Command_C
+                            \Ldloc_0
+                            \Ldloc_1
+                            \Ldloc_2
+                            \Ldc_I4_1
+                            \Add
+                            \Call, typeof(string).GetMethod("Substring", new Type[]{typeof(int)})
+                            \Call, typeof(Queue<string>).GetMethod("Enqueue", new Type[]{typeof(string)})
+                            \Br, CodeExecutionLoopEnd
+
+                            '$. Dequeue two elements and interleave them.
+                            -->Command_D
+                            \Ldc_I4_2
+                            \Newarr, typeof(string)
+                            \Stloc_S, 10
+
+                            \Ldloc_S, 10
+                            \Ldc_I4_0
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Stelem, typeof(string)
+
+                            \Ldloc_S, 10
+                            \Ldc_I4_1
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Stelem, typeof(string)
+
+                            \Ldloc_0
+                            \Ldloc_S, 10
+                            \Call, SugueziumeInterpreter_InterleaveStrings
+                            \Call, typeof(Queue<string>).GetMethod("Enqueue", new Type[]{typeof(string)})
+
+                            \Br, CodeExecutionLoopPrepare
+
+                            '$. Dequeue an element, enqueue it twice.
+                            -->Command_E
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Stloc_S, 4
+                            \Ldloc_S, 4
+                            \Call, typeof(Queue<string>).GetMethod("Enqueue", new Type[]{typeof(string)})
+                            \Ldloc_S, 4
+                            \Call, typeof(Queue<string>).GetMethod("Enqueue", new Type[]{typeof(string)})
+                            \Br, CodeExecutionLoopPrepare
+
+                            '$. Dequeue u, v, w, x, y, z, enqueue v, w, x, y, z, u.
+                            -->Command_F
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Stloc_S, 4
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Stloc_S, 5
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Stloc_S, 6
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Stloc_S, 7
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Stloc_S, 8
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Stloc_S, 9
+
+                            \Ldloc_0
+                            \Ldloc_S, 5
+                            \Call, typeof(Queue<string>).GetMethod("Enqueue", new Type[]{typeof(string)})
+                            \Ldloc_0
+                            \Ldloc_S, 6
+                            \Call, typeof(Queue<string>).GetMethod("Enqueue", new Type[]{typeof(string)})
+                            \Ldloc_0
+                            \Ldloc_S, 7
+                            \Call, typeof(Queue<string>).GetMethod("Enqueue", new Type[]{typeof(string)})
+                            \Ldloc_0
+                            \Ldloc_S, 8
+                            \Call, typeof(Queue<string>).GetMethod("Enqueue", new Type[]{typeof(string)})
+                            \Ldloc_0
+                            \Ldloc_S, 9
+                            \Call, typeof(Queue<string>).GetMethod("Enqueue", new Type[]{typeof(string)})
+                            \Ldloc_0
+                            \Ldloc_S, 4
+                            \Call, typeof(Queue<string>).GetMethod("Enqueue", new Type[]{typeof(string)})
+
+                            \Br, CodeExecutionLoopPrepare
+
+                            '$. Input a string, enqueue it.
+                            -->Command_G
+                            \Ldloc_0
+                            \Call, typeof(Console).GetMethod("ReadLine", Type.EmptyTypes)
+                            \Call, typeof(Queue<string>).GetMethod("Enqueue", new Type[]{typeof(string)})
+                            \Br, CodeExecutionLoopPrepare
+
+                            '$. Dequeue an element, output it.
+                            -->Command_H
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+                            \Br, CodeExecutionLoopPrepare
+
+                            [#
+                            Dequeue a string, if it contains an X, 
+                            jump to the character after the previous after the previous I
+                            #]
+                            -->Command_I
+                            \Ldloc_0
+                            \Call, typeof(Queue<string>).GetMethod("Dequeue")
+                            \Ldstr, "X"
+                            \Call, typeof(string).GetMethod("Contains", new Type[]{typeof(string)})
+                            \Brfalse, Command_I_LoopEnd
+                            \Ldloc_1
+                            \Ldstr, "I"
+                            \Call, typeof(string).GetMethod("IndexOf", new Type[]{typeof(string)})
+                            \Ldloc_2
+                            \Beq, Command_I_LoopEnd
+
+                            -->Command_I_LoopStart
+                            \Ldloc_1
+                            \Ldloc_2
+                            \Call, typeof(string).GetMethod("get_Chars", new Type[]{typeof(int)})
+                            \Ldc_I4_S, 73
+                            \Beq, Command_I_LoopEnd
+
+                            -->Command_I_LoopPrepare
+                            \Ldloc_2
+                            \Ldc_I4_1
+                            \Sub
+                            \Stloc_2
+                            \Br, Command_I_LoopStart
+
+                            -->Command_I_LoopEnd
+                            \Br, CodeExecutionLoopPrepare
+                            
+
+                        '$. Prepare for the next iteration of the loop.
+                        -->CodeExecutionLoopPrepare
+                        '$. Increment the index.
+                        \Ldloc_2
+                        \Ldc_I4_1
+                        \Add
+                        \Stloc_2
+                        \Br, CodeExecutionLoopStart
+
+                        -->CodeExecutionLoopEnd
+                        \Br, QueueExecutionLoopStart
+
+                    -->QueueExecutionLoopEnd
+                    \Ret
+                \/
+
+
+                DefineMethod Entry SugueziumeInterpreter_Entry
+                    Condition args.Length > 1
+                        '$. The filename.
+                        _!!string
+                        '$. Reads from the file.
+                        _!!StreamReader
+                        \Ldstr, args[1]
+                        \Stloc_0
+                        \Ldloc_0
+                        \Newobj, typeof(StreamReader).GetConstructor(new Type[]{typeof(string)})
+                        \Stloc_1
+                        <TRY>
+                            \Ldarg_0
+                            \Ldloc_1
+                            \Call, typeof(StreamReader).GetMethod("ReadToEnd")
+                            '$. Turn it into an array that Sugueziume can use.
+                            \Ldstr, ","
+                            \Call, typeof(string).GetMethod("Split", new Type[]{typeof(string)})
+                            \Call, SugueziumeInterpreter_Interpret
+                        <FINALLY>
+                            '$. Close the StreamReader.
+                            \Ldloc_1
+                            \Call, typeof(StreamReader).GetMethod("Dispose")
+                        <END>
+                    EndCondition
+                    Condition !(args.Length > 1)
+                        [#
+                        Not a real exception because that would display indirectly and be
+                        hard to interpret by an average user. (This compiles to a fairly arcane bit
+                        of the .NET system library [System.Reflection.Emit]).
+                        #]
+                        \Ldstr, "Error: No filename specified in command-line arguments"
+                        \Call, typeof(Console).GetMethod("WriteLine", string)
+                    EndCondition
+                    \Ret
+                \/
+            FinishType
+            CreateObject obj
+            CallMethod Entry obj
+        \|
+    ]@
+EndNamespace

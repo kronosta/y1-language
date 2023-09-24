@@ -1,0 +1,654 @@
+<ATTRIBUTES>
+    Framework:net48
+    Platform:x64
+    SDK:Microsoft.NET.Sdk.WindowsDesktop
+<END_ATTRIBUTES>
+
+<REFS>
+    'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\
+    System.Windows.Forms.dll
+<END_REFS>
+
+C# - namespace Kronosta.Games.Y1_SelfModifyingChess {
+
+  @[State
+    C# - public static System.Windows.Forms.Form chessForm = ,,
+           new System.Windows.Forms.Form();
+    C# - public static System.Windows.Forms.TableLayoutPanel table = ,,
+           new System.Windows.Forms.TableLayoutPanel();
+    C# - public static Dictionary<string, int[][]> legalMoves = ,,
+           new Dictionary<string, int[][]>();
+  ]@
+
+  C# - public class CustomButton : System.Windows.Forms.Button {
+      C# - public CustomButton() : base() {}
+      C# - public void SetFontHeight(int fontHeight) {
+          C# - this.FontHeight = fontHeight;
+      \|
+  ]@
+
+  @[Program
+
+    C# - public static bool MethodPassedLdloca = false;
+
+    |/InitLegalMoves
+      C# - State.legalMoves.Add("km", ,,
+        new int[][]{ ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,1,1,1,0,0,0}, ,,
+          new int[]{0,0,0,1,0,1,0,0,0}, ,,
+          new int[]{0,0,0,1,1,1,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+        });
+      C# - State.legalMoves.Add("kc", ,,
+        new int[][]{ ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,1,1,1,0,0,0}, ,,
+          new int[]{0,0,0,1,0,1,0,0,0}, ,,
+          new int[]{0,0,0,1,1,1,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+        });
+      C# - State.legalMoves.Add("qm", ,,
+        new int[][]{ ,,
+          new int[]{1,0,0,0,1,0,0,0,1}, ,,
+          new int[]{0,1,0,0,1,0,0,1,0}, ,,
+          new int[]{0,0,1,0,1,0,1,0,0}, ,,
+          new int[]{0,0,0,1,1,1,0,0,0}, ,,
+          new int[]{1,1,1,1,0,1,1,1,1}, ,,
+          new int[]{0,0,0,1,1,1,0,0,0}, ,,
+          new int[]{0,0,1,0,1,0,1,0,0}, ,,
+          new int[]{0,1,0,0,1,0,0,1,0}, ,,
+          new int[]{1,0,0,0,1,0,0,0,1}, ,,
+        });
+      C# - State.legalMoves.Add("qc", ,,
+        new int[][]{ ,,
+          new int[]{1,0,0,0,1,0,0,0,1}, ,,
+          new int[]{0,1,0,0,1,0,0,1,0}, ,,
+          new int[]{0,0,1,0,1,0,1,0,0}, ,,
+          new int[]{0,0,0,1,1,1,0,0,0}, ,,
+          new int[]{1,1,1,1,0,1,1,1,1}, ,,
+          new int[]{0,0,0,1,1,1,0,0,0}, ,,
+          new int[]{0,0,1,0,1,0,1,0,0}, ,,
+          new int[]{0,1,0,0,1,0,0,1,0}, ,,
+          new int[]{1,0,0,0,1,0,0,0,1}, ,,
+        });
+      C# - State.legalMoves.Add("rm", ,,
+        new int[][]{ ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{1,1,1,1,0,1,1,1,1}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+        });
+      C# - State.legalMoves.Add("rc", ,,
+        new int[][]{ ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{1,1,1,1,0,1,1,1,1}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+        });
+      C# - State.legalMoves.Add("bm", ,,
+        new int[][]{ ,,
+          new int[]{1,0,0,0,0,0,0,0,1}, ,,
+          new int[]{0,1,0,0,0,0,0,1,0}, ,,
+          new int[]{0,0,1,0,0,0,1,0,0}, ,,
+          new int[]{0,0,0,1,0,1,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,1,0,1,0,0,0}, ,,
+          new int[]{0,0,1,0,0,0,1,0,0}, ,,
+          new int[]{0,1,0,0,0,0,0,1,0}, ,,
+          new int[]{1,0,0,0,0,0,0,0,1}, ,,
+        });
+      C# - State.legalMoves.Add("bc", ,,
+        new int[][]{ ,,
+          new int[]{1,0,0,0,0,0,0,0,1}, ,,
+          new int[]{0,1,0,0,0,0,0,1,0}, ,,
+          new int[]{0,0,1,0,0,0,1,0,0}, ,,
+          new int[]{0,0,0,1,0,1,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,1,0,1,0,0,0}, ,,
+          new int[]{0,0,1,0,0,0,1,0,0}, ,,
+          new int[]{0,1,0,0,0,0,0,1,0}, ,,
+          new int[]{1,0,0,0,0,0,0,0,1}, ,,
+        });
+      C# - State.legalMoves.Add("nm", ,,
+        new int[][]{ ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,1,0,1,0,0,0}, ,,
+          new int[]{0,0,1,0,0,0,1,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,1,0,0,0,1,0,0}, ,,
+          new int[]{0,0,0,1,0,1,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+        });
+      C# - State.legalMoves.Add("nc", ,,
+        new int[][]{ ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,1,0,1,0,0,0}, ,,
+          new int[]{0,0,1,0,0,0,1,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,1,0,0,0,1,0,0}, ,,
+          new int[]{0,0,0,1,0,1,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+        });
+      C# - State.legalMoves.Add("pm", ,,
+        new int[][]{ ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,1,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+        });
+      C# - State.legalMoves.Add("pc", ,,
+        new int[][]{ ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,1,0,1,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,1,0,1,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+          new int[]{0,0,0,0,0,0,0,0,0}, ,,
+        });
+    \|
+
+    |/Main
+      C# - InitLegalMoves();
+      C# - FieldInfo fChessForm = typeof(State).GetField("chessForm");
+      C# - FieldInfo fTable = typeof(State).GetField("table");
+      C# - FieldInfo fLegalMoves = typeof(State).GetField("legalMoves");
+      PushNew
+      DefineType ChessFormInit
+        DefineMethod Start ChessFormInit_Start
+          '$. Table initialization for loop indexes.
+          _!!int
+          _!!int
+
+          '$. Holder int value.
+          _!!int
+
+          '$. Table initialization for loop start labels.
+          ->ForLoopInnerStart
+          ->ForLoopOuterStart
+
+          '$. Initialize basic attributes of the form.
+          \Ldsfld, fChessForm
+          \Ldstr, "Self-Modifying Chess"
+          \Call, typeof(System.Windows.Forms.Form).GetMethod("set_Text", new Type[]{typeof(string)})
+          \Ldsfld, fChessForm
+          \Ldc_I4, 1000
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 1000
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Newobj, typeof(System.Drawing.Size).GetConstructor(new Type[]{typeof(int), typeof(int)})
+          \Call, typeof(System.Windows.Forms.Form).GetMethod("set_Size", new Type[]{typeof(System.Drawing.Size)})
+
+          '$. Initialize the table.
+          \Ldsfld, fTable
+          \Ldc_I4, 768
+          \Ldc_I4, 768
+          \Newobj, typeof(System.Drawing.Size).GetConstructor(new Type[]{typeof(int), typeof(int)})
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("set_Size", new Type[]{typeof(System.Drawing.Size)})
+
+          '$. Initialize table row and column count.
+          \Ldsfld, fTable
+          \Ldc_I4, 8
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("set_RowCount", new Type[]{typeof(int)})
+
+          \Ldsfld, fTable
+          \Ldc_I4, 8
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("set_ColumnCount", new Type[]{typeof(int)})
+
+          '$. Initialize for loop indexes.
+          \Ldc_I4, 0
+            \Stloc, 1
+          \Ldc_I4, 0
+            \Stloc, 2
+
+          '$. For loop.
+          -->ForLoopOuterStart
+          \Ldc_I4_0
+          \Stloc, 2
+          -->ForLoopInnerStart
+          '$. For loop action.
+          \Ldsfld, fTable
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("get_Controls", Type.EmptyTypes)
+          \Newobj, typeof(CustomButton).GetConstructor(Type.EmptyTypes)
+          \Dup
+          \Ldc_I4, 64
+          \Ldc_I4, 64
+          \Newobj, typeof(System.Drawing.Size).GetConstructor(new Type[]{typeof(int), typeof(int)})
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Size", new Type[]{typeof(System.Drawing.Size)})
+          \Dup
+          \Ldc_I4, 100
+          \Call, typeof(CustomButton).GetMethod("SetFontHeight", new Type[]{typeof(int)})
+C# - if (MethodPassedLdloca) {
+          \Ldloca, 1
+          \Ldloca, 2
+C# - }
+C# - else {
+          \Ldloc, 1
+          \Ldloc, 2
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutControlCollection).GetMethod("Add", ,,
+                   new Type[]{typeof(System.Windows.Forms.Control), typeof(int), typeof(int)})
+
+          \Ldstr, "In loop."
+          \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+
+          '$. Increment column counter.
+          \Ldloc, 2
+          \Ldc_I4_1
+          \Add
+          \Stloc, 2
+
+          \Ldloc, 2
+          \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(int)})
+
+          '$. If column counter is not equal to 8, go back to ForLoopInnerStart.
+          \Ldloc, 2
+          \Ldc_I4, 8
+          \Bne_Un, ForLoopInnerStart
+
+          \Ldstr, "In outer loop."
+          \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+
+          \Ldloc, 1
+          \Ldc_I4_1
+          \Add
+          \Stloc, 1
+
+          '$. If column counter is equal to 8 and row counter is not equal to 8, go back to ForLoopOuterStart.
+          \Ldloc, 1
+          \Ldc_I4, 8
+          \Bne_Un, ForLoopOuterStart
+
+
+          \Ldstr, "Finished adding buttons to table."
+          \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+
+
+          '$. Black rook.
+          \Ldsfld, fTable
+          \Ldc_I4, 0
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 0
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u265c"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. Black knight.
+          \Ldsfld, fTable
+          \Ldc_I4, 0
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 1
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u265e"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. Black bishop.
+          \Ldsfld, fTable
+          \Ldc_I4, 0
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 2
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u265d"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. Black rook.
+          \Ldsfld, fTable
+          \Ldc_I4, 0
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 3
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u265b"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. Black king.
+          \Ldsfld, fTable
+          \Ldc_I4, 0
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 4
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u265a"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. Black bishop.
+          \Ldsfld, fTable
+          \Ldc_I4, 0
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 5
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u265d"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. Black knight.
+          \Ldsfld, fTable
+          \Ldc_I4, 0
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 6
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u265e"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. Black rook.
+          \Ldsfld, fTable
+          \Ldc_I4, 0
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 7
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u265c"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+
+        \Ldstr, "Before pawns."
+        \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+
+
+        C# - for (int i = 0; i < 8; i++) {
+          '$. Black pawn.
+          \Ldsfld, fTable
+          \Ldc_I4, 1
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, i
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u265f"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+        C# - }
+
+
+        \Ldstr, "After pawn, before empty."
+        \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+
+
+        C# - for (int i = 0; i < 8; i++) {
+        C# - for (int j = 2; j < 6; j++) {
+          '$. Nothing.
+          \Ldsfld, fTable
+          \Ldc_I4, j
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, i
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, ""
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+        C# - }
+        C# - }
+
+
+        \Ldstr, "After empty, before pawn."
+        \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+
+
+        C# - for (int i = 0; i < 8; i++) {
+          '$. White pawn.
+          \Ldsfld, fTable
+          \Ldc_I4, 6
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, i
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u2659"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+        C# - }
+
+          '$. White rook.
+          \Ldsfld, fTable
+          \Ldc_I4, 7
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 0
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u2656"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. White knight.
+          \Ldsfld, fTable
+          \Ldc_I4, 7
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 1
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u2658"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. White bishop.
+          \Ldsfld, fTable
+          \Ldc_I4, 7
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 2
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u2657"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. White queen.
+          \Ldsfld, fTable
+          \Ldc_I4, 7
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 3
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u2655"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. White king.
+          \Ldsfld, fTable
+          \Ldc_I4, 7
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 4
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u2654"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. White bishop.
+          \Ldsfld, fTable
+          \Ldc_I4, 7
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 5
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u2657"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. White knight.
+          \Ldsfld, fTable
+          \Ldc_I4, 7
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 6
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u2658"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          '$. White rook.
+          \Ldsfld, fTable
+          \Ldc_I4, 7
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Ldc_I4, 7
+C# - if (MethodPassedLdloca) {
+            \Stloc, 3
+            \Ldloca, 3
+C# - }
+          \Call, typeof(System.Windows.Forms.TableLayoutPanel).GetMethod("GetControlFromPosition", new Type[]{typeof(int), typeof(int)})
+          \Ldstr, "\u2656"
+          \Call, typeof(System.Windows.Forms.Button).GetMethod("set_Text", new Type[]{typeof(string)})
+
+          \Ldsfld, fChessForm
+          \Call, typeof(System.Windows.Forms.Form).GetMethod("get_Controls", Type.EmptyTypes)
+          \Ldsfld, fTable
+          \Call, typeof(System.Windows.Forms.Form.ControlCollection).GetMethod("Add", new Type[]{typeof(System.Windows.Forms.Control)})
+
+          \Ret
+        \/        
+      FinishType
+      CreateObject chessFormInit
+      CallMethod Start chessFormInit
+      C# - State.chessForm.Show();
+      C# - System.Windows.Forms.Application.Run(State.chessForm);
+    \|
+
+  ]@
+
+C# - }

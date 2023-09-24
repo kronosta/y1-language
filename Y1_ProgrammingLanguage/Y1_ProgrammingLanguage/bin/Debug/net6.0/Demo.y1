@@ -1,0 +1,16 @@
+Namespace HelloWorld
+	@[Program
+		|/Main
+			PushNew
+			DefineType T
+				DefineMethod M Method_M
+					\Ldstr, "Hello, World!"
+					\Call, typeof(Console).GetMethod("WriteLine", new Type[] {typeof(string)})
+					\Ret
+				\/
+			FinishType
+			CreateObject T o
+			CallMethod M o
+		\|
+	]@
+EndNamespace

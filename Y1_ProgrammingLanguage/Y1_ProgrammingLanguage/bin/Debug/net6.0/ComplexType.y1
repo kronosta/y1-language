@@ -1,0 +1,28 @@
+@[ComplexTypeTest
+  |/Main
+    PushNew
+    DefineComplexType ITest
+        typeof(object)
+        Type.EmptyTypes
+        public interface abstract
+      DefineComplexMethod TestM ITest_TestM
+          Type.EmptyTypes
+          typeof(void)
+          public abstract
+    FinishType
+    C# - Type ITest = y1__stack_0[y1__stack_0.Count - 1].Item1;
+    PushNew
+    DefineComplexType Test
+        typeof(object)
+        new Type[]{ITest}
+        public
+      DefineMethod TestM Test_TestM
+        \Ldstr, "Hello from interface method."
+        \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+        \Ret
+      \/
+    FinishType
+    CreateObject o
+    CallMethod TestM o
+  \|
+]@

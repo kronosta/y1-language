@@ -1,0 +1,21 @@
+<IMPORTS>
+  System.Threading
+<END_IMPORTS>
+
+@[DoMultiTest
+  |/Main
+    DoMulti
+      Summation 1 10 I
+        C# - Console.WriteLine($"First: {I}");
+        C# - Thread.Sleep(5);
+        C# - return I;
+      EndSummation
+    AndMulti
+      Summation 1 10 I
+        C# - Console.WriteLine($"Second: {I}");
+        C# - Thread.Sleep(5);
+        C# - return I;
+      EndSummation
+    EndMulti
+  \|
+]@

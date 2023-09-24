@@ -1,0 +1,59 @@
+<ATTRIBUTES>
+    Framework:net48
+    Platform:x64
+    SDK:Microsoft.NET.Sdk.WindowsDesktop
+<END_ATTRIBUTES>
+
+<REFS>
+    'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\
+    System.Windows.Forms.dll
+<END_REFS>
+
+@[Forms
+
+|/Main
+  C# - Type tForm = typeof(System.Windows.Forms.Form);
+  C# - Type tLabel = typeof(System.Windows.Forms.Label);
+  PushNew
+  DefineType FormCreator
+    DefineMethod CreateForm CreateForm
+      '$. Local variables.
+      _!tForm
+      _!tLabel
+
+      '$. Initializing the locals.
+      \Newobj, tForm.GetConstructor(Type.EmptyTypes)
+      \Stloc_0
+      \Newobj, tLabel.GetConstructor(Type.EmptyTypes)
+      \Stloc_1
+      
+      '$. Setting up the label.
+      \Ldloc_1
+      \Ldstr, "Hello! This is working! Yay!"
+      \Call, tLabel.GetMethod("set_Text", new Type[]{typeof(string)})
+
+      '$. Setting up the form.
+      \Ldloc_0
+      \Call, tForm.GetMethod("get_Controls", Type.EmptyTypes)
+      \Ldloc_1
+      \Call, typeof(System.Windows.Forms.Control.ControlCollection) ,,
+             .GetMethod("Add", new Type[]{                          ,,
+             typeof(System.Windows.Forms.Control)                   ,,
+             })
+
+      '$. Displaying the form.
+      \Ldloc_0
+      \Call, tForm.GetMethod("ShowDialog", Type.EmptyTypes)
+      \Pop
+
+      '$. Exit the app.
+      \Call, typeof(Console).GetMethod("ReadKey", Type.EmptyTypes)
+      \Pop
+      \Ret
+    \/
+  FinishType
+  CreateObject formCreator
+  CallMethod CreateForm formCreator
+\|
+
+]@
