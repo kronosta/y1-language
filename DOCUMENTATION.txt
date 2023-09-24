@@ -33,6 +33,7 @@ Inside "Framework:", "Platform:", or "SDK:" followed by something denote the cor
 (There is currently no .y1proj, the compiler creates a .csproj from the Y1 source code)
 
 2. A line containing "<REFS>" denotes a list of .dll references until "<END_REFS>".
+A line starting with a single quote denotes a folder to look for .dlls, while anything else is the path to a single .dll.
 
 3. A line containing "<IMPORTS>" denotes a list of C# using statements without the "using" or the semicolon, until "<END_IMPORTS>".
 
