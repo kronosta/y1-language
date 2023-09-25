@@ -237,6 +237,9 @@ when that is necessary.
 The preprocessor runs in cycles, running over and over again until there are no more lines starting with a question mark.
 This means preprocessor directives can manufacture other preprocessor directives.
 
+"?File" <filename>
+  Reads the file into the source code for the next cycle. (Somewhat like #include in C/C++).
+
 "?Define" <name>
 <block>
 ?
