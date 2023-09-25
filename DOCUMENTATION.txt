@@ -267,6 +267,10 @@ This means preprocessor directives can manufacture other preprocessor directives
   ?Defer ?
   ?Defer ?Call DeferredShort !![[
 
+  Note that these methods will not apply the short macro later (it has already been run and never will again).
+  In order to apply it, you will also need to defer another copy of the "?DefineShort" command.
+  The best use of these methods is simply to escape the short macro so it can be used literally in the code.
+
 "?Rewrite" <Out|Err>
 <block>
 ?
