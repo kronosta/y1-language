@@ -234,6 +234,9 @@ Some directives take a block as an argument. These are always ended by a line co
 Inside of a preprocessor block, "?!" is replaced by "?". This of course means that "?!!" is replaced by just "?!", allowing you to nest preprocessor blocks
 when that is necessary.
 
+The preprocessor runs in cycles, running over and over again until there are no more lines starting with a question mark.
+This means preprocessor directives can manufacture other preprocessor directives.
+
 "?Define" <name>
 <block>
 ?
@@ -247,4 +250,81 @@ when that is necessary.
 "?Call" <name> !!arg1!!arg2!!arg3!!etc.
   Calls the long macro with the name.
 
-There are more, I'll get to documenting them later. For now you can look at the code in Preprocess() in Program.cs.
+"?DefineShort" <name> <content>
+  Defines a short macro. They have the same ?n? substitution and can be called with [[name !!arg1!!arg2!!etc.]]
+  Note that short macro calls cannot be deferred with ?Defer, and the substitution applies immediately across the entire remaining code,
+  including within strings and comments.
+
+  One way of deferring a short macro call is to do something like this:
+  ?Define DeferredShort
+    :?!1?!ShortMacro !!argument 1!!argument 2]]
+  ?
+  ?Call DeferredShort !![[
+
+  If you want to defer it twice you can just defer all of those likes like this:
+  ?Defer ?Define DeferredShort
+  ?Defer   :?!1?!ShortMacro !!argument 1!!argument 2]]
+  ?Defer ?
+  ?Defer ?Call DeferredShort !![[
+
+"?Rewrite" <Out|Err>
+<block>
+?
+<block>
+?
+  Rewrites the second block with either the standard output or standard error of the first when supplied the second block as standard input.
+  This compiles and runs the first block separately, so too many of these can make compiling slow.
+
+"?Undefine" <name>
+  Undefines the long macro with the name.
+  You cannot undefine a short macro because it's never really defined in the first place,
+  it has immediate and permanent effects on the code in the same cycle and then doesn't do anything anymore.
+
+"?IfDefined" <name>
+<block>
+?
+<block>
+?
+  If the long macro with the name is defined, it will preprocess/include/compile the first block, otherwise the second.
+
+"?Defer" <line>
+  Defers the line to the next cycle. Mainly useful for directives and their blocks so that they have an effect later.
+  You can stack these indefinitely.
+
+"?WriteToFile" <filename> <macro name>
+  Writes the contents of the macro with the name to the file. No arguments (?n?) are substituted.
+
+"?PreprocessorEnclose"
+<block>
+?
+  Runs the block in a separate environment with different macros (none of them carry over in either direction.)
+
+"?CondenseLines" <lines>
+  Allows you to have multiple lines in a single line, since unpreprocessed Y1 has only one command per line with continuations.
+  The lines are separated by "!!". In the line, "`E" is replaced with an exclamation point and "`G" is replaced with a grave accent mark.
+  So:
+    ?CondenseLines !!DefineVariable Str "hello"!!C# - Console.WriteLine(Str + "`E`G" + "`GE");
+  Effectively means:
+    DefineVariable Str "hello"
+    C# - Console.WriteLine(Str + "!`" + "`E");
+  This also defers each of the lines to the next cycle, so if you put a macro in here, it won't immediately be executed.
+
+"?User_Diagnostic" <message>
+  Prints the message to the console, with `U(four digit hex code) replaced with the corresponding Unicode character.
+  Note that spaces are not allowed unless escaped (with `U0020). (same deal with vertical whitespace and grave accent marks)
+  This should ideally end with `U000A, because it does not automatically print a newline (this is to allow compile-time binary output)
+
+"?User_Read"
+  Reads a single character from the user (at preprocessing time, not runtime) and puts it into a queue.
+
+"?User_IfChar" <char>
+<block>
+?
+<block>
+?
+  Looks at the front character of the input queue (without dequeueing it) and checks it against the given character.
+  The character can be `U(four digit hex code) for the corresponding Unicode character.
+  If the character matches, runs the first block, otherwise runs the second.
+
+"?User_DequeueInput"
+  Dequeues a character from the input queue.
