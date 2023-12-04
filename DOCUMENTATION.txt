@@ -162,7 +162,7 @@ Any syntax errors will print a message in the console while compiling so you can
   Declares a dynamically typed (C#'s dynamic) variable with the name, and assigns it the expression. There is currently no built-in way to reassign this variable, other than C# calls.
 
 "Condition" <boolean expression>
-  An if block, defining a block until "EndCondition". Does not currently support else or else if. This command does not increase the depth.
+  An if block, defining a block until "EndCondition". Does not currently support else or else if. This command does not increase the depth. 
 
 "While" <boolean expression>
   A while loop, defining a block until "EndWhile". This command does not increase the depth.
@@ -177,11 +177,11 @@ Any syntax errors will print a message in the console while compiling so you can
   Followed by a list of blocks separated by "KeyCase" <ConsoleKeyInfo expression> lines. The first block will be run for every key, the rest will be run for the respective ConsoleKeyInfo. See KeyListenerTest.y1.
 
 ====Methodbuilding mode====
-"\\/"
+"\/"
   Ends the local scope for the method and goes back to run mode.
 
-"\\"<arg>
-  Normally this emits an opcode. It can also have ", " followed by an argument after it for opcodes with arguments. However, it simply prefixes arg with "il.Emit(OpCodes." and suffixes the result with ");". This means if you emit a Nop instruction and finish it yourself, you can insert arbitrary C# code into Methodbuilder mode with line continuations. You must have the implicit ");" suffix not be a syntax error (A good way to do this is to end the C# injection with "Console.Write(\"\"", with no ending parenthesis or semicolons. The parenthesis and semicolon will be added automatically, and since nothing is printed, it effectively does nothing. You could also make a custom method that simply returns, and run that instead for a true no-op.) This also allows any expression to be used for the argument. (For any expression for the opcode, you can prefix your expression with "Nop == OpCodes.Nop ? (" and suffix with ") : OpCodes.Nop".)
+"\"<arg>
+  Normally this emits an opcode. It can also have ", " followed by an argument after it for opcodes with arguments. However, it simply prefixes arg with "il.Emit(OpCodes." and suffixes the result with ");". The following strategy is mostly unnecessary because C# calls are allowed in methods. If you emit a Nop instruction and finish it yourself, you can insert arbitrary C# code into Methodbuilder mode with line continuations. You must have the implicit ");" suffix not be a syntax error (A good way to do this is to end the C# injection with Console.WriteLine("", with no ending parenthesis or semicolons. The parenthesis and semicolon will be added automatically, and since nothing is printed, it effectively does nothing. You could also make a custom method that simply returns, and run that instead for a true no-op.) This also allows any expression to be used for the argument. (For any expression for the opcode, you can prefix your expression with "Nop == OpCodes.Nop ? (" and suffix with ") : OpCodes.Nop".) 
 
 "->"<name>
   Declares a local variable named name containing a new label. You need to use this before any branch instructions to the label, or "-->" with the label.
@@ -209,6 +209,9 @@ Any syntax errors will print a message in the console while compiling so you can
 
 "<END>"
   Ends an exception block.
+
+"Condition", "While"
+  Also allowed in method-building mode.
 
 By convention, the area inside of exception blocks not including the starting and ending instructions themselves should be indented, although it doesn't have to be.
 
