@@ -55,16 +55,16 @@ Top-level classes don't have a ton of native functionality, but using direct C# 
 
 The program always starts inside of a class with the name of the file. This class can be ended, and new classes can be started. Note that the class is also implicitly ended, so the class declared last should not be closed explicitly.
 
-Top level classes are started with "@[" followed by the class's name. They are typically ended with "]@", by convention, but can also be ended with "\\|", just like a method.
+Top level classes are started with "@[" followed by the class's name. They are typically ended with "]@", by convention, but can also be ended with "\|", just like a method.
 
 ===Methods===
-Methods are started with "|/" followed by the method's name. They are, by convention, ended with "\\|", but can also be ended by "]@". 
+Methods are started with "|/" followed by the method's name. They are, by convention, ended with "\|", but can also be ended by "]@". 
 
 ===Variables===
 Variables are not normally declared explicitly except by C# calls, however there are some important considerations with names. Any name beginning with "y1__" is reserved for use by compiled programs. New variables should not be declared with these names, but they can be. You can also use the pre-existing names for manipulation.
 
-y1__aName: An AssemblyName which normally contains "Y1_" followed by a random number. If you want to choose the Assembly name for some reason, you can redeclare y1__aName, although you will also have to redeclare y1__ab and y1__mb.
-y1__ab: An AssemblyBuilder with y1__aName as its name and AssemblyBuilderAccess.Run as its run type.
+y1__aName: An AssemblyName which normally contains "Y1_" followed by a random number. If you want to choose the Assembly name for some reason, you can assign y1__aName a different value, although you will also have to redefine y1__ab and y1__mb.
+y1__ab: An AssemblyBuilder with y1__aName as its name and AssemblyBuilderAccess.RunAndCollect as its run type.
 y1__mb: A ModuleBuilder contained within y1__ab which contains all dynamic classes. You could declare other ModuleBuilders or AssemblyBuilders, but this would require either swapping them to define new classes or doing the entire thing through C# calls.
 y1__il: The ILGenerator. It gets redefined every time a new dynamic method is declared, to that method's ILGenerator.
 y1__stack: A List<Tuple<Type, Dictionary<string, object>, TypeBuilder, Dictionary<string, Type>>>. Item1 is the finished type, Item2 is the objects of the type, Item3 is the TypeBuilder while the class is being dynamically defined, Item4 is the subclasses (this is currently unused as inheritance is not yet implemented). This contains most data normally, although custom variables through C# calls and certain commands may be used as well.
@@ -74,6 +74,7 @@ y1__result: Intended to hold the temporary result of operations. Currently used 
 All of these variables are followed by an underscore followed by the depth. The depth increases inside of internally created lambda expressions, such as summations. In normal circumstances, you should refer to y1__stack as y1__stack_0, for example. Here are the operations that cause the depth to increase (usually only inside of the corresponding block):
 * Summation
 * DoMulti
+* ListenForKeys
 
 y1__arg is also used without a depth. It is only used internally during certain commands, but immediately goes out of scope as soon as the command finished. You should never even be able to acess this variable, but if you declare a variable with this name, many essential commands will throw errors.
 
@@ -84,22 +85,6 @@ Any syntax errors will print a message in the console while compiling so you can
 
 
 ===Commands===
-====Preprocessor====
-The preprocessor runs before even compiling your Y1 code. Preprocessor directives begin with "?" followed by a name.
-
-"?File" <filename>
-The filename cannot contain spaces. Copies everything from that file into the code that will be compiled, right at the point of this directive.
-
-"?Define" <name>
-Defines a multi-line macro. Each line should start with a colon (arbitrary text can occur before the colon), followed by the Y1 code.
-The lines should end with a line containing only a single question mark, surrounded by optional whitespace. Any cases of "?" + n + "?" will be replaced with the nth parameter supplied in a "?Call" directive.
-
-"?Call" <name> <params>
-Calls the multi-line macro with the specified name. Note that it the preprocessor does not replace these immediately, rather, it moves in passes. If this directive is generated at a later pass, it will still be converted. The parameters should start with "!!" and be separated by additional "!!"s.
-
-"?DefineShort" <name> <expression>
-Defines a single-line expression macro with the specified name and the specified expression. Any cases of "?" + n + "?" will be replaced with the nth parameter supplied. To call this, there is no directive. Instead, cases of "[[" + name + " " + params + "]]" will be replaced immediately (later passes do not replace single-line macros). The params should start with "!!" and be separated by "!!".
-
 ====Run mode====
 "PushNew"
   Pushes a new element onto y1__stack.
