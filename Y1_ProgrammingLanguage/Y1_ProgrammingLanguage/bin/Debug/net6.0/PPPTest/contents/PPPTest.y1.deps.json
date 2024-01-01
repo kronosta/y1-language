@@ -6,15 +6,15 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {
-      "Y1_ProgrammingLanguage/1.0.0": {
+      "PPPTest.y1/1.0.0": {
         "runtime": {
-          "Y1_ProgrammingLanguage.dll": {}
+          "PPPTest.y1.dll": {}
         }
       }
     }
   },
   "libraries": {
-    "Y1_ProgrammingLanguage/1.0.0": {
+    "PPPTest.y1/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

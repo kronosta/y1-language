@@ -8,6 +8,10 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
+using System.Xml.Schema;
+using System.Runtime.InteropServices;
+using System.IO.Pipes;
+using System.Text;
 
 namespace Y1
 {
@@ -19,6 +23,45 @@ namespace Y1
         public static string framework = "net6.0", platform = "anycpu", sdk = "Microsoft.NET.Sdk";
         public static Random rand = new Random((int)DateTime.Now.ToBinary());
 
+        public static string GraveEscape(string escaped)
+        {
+            escaped = escaped
+                .Replace("`E", "!")
+                .Replace("`S", " ")
+                .Replace("`N", "\n")
+                .Replace("`T", "\t")
+                .Replace("`R", "\r");
+            string total = "";
+            for (int i = 0; i < escaped.Length; i++)
+            {
+                if (escaped[i] == '`')
+                {
+                    i++;
+                    if (escaped[i] == 'U')
+                    {
+                        string hexCode = "0x";
+                        i++;
+                        hexCode += escaped[i];
+                        i++;
+                        hexCode += escaped[i];
+                        i++;
+                        hexCode += escaped[i];
+                        i++;
+                        hexCode += escaped[i];
+                        total += "" + (char)(Convert.ToInt32(hexCode, 16));
+                    }
+                    else if (escaped[i] == 'G')
+                    {
+                        total += "`";
+                    }
+                }
+                else
+                {
+                    total += escaped[i];
+                }
+            }
+            return total;
+        }
         public static string ToIdentifier(string unprocessed)
         {
             if (unprocessed.Contains('.'))
@@ -36,6 +79,137 @@ namespace Y1
                 {
                     result += unprocessed[i];
                 }
+            }
+            return result;
+        }
+
+        public static string HandleYen(string match, string soFar)
+        {
+            string result = soFar;
+            string matchContents = match;
+            if (matchContents[1] == '\\')
+            {
+                char value = (char)int.Parse(matchContents.Substring(2, matchContents.Length - 3));
+                result += value;
+            }
+            else if (matchContents[1] == '$')
+            {
+                string contents = matchContents.Substring(2, matchContents.Length - 3);
+                Tuple<string, string>[] conditionedCommands =
+                    contents.Split(";")
+                    .Select(x => x.Trim())
+                    .Select(x => new Tuple<string, string>(x.Split(':')[0], x.Split(':')[1]))
+                    .ToArray();
+                string command = "";
+                int i = 0;
+                while (true)
+                {
+                    if (i >= conditionedCommands.Length) break;
+                    string[] lifoPieces = conditionedCommands[i]
+                        .Item1
+                        .Trim()
+                        .Split(' ')
+                        .Select(x => GraveEscape(x))
+                        .ToArray();
+                    Stack<string> stack = new Stack<string>();
+                    foreach (string piece in lifoPieces)
+                    {
+                        if (piece == "@FileExists")
+                        {
+                            stack.Push(File.Exists(stack.Pop()) ? "true" : "false");
+                        }
+                        else if (piece == "@OSMatch")
+                        {
+                            OperatingSystem os = Environment.OSVersion;
+                            string osString = os.Platform.ToString() + "-" + os.Version.ToString();
+                            stack.Push(Regex.IsMatch(osString, stack.Pop()) ? "true" : "false");
+                        }
+                        else if (piece == "@OSVersionMatch")
+                        {
+                            Version version = Environment.OSVersion.Version;
+                            string matcher = stack.Pop();
+                            Version matcherVersion = new Version(matcher.Substring(1));
+                            if (matcher[0] == '=')
+                            {
+                                stack.Push(version == matcherVersion ? "true" : "false");
+                            }
+                            else if (matcher[0] == '>')
+                            {
+                                stack.Push(version > matcherVersion ? "true" : "false");
+                            }
+                            else if (matcher[0] == '<')
+                            {
+                                stack.Push(version < matcherVersion ? "true" : "false");
+                            }
+                            if (matcher[0] == '{')
+                            {
+                                stack.Push(version <= matcherVersion ? "true" : "false");
+                            }
+                            if (matcher[0] == '}')
+                            {
+                                stack.Push(version >= matcherVersion ? "true" : "false");
+                            }
+                        }
+                        else if (piece == "@And")
+                        {
+                            string a = stack.Pop();
+                            string b = stack.Pop();
+                            stack.Push((a == "true" && b == "true") ? "true" : "false");
+                        }
+                        else if (piece == "@Or")
+                        {
+                            string a = stack.Pop();
+                            string b = stack.Pop();
+                            stack.Push((a == "true" || b == "true") ? "true" : "false");
+                        }
+                        else if (piece == "@Not")
+                        {
+                            string a = stack.Pop();
+                            stack.Push(a == "true" ? "false" : "true");
+                        }
+                        else
+                        {
+                            stack.Push(piece);
+                        }
+                    }
+                    string boolean = stack.Pop();
+                    if (boolean == "true")
+                    {
+                        command = conditionedCommands[i].Item2.Trim();
+                        break;
+                    }
+                    i++;
+                }
+                if (command != "")
+                {
+                    string[] commandParts = command.Split(' ').Select(x => GraveEscape(x)).ToArray();
+                    ProcessStartInfo psi = new ProcessStartInfo();
+                    psi.RedirectStandardOutput = true;
+                    psi.FileName = GraveEscape(commandParts[0]);
+                    psi.Arguments = GraveEscape(commandParts[1]);
+                    Process process = new Process();
+                    process.StartInfo = psi;
+                    process.Start();
+                    StreamReader reader = process.StandardOutput;
+                    string output = reader.ReadToEnd();
+                    process.WaitForExit();
+                    result += output;
+                }
+            }
+            return result;
+        }
+
+        public static string Prepreprocess(string unpp)
+        {
+            string result = "";
+            Regex yenRegex = new Regex("¥.[^\\]]*]");
+            MatchCollection yenMatches = yenRegex.Matches(unpp);
+            foreach (Match yenMatch in yenMatches) Console.WriteLine("PPP Match: " + yenMatch.Value);
+            string[] withoutYen = yenRegex.Split(unpp);
+            for (int i = 0; i < withoutYen.Length; i++)
+            {
+                result += withoutYen[i];
+                if (i < yenMatches.Count) result = HandleYen(yenMatches[i].Value, result);
             }
             return result;
         }
@@ -239,41 +413,14 @@ namespace Y1
                     for (int j = 1; j < contents.Length; j++)
                     {
                         result.Add(
-                          contents[j]
-                            .Replace("`E", "!")
-                            .Replace("`G", "`")
+                          GraveEscape(contents[j])
                         );
                     }
                 }
                 else if (trimmed.Split(' ')[0] == "?User_Diagnostic")
                 {
                     string contents = trimmed.Split(' ')[1];
-                    string descaped = "";
-                    for (int j = 0; j < contents.Length; j++)
-                    {
-                        if (contents[j] == '`')
-                        {
-                            j++;
-                            if (contents[j] == 'U')
-                            {
-                                string hexCode = "0x";
-                                j++;
-                                hexCode += contents[j];
-                                j++;
-                                hexCode += contents[j];
-                                j++;
-                                hexCode += contents[j];
-                                j++;
-                                hexCode += contents[j];
-                                descaped += "" + (char)(Convert.ToInt32(hexCode, 16));
-                            }
-                        }
-                        else
-                        {
-                            descaped += "" + contents[j];
-                        }
-                    }
-                    Console.Write(descaped);
+                    Console.Write(GraveEscape(contents));
                 }
                 else if (trimmed.Split(' ')[0] == "?User_Read")
                 {
@@ -282,23 +429,7 @@ namespace Y1
                 else if (trimmed.Split(' ')[0] == "?User_IfChar")
                 {
                     char inputChar = input[0];
-                    char test = '\u0000';
-                    if (trimmed.Split(' ')[1][0] == '`')
-                    {
-                        if (trimmed.Split(' ')[1][1] == 'U')
-                        {
-                            string hexCode = "0x" + trimmed.Split(' ')[1].Substring(2);
-                            test = (char)(Convert.ToInt32(hexCode, 16));
-                        }
-                        else
-                        {
-                            test = '\u0000';
-                        }
-                    }
-                    else
-                    {
-                        test = trimmed.Split(' ')[1][0];
-                    }
+                    char test = GraveEscape(trimmed.Split(' ')[1])[0];
                     List<string> ifContents = new List<string>();
                     List<string> elseContents = new List<string>();
                     i++;
@@ -1055,6 +1186,10 @@ namespace Y1
                         csCode += "Y1.KeyListener.KeyPressed -= y1__keyListenerHandler_" + depth + ";\n";
                         csCode += "}\n";
                     }
+                    else if (trimmed.Split(' ')[0] == "Namespace")
+                    {
+                        csCode += "namespace " + trimmed.Split(' ')[1] + "{\n";
+                    }
                     else if (trimmed.StartsWith("C# - "))
                     {
                         csCode += trimmed.Substring(5);
@@ -1166,10 +1301,6 @@ namespace Y1
                         csCode += ConvertToCSharp(lines, depth, false, "methodbuild");
                         csCode += "}\n";
                     }
-                    else if (trimmed.Split(' ')[0] == "Namespace")
-                    {
-                        csCode += "namespace " + trimmed.Split(' ')[1] + "{\n";
-                    }
                     else
                     {
                         Console.WriteLine("Syntax error: Line " + i);
@@ -1194,11 +1325,13 @@ namespace Y1
             {
                 isLibrary = true;
             }
+            Encoding encoding = Encoding.UTF8;
             try
             {
                 using (var sr = new StreamReader(filename))
                 {
                     y1Code = sr.ReadToEnd();
+                    encoding = sr.CurrentEncoding;
                 }
             }
             catch
@@ -1207,6 +1340,9 @@ namespace Y1
                 Console.ReadKey();
                 Environment.Exit(1);
             }
+            Encoding.UTF8.GetString(Encoding.Convert(encoding, Encoding.UTF8, encoding.GetBytes(y1Code)));
+            if (y1Code.StartsWith("^^$")) y1Code = y1Code.Substring(3).Replace("###Yen;", "¥");
+            y1Code = Prepreprocess(y1Code);
             string[] y1CodeSplitBlankLines = y1Code.Split('\n', '\r', '\f', '\v');
             List<string> y1CodeSplitBlankLinesRemoved = new List<string>();
             foreach (string i in y1CodeSplitBlankLines)
@@ -1269,21 +1405,21 @@ namespace Y1
                 sw.WriteLine("<PropertyGroup>");
                 sw.WriteLine(isLibrary ? "<OutputType>Library</OutputType>" : "<OutputType>Exe</OutputType>");
                 sw.WriteLine($"<TargetFramework>{framework}</TargetFramework>");
-                sw.Write("<AdditionalLibPaths>C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.8\\");
+                /*sw.Write("<AdditionalLibPaths>C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.8\\");
                 foreach (var i in assemblyPaths)
                 {
                     sw.Write("," + i);
                 }
-                sw.WriteLine("</AdditionalLibPaths>");
+                sw.WriteLine("</AdditionalLibPaths>");*/
                 sw.WriteLine($"<PlatformTarget>{platform}</PlatformTarget>");
                 sw.WriteLine("</PropertyGroup>");
                 sw.WriteLine("<ItemGroup>");
-                sw.WriteLine("<Reference Include=\"System.Core.dll\" />");
+                /*sw.WriteLine("<Reference Include=\"System.Core.dll\" />");
                 sw.WriteLine("<Reference Include=\"System.Reflection.dll\" />");
                 sw.WriteLine("<Reference Include=\"System.Reflection.Emit.dll\" />");
                 sw.WriteLine("<Reference Include=\"System.Collections.dll\" />");
                 sw.WriteLine("<Reference Include=\"System.Console.dll\" />");
-                sw.WriteLine("<Reference Include=\"System.Threading.Tasks.dll\" />");
+                sw.WriteLine("<Reference Include=\"System.Threading.Tasks.dll\" />");*/
                 foreach (var i in assemblyRefs)
                 {
                     sw.WriteLine("<Reference Include=\"" + i + "\" />");

@@ -1,0 +1,15 @@
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\obj\Debug\net6.0\PPPTest.y1.csproj.AssemblyReference.cache
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\obj\Debug\net6.0\PPPTest.y1.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\obj\Debug\net6.0\PPPTest.y1.AssemblyInfoInputs.cache
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\obj\Debug\net6.0\PPPTest.y1.AssemblyInfo.cs
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\obj\Debug\net6.0\PPPTest.y1.csproj.CoreCompileInputs.cache
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\bin\Debug\net6.0\PPPTest.y1.exe
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\bin\Debug\net6.0\PPPTest.y1.deps.json
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\bin\Debug\net6.0\PPPTest.y1.runtimeconfig.json
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\bin\Debug\net6.0\PPPTest.y1.dll
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\bin\Debug\net6.0\PPPTest.y1.pdb
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\obj\Debug\net6.0\PPPTest.y1.dll
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\obj\Debug\net6.0\refint\PPPTest.y1.dll
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\obj\Debug\net6.0\PPPTest.y1.pdb
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\obj\Debug\net6.0\PPPTest.y1.genruntimeconfig.cache
+C:\Users\caetu\OneDrive\Documents\GitHub\y1-language\Y1_ProgrammingLanguage\Y1_ProgrammingLanguage\bin\Debug\net6.0\obj\Debug\net6.0\ref\PPPTest.y1.dll
