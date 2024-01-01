@@ -538,7 +538,7 @@ namespace Y1
                     {
                         if (y1CodeSplit[startingPos].Trim().StartsWith("'"))
                         {
-                            assemblyPaths.Add(y1CodeSplit[startingPos].Trim());
+                            assemblyPaths.Add(y1CodeSplit[startingPos].Trim().Substring(1));
                         }
                         else
                         {
@@ -1312,6 +1312,14 @@ namespace Y1
 
         public static void Main(string[] args)
         {
+            //Fix old versions having "multiple entry points"
+            try 
+            {
+                File.Delete("./compiled.cs");
+            }
+            catch
+            {
+            }
             if (args.Length >= 1)
             {
                 filename = args[0];
@@ -1353,9 +1361,12 @@ namespace Y1
                 }
             }
             string csCode = ConvertToCSharp(Preprocess(y1CodeSplitBlankLinesRemoved), 0, true);
-            using (var file = File.Create("compiled.cs")) { }
+            string filenameLast = filename.Substring(filename.LastIndexOf("/"));
+            string csprojName = "./" + filenameLast + ".csproj";
+            string csName = "./" + filenameLast + ".cs";
+            using (var file = File.Create(csName)) { }
 
-            using (var sw = new StreamWriter("compiled.cs"))
+            using (var sw = new StreamWriter(csName))
             {
                 sw.Write(csCode);
             }
@@ -1399,18 +1410,17 @@ namespace Y1
             compiler_args += " compiled.cs";
             Console.WriteLine(compiler_args);
             */
-            using (StreamWriter sw = new StreamWriter(filename + ".csproj"))
+            using (StreamWriter sw = new StreamWriter(csprojName))
             {
                 sw.WriteLine($"<Project Sdk=\"{sdk}\">");
                 sw.WriteLine("<PropertyGroup>");
                 sw.WriteLine(isLibrary ? "<OutputType>Library</OutputType>" : "<OutputType>Exe</OutputType>");
                 sw.WriteLine($"<TargetFramework>{framework}</TargetFramework>");
-                /*sw.Write("<AdditionalLibPaths>C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.8\\");
+                sw.Write("<AdditionalLibPaths>C:/Program Files/dotnet/shared/Microsoft.NETCore.App/6.0.8</AdditionalLibPaths>");
                 foreach (var i in assemblyPaths)
                 {
-                    sw.Write("," + i);
+                    sw.WriteLine("<AdditionalLibPaths>" + i + "</AdditionalLibPaths>");
                 }
-                sw.WriteLine("</AdditionalLibPaths>");*/
                 sw.WriteLine($"<PlatformTarget>{platform}</PlatformTarget>");
                 sw.WriteLine("</PropertyGroup>");
                 sw.WriteLine("<ItemGroup>");
@@ -1427,7 +1437,7 @@ namespace Y1
                 sw.WriteLine("</ItemGroup>");
                 sw.WriteLine("</Project>");
             }
-            ProcessStartInfo si = new ProcessStartInfo("dotnet", "build " + filename + ".csproj");
+            ProcessStartInfo si = new ProcessStartInfo("dotnet", "build " + csprojName);
             si.UseShellExecute = false;
             Process p = Process.Start(si);
             p.WaitForExit();
@@ -1437,7 +1447,7 @@ namespace Y1
             }
             Directory.CreateDirectory(ToIdentifier(filename));
             Directory.Move($"bin/Debug/{framework}", ToIdentifier(filename) + "/contents");
-            File.Delete(filename + ".csproj");
+            //File.Delete(csprojName);
             Directory.Delete("bin", true);
         }
     }
