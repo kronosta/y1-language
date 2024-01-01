@@ -1,2 +1,2 @@
-Y1_ProgrammingLanguage/.vs/.*
-.git
+Y1_ProgrammingLanguage/.vs/**
+.git/**
