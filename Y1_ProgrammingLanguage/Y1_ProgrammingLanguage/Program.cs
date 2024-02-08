@@ -1361,7 +1361,10 @@ namespace Y1
                 }
             }
             string csCode = ConvertToCSharp(Preprocess(y1CodeSplitBlankLinesRemoved), 0, true);
-            string filenameLast = filename.Substring(filename.LastIndexOf("/"));
+            int filenameSlashLastIndex = filename.LastIndexOf("/");
+            string filenameLast = filename;
+            if (filenameSlashLastIndex >= 0)
+                filenameLast = filename.Substring(filenameSlashLastIndex);
             string csprojName = "./" + filenameLast + ".csproj";
             string csName = "./" + filenameLast + ".cs";
             using (var file = File.Create(csName)) { }
