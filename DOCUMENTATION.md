@@ -89,148 +89,148 @@ Here are the operations that cause the depth to increase (usually only inside of
 * `Summation`
 * `DoMulti`
 
-y1__arg is also used without a depth. 
+`y1__arg` is also used without a depth. 
 It is only used internally during certain commands, but immediately goes out of scope as soon as the command finished. 
 If you declare a variable with this name, many essential commands will throw errors.
 
-Also note that often you can access lower depths then what is currently executing, allowing it to modify mutable values such as y1__stack.
+Also note that often you can access lower depths then what is currently executing, allowing it to modify mutable values such as `y1__stack`.
 
-===Syntax Errors===
+## Syntax Errors
 Any syntax errors will print a message in the console while compiling so you can tell if something is wrong. 
 However, it does not throw an error. 
 Any syntax error is simply not compiled, and the compiler will move on to the next line and compile as normal. 
 
 
-===Commands===
-====Run mode====
-"PushNew"
-  Pushes a new element onto y1__stack.
+## Commands
+### Run mode
+#### `PushNew`
+Pushes a new element onto `y1__stack`.
 
-"DefineType" <name>
-  Takes the top element on y1__stack and initializes the TypeBuilder to begin defining a class dynamically. 
-  By convention, an indented section should be inserted until FinishType, but it doesn't have to be.
+#### `DefineType <name>`
+Takes the top element on `y1__stack` and initializes the `TypeBuilder` to begin defining a class dynamically. 
+By convention, an indented section should be inserted until `FinishType`, but it doesn't have to be.
 
-"DefineMethod" <name> <var-name>
-  Defines the method with name in the TypeBuilder of the top element of y1__stack, in addition to saving it to a local variable named var-name. 
-  This changes it to Method-building mode, which has a different set of commands. 
-  It also declares a new local scope (The MethodBuilder itself it outside that local scope). 
-  By convention, the stuff in Method-builder mode should be indented, but it doesn't have to be.
+#### `DefineMethod <name> <var-name>`
+Defines the method with name in the TypeBuilder of the top element of `y1__stack`, in addition to saving it to a local variable named var-name. 
+This changes it to Method-building mode, which has a different set of commands. 
+It also declares a new local scope (The `MethodBuilder` itself it outside that local scope). 
+By convention, the stuff in Method-builder mode should be indented, but it doesn't have to be.
 
-"FinishType"
-  Takes the top element on y1__stack, and initializes the Type to the result of the TypeBuilder.
+#### `FinishType`
+Takes the top element on `y1__stack`, and initializes the `Type` to the result of the `TypeBuilder`.
 
-"CreateObject" <name>
-  Takes the top element of y1__stack, and declares a new instance. 
-  Note that since it is stored in a dictionary, names can be overloaded by type in this command, although custom variables do not work this way.
+#### `CreateObject <name>`
+Takes the top element of `y1__stack`, and declares a new instance. 
+Note that since it is stored in a dictionary, names can be overloaded by type in this command, although custom variables do not work this way.
 
-"CallMethod" <method-name> <object-name>
-  Takes the top element of y1__stack, takes the instance with key object-name and calls its no-parameter method with method-name.
+#### `CallMethod <method-name> <object-name>`
+Takes the top element of `y1__stack`, takes the instance with key object-name and calls its no-parameter method with method-name.
 
-"Roll" <depth>
-  Takes the nth element from the top of y1__stack (1-based), and moves it to the top, removing it from its original spot. 
-  You can use this to access types lower down on the stack.
+#### `Roll <depth>`
+Takes the nth element from the top of `y1__stack` (1-based), and moves it to the top, removing it from its original spot. 
+You can use this to access types lower down on the stack.
 
-"ReverseRoll" <depth>
-  Reverses the effect of a "Roll" with the same depth. 
+#### `ReverseRoll <depth>`
+  Reverses the effect of a `Roll` with the same depth. 
 
-"Drop"
-  Removes the top element of y1__stack. 
-  Everything is likely to be garbage collected. 
-  If you have a top-level type, load it, drop it, and load it again, the instances will be gone.
+#### `Drop`
+Removes the top element of `y1__stack`. 
+Everything is likely to be garbage collected. 
+If you have a top-level type, load it, drop it, and load it again, the instances will be gone.
 
-"LoadType" <arg>
-  Takes the type given by the expression written with "typeof(" + arg + "), pushes it onto y1__stack, with empty dictionaries and with the TypeBuilder assigned null.
+#### `LoadType <arg>`
+Takes the type given by the expression written with `typeof(` + arg + `)`, pushes it onto `y1__stack`, with empty dictionaries and with the TypeBuilder assigned null.
 
-"ObjParams"
-  On the next line should be the object name. 
-  On the next line should be the parameters. 
-  Takes the top element of y1__stack, creates a new object with a parameterized constructor and gives it the key of the object name. 
-  The parameters must evaluate to an object[].
-  Only the parameters support line continuations.
+#### `ObjParams`
+On the next line should be the object name. 
+On the next line should be the parameters. 
+Takes the top element of `y1__stack`, creates a new object with a parameterized constructor and gives it the key of the object name. 
+The parameters must evaluate to an `object[]`.
+Only the parameters support line continuations.
 
-"MethodParams"
-  On the next line should be the method name. 
-  On the next line should be the types as a C# expression evaluating to a Type[]. 
-  On the next line should be the object name.
-  On the next line should be the parameters as a C# expression evaluating to an object[]. 
-  Calls a parameterized method. Only the parameters support line continuations.
+#### MethodParams
+On the next line should be the method name. 
+On the next line should be the types as a C# expression evaluating to a `Type[]`. 
+On the next line should be the object name.
+On the next line should be the parameters as a C# expression evaluating to an `object[]`. 
+Calls a parameterized method. Only the parameters support line continuations.
 
-"DefineField" <name> <type>
-  Creates a local variable with name that is a field in the TypeBuilder of the top element of y1__stack with the same name. 
-  The type should be a C# expression evaluating to a Type, and should not have spaces. 
-  This can be replaced with a C# call for the ability to have the field and local variable have separate names, or to have spaces in the expression.
+#### `DefineField <name> <type>`
+Creates a local variable with name that is a field in the `TypeBuilder` of the top element of `y1__stack` with the same name. 
+The type should be a C# expression evaluating to a `Type`, and should not have spaces. 
+This can be replaced with a C# call for the ability to have the field and local variable have separate names, or to have spaces in the expression.
 
-"DefineParamMethod" <name> <var-name>
-  On the next line should be a C# expression that evaluates to a Type[]. 
-  Creates a local variable with var-name that is a MethodBuilder for a method that is named name, and goes into Methodbuilding mode.
+#### `DefineParamMethod <name> <var-name>`
+On the next line should be a C# expression that evaluates to a `Type[]`. 
+Creates a local variable with var-name that is a `MethodBuilder` for a method that is named name, and goes into Method-building mode.
 
-"LoadField" <name> <var-name>
-  Creates a local variable that is the field with name name from the type of the top element of y1__stack.
+#### `LoadField <name> <var-name>`
+Creates a local variable that is the field with name name from the type of the top element of `y1__stack`.
 
-"DefineComplexMethod" <name> <var-name>
-  Next line should be the parameter types. 
-  Next line should be the return type. 
-  Next line should be the method attributes else (public, private, and/or static)
+#### `DefineComplexMethod <name> <var-name>`
+Next line should be the parameter types. 
+Next line should be the return type. 
+Next line should be the method attributes else (`public`, `private`, and/or `static`)
 
-"DefineComplexField" <name> <type>
-  Next line should be the field attributes (public, private, and/or static).
+#### `DefineComplexField <name> <type>`
+Next line should be the field attributes (`public`, `private`, and/or `static`).
 
-"Subclass" <name>
-  Takes the top element of the stack and subclasses it. 
-  The subclass is exclusively accessible through the main class.
+#### `Subclass <name>`
+Takes the top element of the stack and subclasses it. 
+The subclass is exclusively accessible through the main class.
 
-"DefineSubclassMethod" <subclass-name> <method-name> <var-name>
-  Like DefineComplexMethod, but before the other arguments, the subclass name should be given.
+#### `DefineSubclassMethod <subclass-name> <method-name> <var-name>`
+Like `DefineComplexMethod`, but before the other arguments, the subclass name should be given.
 
-"DefineSubclassField" <subclass-name> <method-name> <var-name>
-  Like DefineComplexField, but before the other arguments, the subclass name should be given.
+#### `DefineSubclassField <subclass-name> <method-name> <var-name>`
+Like `DefineComplexField`, but before the other arguments, the subclass name should be given.
 
-"FinishSubclass" <subclass-name>
-  Changes the TypeBuilder to Type.
+#### `FinishSubclass <subclass-name>`
+Changes the `TypeBuilder` to `Type`.
 
-"CreateSubclassObject" <object-name> <subclass-name>
-  Creates an object of a subclass. 
-  The subclass name, enclosed in square brackets, will be automatically inserted before the object name. 
-  In any further commands, you are required to add the square bracket section/
+#### `CreateSubclassObject <object-name> <subclass-name>`
+Creates an object of a subclass. 
+The subclass name, enclosed in square brackets, will be automatically inserted before the object name. 
+In any further commands, you are required to add the square bracket section.
 
-"CallSubclassMethod" <method-name> <object-name> <subclass-name>
-  Calls a method of a subclass.
+#### `CallSubclassMethod <method-name> <object-name> <subclass-name>`
+Calls a method of a subclass.
 
-"Summation" <start> <end> <index-name>
-  Followed by a block of code ending with "EndSummation". 
-  Inside of that block of code, the variable index-name will be assigned an integer. 
-  Each integer starting at start inclusively and ending at end exclusively will be passed to the block. 
-  The results of each iteration will all be added up, either using the normal + operation or the "op_Addition" method if it has one. 
-  It adds them starting with start and then in increasing order, 
-    (this might matter if the op_Addition function is non-associative or non-commutative, or if the block can return multiple different types). 
-  y1__result_(outer depth) will be set to the result of the summation.
-  This function increments the depth while in the block.
+#### `Summation <start> <end> <index-name>`
+Followed by a block of code ending with `EndSummation`. 
+Inside of that block of code, the variable index-name will be assigned an integer. 
+Each integer starting at start inclusively and ending at end exclusively will be passed to the block. 
+The results of each iteration will all be added up, either using the normal + operation or the `op_Addition` method if it has one. 
+It adds them starting with start and then in increasing order, 
+(this might matter if the `op_Addition` function is non-associative or non-commutative, or if the block can return multiple different types). 
+`y1__result_(outer depth)` will be set to the result of the summation.
+This function increments the depth while in the block.
 
-"DefineVariable" <name> <expression>
-  Declares a dynamically typed (C#'s dynamic) variable with the name, and assigns it the expression. 
-  There is currently no built-in way to reassign this variable, other than C# calls.
+#### `DefineVariable <name> <expression>`
+Declares a dynamically typed (C#'s `dynamic`) variable with the name, and assigns it the expression. 
+There is currently no built-in way to reassign this variable, other than C# calls.
 
-"Condition" <boolean expression>
-  An if block, defining a block until "EndCondition". Does not currently support else or else if. 
-  This command does not increase the depth.
+#### `Condition <boolean expression>`
+An if block, defining a block until `EndCondition`. Does not currently support else or else if. 
+This command does not increase the depth.
 
-"While" <boolean expression>
-  A while loop, defining a block until "EndWhile". This command does not increase the depth.
+#### `While <boolean expression>`
+A while loop, defining a block until `EndWhile`. This command does not increase the depth.
 
-"DoMulti"
-  Starts a series of blocks until "EndMulti", with "AndMulti" between the blocks. 
-  The blocks will run in separate threads, and the main thread will wait until all of them are done. 
-  In each block, the depth is incremented. Note that if even one of the blocks is still running, the main thread will not continue. 
-  You can use "C# - return;" to exit a block prematurely, to make sure they don't get stuck in an infinite loop.
+#### `DoMulti`
+Starts a series of blocks until `EndMulti`, with `AndMulti` between the blocks. 
+The blocks will run in separate threads, and the main thread will wait until all of them are done. 
+In each block, the depth is incremented. Note that if even one of the blocks is still running, the main thread will not continue. 
+You can use `C# - return;` to exit a block prematurely, to make sure they don't get stuck in an infinite loop.
 
-"DefineComplexType" <name>
-  Followed by a line containing the superclass as an expression evaluating to a Type. 
-  Followed by a line containing the interfaces as an expression evaluating to a Type[]. 
-  Followed by a line containing type attributes (public, abstract, sealed, and/or interface). Defines a type with the name.
+#### `DefineComplexType <name>`
+Followed by a line containing the superclass as an expression evaluating to a `Type`. 
+Followed by a line containing the interfaces as an expression evaluating to a `Type[]`. 
+Followed by a line containing type attributes (`public`, `abstract`, `sealed`, and/or `interface`). Defines a type with the name.
 
-"ListenForKeys"
-  Followed by a list of blocks separated by "KeyCase" <ConsoleKeyInfo expression> lines, ended by "EndListenForKeys".
-  The first block will be run for every key, the rest will be run for the respective ConsoleKeyInfo. See KeyListenerTest.y1.
+#### `ListenForKeys`
+Followed by a list of blocks separated by `KeyCase <ConsoleKeyInfo expression>` lines, ended by `EndListenForKeys`.
+The first block will be run for every key, the rest will be run for the respective `ConsoleKeyInfo`. See `examples/KeyListenerTest.y1`.
 
 ====Methodbuilding mode====
 "\\/"
