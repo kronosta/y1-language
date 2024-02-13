@@ -88,6 +88,7 @@ In normal circumstances, you should refer to `y1__stack` as `y1__stack_0`, for e
 Here are the operations that cause the depth to increase (usually only inside of the corresponding block):
 * `Summation`
 * `DoMulti`
+* `ListenForKeys`
 
 `y1__arg` is also used without a depth. 
 It is only used internally during certain commands, but immediately goes out of scope as soon as the command finished. 
