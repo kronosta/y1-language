@@ -1,0 +1,401 @@
+Y1 is a proof-of-concept programming language made to show off a brand new paradigm known as Type-Oriented Programming.
+
+# Name
+The name was created while looking for good names that weren't already taken.
+A lot of the best names are already used. I recalled probably the worst misspeech I'd ever come across, 
+that being saying "Where one?" instead of "Where is it?". Then the thought process began as follows: "Where one" -> "Why one" -> "Y1". 
+Y1 appeared to be untaken, and also sounded cool, so I went with it.
+
+# Type-oriented programming
+Type-orientation is a derivative of Object-orientation, but instead of focusing on objects, it focuses on types/classes. 
+Types have a link to all their instances, and objects are only accessible from their types. 
+While typically subclasses have a link to their superclass, in type-oriented programming, 
+superclasses have a link to their subclasses, and subclasses are only accessible from their superclass. 
+Type-oriented programming also focuses on defining types dynamically for small differences in storage, 
+rather than generic types or fields.
+
+# Y1 Syntax and Semantics
+A newline sequence is one of: Linefeed, Carriage Return, Form Feed, Vertical Tab.
+Each command is normally on its own line, although they can be split across multiple lines in most circumstances 
+if the line ends with the line continuation `,,`. Blank lines are completely ignored in the source code. 
+Windows line sequences composed of both a Carriage Return and a Linefeed are treated as having a blank line in the middle, 
+but blank lines are pretty much removed from the stored-in-memory source-code before it is even processed into C# by the compiler.
+
+## Imports
+The namespaces `System`, `System.Reflection`, `System.Reflection.Emit`, `System.Collections.Generic`, and `System.Threading.Tasks` namespaces are imported automatically, 
+and there is no way to stop this. Unfortunately, this means that any namespaces that share a single identifier with one that the compiler uses will throw errors if imported, 
+so you have to fully qualify EVERY NAME. I would like to change this by removing these imports and having the compiler fully qualify all the names it uses instead.
+
+## Starting Lines
+There is a natural progression of beginning sections (although this only applies after the preprocessor is run). All elements are optional.
+
+1. A line containing `<ATTRIBUTES>` denotes some special content until a line containing `<END_ATTRIBUTES>`.
+Inside `Framework:`, `Platform:`, or `SDK:` followed by something denote the corresponding info in the .csproj file
+(There are currently no `.y1proj` files; the compiler creates a `.csproj` from the Y1 source code)
+2. A line containing `<REFS>` denotes a list of .dll references until a line containing `<END_REFS>`.
+A line starting with a single quote denotes a folder to look for .dlls, while anything else is the path to a single .dll.
+3. A line containing `<IMPORTS>` denotes a list of C# using statements without the "using" or the semicolon, until `<END_IMPORTS>`.
+4. A line containing `<STANDARD_Y1_LIBS>` denotes a list of standard Y1 libraries to include until `<END_STANDARD_Y1_LIBS>`. 
+This is currently only used for the `KeyListener` class which is required for the `ListenForKeys` statement.
+
+## Direct C# Calls
+A line beginning with optional whitespace followed by `C# - ` directly compiles to the C# code following it. 
+Anything that can be expressed in C# can be used here.
+
+## Comments
+A single-line comment starts with `'$.` or `'$:` with optional preceding whitespace. These cannot be on the same line as other code.
+
+A multi-line comment starts with `[#` and ends with `#]`. `[#` can have stuff after it, and `#]` can have stuff before it, but they must not be on the same line and no regular code
+can be on the same line. 
+
+Comments are processed AFTER the code is already preprocessed. This means you can use comments to signify data to a `?Rewrite` preprocessor command.
+
+## Top-level classes
+Top-level classes don't have a ton of native functionality, but using direct C# calls, you can add basically anything that can be in a class in C#. 
+All top-level classes are public.
+
+Note that the class is also implicitly ended, so the class declared last should not be closed explicitly.
+
+Top level classes are started with `@[` followed by the class's name. 
+They are typically ended with `]@`, by convention, but can also be ended with `\|`, just like a method.
+
+## Methods
+Methods are started with `|/` followed by the method's name. 
+They are, by convention, ended with `\|`, but can also be ended by `]@`. 
+
+## Variables
+Variables are not normally declared explicitly except by C# calls, however there are some important considerations with names. 
+Any name beginning with `y1__` is reserved for use by compiled programs. 
+New variables should not be declared with these names, but they can be. 
+You can also use the pre-existing names for manipulation.
+
+* `y1__aName`: An AssemblyName which normally contains "Y1_" followed by a random number.
+  * If you want to choose the Assembly name for some reason, you can redeclare y1__aName, although you will also have to redeclare y1__ab and y1__mb.
+* `y1__ab`: An AssemblyBuilder with y1__aName as its name and AssemblyBuilderAccess.Run as its run type.
+* `y1__mb`: A ModuleBuilder contained within y1__ab which contains all dynamic classes. 
+* `y1__il`: The ILGenerator. It gets redefined every time a new dynamic method is declared, to that method's ILGenerator.
+* `y1__stack`: A List<Tuple<Type, Dictionary<string, object>, TypeBuilder, Dictionary<string, Type>>>. 
+  * `Item1` is the finished type.
+  * `Item2` is the objects of the type.
+  * `Item3` is the TypeBuilder while the class is being dynamically defined,.
+  * `Item4` is the subclasses. 
+* `y1__func`: Intended to hold temporary functions for internal usage. Currently used for summations.
+* `y1__result`: Intended to hold the temporary result of operations. Currently used for summations.
+
+All of these variables are followed by an underscore followed by the depth. 
+The depth increases inside of internally created lambda expressions, such as summations. 
+In normal circumstances, you should refer to `y1__stack` as `y1__stack_0`, for example. 
+Here are the operations that cause the depth to increase (usually only inside of the corresponding block):
+* `Summation`
+* `DoMulti`
+
+y1__arg is also used without a depth. 
+It is only used internally during certain commands, but immediately goes out of scope as soon as the command finished. 
+If you declare a variable with this name, many essential commands will throw errors.
+
+Also note that often you can access lower depths then what is currently executing, allowing it to modify mutable values such as y1__stack.
+
+===Syntax Errors===
+Any syntax errors will print a message in the console while compiling so you can tell if something is wrong. 
+However, it does not throw an error. 
+Any syntax error is simply not compiled, and the compiler will move on to the next line and compile as normal. 
+
+
+===Commands===
+====Run mode====
+"PushNew"
+  Pushes a new element onto y1__stack.
+
+"DefineType" <name>
+  Takes the top element on y1__stack and initializes the TypeBuilder to begin defining a class dynamically. 
+  By convention, an indented section should be inserted until FinishType, but it doesn't have to be.
+
+"DefineMethod" <name> <var-name>
+  Defines the method with name in the TypeBuilder of the top element of y1__stack, in addition to saving it to a local variable named var-name. 
+  This changes it to Method-building mode, which has a different set of commands. 
+  It also declares a new local scope (The MethodBuilder itself it outside that local scope). 
+  By convention, the stuff in Method-builder mode should be indented, but it doesn't have to be.
+
+"FinishType"
+  Takes the top element on y1__stack, and initializes the Type to the result of the TypeBuilder.
+
+"CreateObject" <name>
+  Takes the top element of y1__stack, and declares a new instance. 
+  Note that since it is stored in a dictionary, names can be overloaded by type in this command, although custom variables do not work this way.
+
+"CallMethod" <method-name> <object-name>
+  Takes the top element of y1__stack, takes the instance with key object-name and calls its no-parameter method with method-name.
+
+"Roll" <depth>
+  Takes the nth element from the top of y1__stack (1-based), and moves it to the top, removing it from its original spot. 
+  You can use this to access types lower down on the stack.
+
+"ReverseRoll" <depth>
+  Reverses the effect of a "Roll" with the same depth. 
+
+"Drop"
+  Removes the top element of y1__stack. 
+  Everything is likely to be garbage collected. 
+  If you have a top-level type, load it, drop it, and load it again, the instances will be gone.
+
+"LoadType" <arg>
+  Takes the type given by the expression written with "typeof(" + arg + "), pushes it onto y1__stack, with empty dictionaries and with the TypeBuilder assigned null.
+
+"ObjParams"
+  On the next line should be the object name. 
+  On the next line should be the parameters. 
+  Takes the top element of y1__stack, creates a new object with a parameterized constructor and gives it the key of the object name. 
+  The parameters must evaluate to an object[].
+  Only the parameters support line continuations.
+
+"MethodParams"
+  On the next line should be the method name. 
+  On the next line should be the types as a C# expression evaluating to a Type[]. 
+  On the next line should be the object name.
+  On the next line should be the parameters as a C# expression evaluating to an object[]. 
+  Calls a parameterized method. Only the parameters support line continuations.
+
+"DefineField" <name> <type>
+  Creates a local variable with name that is a field in the TypeBuilder of the top element of y1__stack with the same name. 
+  The type should be a C# expression evaluating to a Type, and should not have spaces. 
+  This can be replaced with a C# call for the ability to have the field and local variable have separate names, or to have spaces in the expression.
+
+"DefineParamMethod" <name> <var-name>
+  On the next line should be a C# expression that evaluates to a Type[]. 
+  Creates a local variable with var-name that is a MethodBuilder for a method that is named name, and goes into Methodbuilding mode.
+
+"LoadField" <name> <var-name>
+  Creates a local variable that is the field with name name from the type of the top element of y1__stack.
+
+"DefineComplexMethod" <name> <var-name>
+  Next line should be the parameter types. 
+  Next line should be the return type. 
+  Next line should be the method attributes else (public, private, and/or static)
+
+"DefineComplexField" <name> <type>
+  Next line should be the field attributes (public, private, and/or static).
+
+"Subclass" <name>
+  Takes the top element of the stack and subclasses it. 
+  The subclass is exclusively accessible through the main class.
+
+"DefineSubclassMethod" <subclass-name> <method-name> <var-name>
+  Like DefineComplexMethod, but before the other arguments, the subclass name should be given.
+
+"DefineSubclassField" <subclass-name> <method-name> <var-name>
+  Like DefineComplexField, but before the other arguments, the subclass name should be given.
+
+"FinishSubclass" <subclass-name>
+  Changes the TypeBuilder to Type.
+
+"CreateSubclassObject" <object-name> <subclass-name>
+  Creates an object of a subclass. 
+  The subclass name, enclosed in square brackets, will be automatically inserted before the object name. 
+  In any further commands, you are required to add the square bracket section/
+
+"CallSubclassMethod" <method-name> <object-name> <subclass-name>
+  Calls a method of a subclass.
+
+"Summation" <start> <end> <index-name>
+  Followed by a block of code ending with "EndSummation". 
+  Inside of that block of code, the variable index-name will be assigned an integer. 
+  Each integer starting at start inclusively and ending at end exclusively will be passed to the block. 
+  The results of each iteration will all be added up, either using the normal + operation or the "op_Addition" method if it has one. 
+  It adds them starting with start and then in increasing order, 
+    (this might matter if the op_Addition function is non-associative or non-commutative, or if the block can return multiple different types). 
+  y1__result_(outer depth) will be set to the result of the summation.
+  This function increments the depth while in the block.
+
+"DefineVariable" <name> <expression>
+  Declares a dynamically typed (C#'s dynamic) variable with the name, and assigns it the expression. 
+  There is currently no built-in way to reassign this variable, other than C# calls.
+
+"Condition" <boolean expression>
+  An if block, defining a block until "EndCondition". Does not currently support else or else if. 
+  This command does not increase the depth.
+
+"While" <boolean expression>
+  A while loop, defining a block until "EndWhile". This command does not increase the depth.
+
+"DoMulti"
+  Starts a series of blocks until "EndMulti", with "AndMulti" between the blocks. 
+  The blocks will run in separate threads, and the main thread will wait until all of them are done. 
+  In each block, the depth is incremented. Note that if even one of the blocks is still running, the main thread will not continue. 
+  You can use "C# - return;" to exit a block prematurely, to make sure they don't get stuck in an infinite loop.
+
+"DefineComplexType" <name>
+  Followed by a line containing the superclass as an expression evaluating to a Type. 
+  Followed by a line containing the interfaces as an expression evaluating to a Type[]. 
+  Followed by a line containing type attributes (public, abstract, sealed, and/or interface). Defines a type with the name.
+
+"ListenForKeys"
+  Followed by a list of blocks separated by "KeyCase" <ConsoleKeyInfo expression> lines, ended by "EndListenForKeys".
+  The first block will be run for every key, the rest will be run for the respective ConsoleKeyInfo. See KeyListenerTest.y1.
+
+====Methodbuilding mode====
+"\\/"
+  Ends the local scope for the method and goes back to run mode.
+
+"\\"<arg>
+  Normally this emits an opcode. 
+  It can also have ", " followed by an argument after it for opcodes with arguments.
+  However, it simply prefixes arg with "il.Emit(OpCodes." and suffixes the result with ");". 
+  This means if you emit a Nop instruction and finish it yourself, you can insert arbitrary C# code into Methodbuilder mode with line continuations. 
+  You must have the implicit ");" suffix not be a syntax error 
+    (A good way to do this is to end the C# injection with "Console.Write(\"\"", with no ending parenthesis or semicolons. 
+       The parenthesis and semicolon will be added automatically, and since nothing is printed, it effectively does nothing. 
+       You could also make a custom method that simply returns, and run that instead for a true no-op.) 
+  This also allows any expression to be used for the argument. 
+    (For any expression for the opcode, you can prefix your expression with "Nop == OpCodes.Nop ? (" and suffix with ") : OpCodes.Nop".)
+
+"->"<name>
+  Declares a local variable named name containing a new label. 
+  You need to use this before any branch instructions to the label, or "-->" with the label.
+
+"-->"<name>
+  Marks the label stored in the local variable named name. 
+  You can jump to this point using branch instructiond.
+
+"_!"<type>
+  Declares a local variable in the dynamic method, with the type dictated by the result of a C# Type expression in type. 
+  If the first character of type is '!', it automatically inserts it into typeof(). 
+  You can still have the first bit of the expression be a logical not by having whitespace before the exclamation point.
+
+"<TRY>"<label-name>
+  Declares the start of the try part of an exception handling block, with a local variable with name label-name attached to a label at the start here. 
+  The label is automatically marked, so you cannot jump forward to it, although you can jump back. 
+  (A way to deal with this is to have the try block at the beginning, after a goto to a label after the try block, but declared before the goto.
+
+"<CATCH>"<type>
+  Declares the start of a catch block, with exception type type. 
+  The type is automatically enclosed within typeof(), but this can be circumvented to be a full C# Type expression by prefixing with "int) == typeof(int) ? (" and suffixing with ") : typeof(int".
+
+"<FINALLY>"
+  Declares the start of a finally block. Remember that it must be ended with the Endfinally opcode.
+
+"<FAULT>"
+  Declares the start of a fault block. Remember that it must be ended with the Endfinally opcode.
+
+"<FILTER>"
+  Declares the start of a filter block. Remember that it must be ended with the Endfilter opcode.
+
+"<END>"
+  Ends an exception block.
+
+By convention, the area inside of exception blocks not including the starting and ending instructions themselves should be indented, although it doesn't have to be.
+
+==Preprocessor==
+The preprocessor uses lines starting with a question mark.
+
+Some directives take a block as an argument. These are always ended by a line containing a single question mark.
+Inside of a preprocessor block, "?!" is replaced by "?". This of course means that "?!!" is replaced by just "?!", allowing you to nest preprocessor blocks
+when that is necessary.
+
+The preprocessor runs in cycles, running over and over again until there are no more lines starting with a question mark.
+This means preprocessor directives can manufacture other preprocessor directives.
+
+"?File" <filename>
+  Reads the file into the source code for the next cycle. (Somewhat like #include in C/C++).
+
+"?Define" <name>
+<block>
+?
+  Defines the long macro with the name as the block. On each line, everything preceding the first colon is considered a comment.
+  When called, ?n? will be replaced with the nth argument.
+  For example:
+    ?Define Print
+      Print the line :C# - Console.WriteLine("?!1?!")
+    ?
+
+"?Call" <name> !!arg1!!arg2!!arg3!!etc.
+  Calls the long macro with the name.
+
+"?DefineShort" <name> <content>
+  Defines a short macro. They have the same ?n? substitution and can be called with [[name !!arg1!!arg2!!etc.]]
+  Note that short macro calls cannot be deferred with ?Defer, and the substitution applies immediately across the entire remaining code,
+  including within strings and comments.
+
+  One way of deferring a short macro call is to do something like this:
+  ?Define DeferredShort
+    :?!1?!ShortMacro !!argument 1!!argument 2]]
+  ?
+  ?Call DeferredShort !![[
+
+  If you want to defer it twice you can just defer all of those likes like this:
+  ?Defer ?Define DeferredShort
+  ?Defer   :?!1?!ShortMacro !!argument 1!!argument 2]]
+  ?Defer ?
+  ?Defer ?Call DeferredShort !![[
+
+  Note that these methods will not apply the short macro later (it has already been run and never will again).
+  In order to apply it, you will also need to defer another copy of the "?DefineShort" command.
+  The best use of these methods is simply to escape the short macro so it can be used literally in the code.
+
+"?Rewrite" <Out|Err>
+<block>
+?
+<block>
+?
+  Rewrites the second block with either the standard output or standard error of the first when supplied the second block as standard input.
+  This compiles and runs the first block separately, so too many of these can make compiling slow.
+
+"?Undefine" <name>
+  Undefines the long macro with the name.
+  You cannot undefine a short macro because it's never really defined in the first place,
+  it has immediate and permanent effects on the code in the same cycle and then doesn't do anything anymore.
+
+"?IfDefined" <name>
+<block>
+?
+<block>
+?
+  If the long macro with the name is defined, it will preprocess/include/compile the first block, otherwise the second.
+
+"?Defer" <line>
+  Defers the line to the next cycle. Mainly useful for directives and their blocks so that they have an effect later.
+  You can stack these indefinitely.
+
+"?WriteToFile" <filename> <macro name>
+  Writes the contents of the macro with the name to the file. No arguments (?n?) are substituted.
+
+"?PreprocessorEnclose"
+<block>
+?
+  Runs the block in a separate environment with different macros (none of them carry over in either direction.)
+
+"?CondenseLines" <lines>
+  Allows you to have multiple lines in a single line, since unpreprocessed Y1 has only one command per line with continuations.
+  The lines are separated by "!!". In the line, "`E" is replaced with an exclamation point and "`G" is replaced with a grave accent mark.
+  So:
+    ?CondenseLines !!DefineVariable Str "hello"!!C# - Console.WriteLine(Str + "`E`G" + "`GE");
+  Effectively means:
+    DefineVariable Str "hello"
+    C# - Console.WriteLine(Str + "!`" + "`E");
+  This also defers each of the lines to the next cycle, so if you put a macro in here, it won't immediately be executed.
+
+"?User_Diagnostic" <message>
+  Prints the message to the console, with `U(four digit hex code) replaced with the corresponding Unicode character.
+  Note that spaces are not allowed unless escaped (with `U0020). (same deal with vertical whitespace and grave accent marks)
+  This should ideally end with `U000A, because it does not automatically print a newline (this is to allow compile-time binary output)
+
+"?User_Read"
+  Reads a single character from the user (at preprocessing time, not runtime) and puts it into a queue.
+
+"?User_IfChar" <char>
+<block>
+?
+<block>
+?
+  Looks at the front character of the input queue (without dequeueing it) and checks it against the given character.
+  The character can be `U(four digit hex code) for the corresponding Unicode character.
+  If the character matches, runs the first block, otherwise runs the second.
+
+"?User_DequeueInput"
+  Dequeues a character from the input queue.
+
+==Prepreprocessor==
+A prepreprocessor exists that processes the input in terms of strings and regex rather than lines. 
+The full extent will be documented later but you can call these functions with the yen symbol (¥). 
+Note that this doesn't really work on ANSI-encoded documents, so you'll have to encode it in UTF-8 or UTF-16. 
+Also, if the program begins with "^^$", any instances of "###Yen;" will be replaced with the yen symbol BEFORE prepreprocessing, meaning you can use this
+  if you don't want to have a literal yen symbol in the program.
