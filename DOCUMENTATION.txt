@@ -234,7 +234,7 @@ Any syntax error is simply not compiled, and the compiler will move on to the ne
   Followed by a line containing type attributes (public, abstract, sealed, and/or interface). Defines a type with the name.
 
 "ListenForKeys"
-  Followed by a list of blocks separated by "KeyCase" <ConsoleKeyInfo expression> lines. 
+  Followed by a list of blocks separated by "KeyCase" <ConsoleKeyInfo expression> lines, ended by "EndListenForKeys".
   The first block will be run for every key, the rest will be run for the respective ConsoleKeyInfo. See KeyListenerTest.y1.
 
 ====Methodbuilding mode====
