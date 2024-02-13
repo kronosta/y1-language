@@ -232,170 +232,195 @@ Followed by a line containing type attributes (`public`, `abstract`, `sealed`, a
 Followed by a list of blocks separated by `KeyCase <ConsoleKeyInfo expression>` lines, ended by `EndListenForKeys`.
 The first block will be run for every key, the rest will be run for the respective `ConsoleKeyInfo`. See `examples/KeyListenerTest.y1`.
 
-====Methodbuilding mode====
-"\\/"
-  Ends the local scope for the method and goes back to run mode.
+### Methodbuilding mode
+#### `\/`
+Ends the local scope for the method and goes back to run mode.
 
-"\\"<arg>
-  Normally this emits an opcode. 
-  It can also have ", " followed by an argument after it for opcodes with arguments.
-  However, it simply prefixes arg with "il.Emit(OpCodes." and suffixes the result with ");". 
-  This means if you emit a Nop instruction and finish it yourself, you can insert arbitrary C# code into Methodbuilder mode with line continuations. 
-  You must have the implicit ");" suffix not be a syntax error 
-    (A good way to do this is to end the C# injection with "Console.Write(\"\"", with no ending parenthesis or semicolons. 
-       The parenthesis and semicolon will be added automatically, and since nothing is printed, it effectively does nothing. 
-       You could also make a custom method that simply returns, and run that instead for a true no-op.) 
-  This also allows any expression to be used for the argument. 
-    (For any expression for the opcode, you can prefix your expression with "Nop == OpCodes.Nop ? (" and suffix with ") : OpCodes.Nop".)
+#### `\<arg>`
+Normally this emits an opcode. 
+It can also have `, ` followed by an argument after it for opcodes with arguments.
+However, it simply prefixes arg with `il.Emit(OpCodes.` and suffixes the result with `);`. 
+This means if you emit a `Nop` instruction and finish it yourself, you can insert arbitrary C# code into Methodbuilder mode with line continuations. 
+You must have the implicit `);` suffix not be a syntax error 
+(A good way to do this is to end the C# injection with `Console.Write(""`, with no ending parenthesis or semicolons. 
+The parenthesis and semicolon will be added automatically, and since nothing is printed, it effectively does nothing. 
+You could also make a custom method that simply returns, and run that instead for a true no-op.) 
+This also allows any expression to be used for the argument. 
+(For any expression for the opcode, you can prefix your expression with `Nop == OpCodes.Nop ? (` and suffix with `) : OpCodes.Nop`.)
 
-"->"<name>
-  Declares a local variable named name containing a new label. 
-  You need to use this before any branch instructions to the label, or "-->" with the label.
+#### `->(name)`
+Declares a local variable named name containing a new label. 
+You need to use this before any branch instructions to the label, or `-->` with the label.
 
-"-->"<name>
-  Marks the label stored in the local variable named name. 
-  You can jump to this point using branch instructiond.
+#### `-->(name)`
+Marks the label stored in the local variable named name. 
+You can jump to this point using branch instructiond.
 
-"_!"<type>
-  Declares a local variable in the dynamic method, with the type dictated by the result of a C# Type expression in type. 
-  If the first character of type is '!', it automatically inserts it into typeof(). 
-  You can still have the first bit of the expression be a logical not by having whitespace before the exclamation point.
+#### `_!<type>`
+Declares a local variable in the dynamic method, with the type dictated by the result of a C# `Type` expression in type. 
+If the first character of type is `!`, it automatically inserts it into `typeof()`. 
+You can still have the first bit of the expression be a logical not by having whitespace before the exclamation point.
 
-"<TRY>"<label-name>
-  Declares the start of the try part of an exception handling block, with a local variable with name label-name attached to a label at the start here. 
-  The label is automatically marked, so you cannot jump forward to it, although you can jump back. 
-  (A way to deal with this is to have the try block at the beginning, after a goto to a label after the try block, but declared before the goto.
+#### `<TRY>(label-name)`
+Declares the start of the try part of an exception handling block, with a local variable with name label-name attached to a label at the start here. 
+The label is automatically marked, so you cannot jump forward to it, although you can jump back. 
+(A way to deal with this is to have the try block at the beginning, after a goto to a label after the try block, but declared before the goto.
 
-"<CATCH>"<type>
-  Declares the start of a catch block, with exception type type. 
-  The type is automatically enclosed within typeof(), but this can be circumvented to be a full C# Type expression by prefixing with "int) == typeof(int) ? (" and suffixing with ") : typeof(int".
+#### `<CATCH>(type)`
+Declares the start of a catch block, with exception type type. 
+The type is automatically enclosed within typeof(), but this can be circumvented to be a full C# Type expression by prefixing with `int) == typeof(int) ? (` and suffixing with `) : typeof(int`.
 
-"<FINALLY>"
-  Declares the start of a finally block. Remember that it must be ended with the Endfinally opcode.
+#### `<FINALLY>`
+Declares the start of a finally block. Remember that it must be ended with the `Endfinally` opcode.
 
-"<FAULT>"
-  Declares the start of a fault block. Remember that it must be ended with the Endfinally opcode.
+#### `<FAULT>`
+Declares the start of a fault block. Remember that it must be ended with the `Endfinally` opcode.
 
-"<FILTER>"
-  Declares the start of a filter block. Remember that it must be ended with the Endfilter opcode.
+#### `<FILTER>`
+Declares the start of a filter block. Remember that it must be ended with the `Endfilter` opcode.
 
-"<END>"
-  Ends an exception block.
+#### `<END>`
+Ends an exception block.
 
 By convention, the area inside of exception blocks not including the starting and ending instructions themselves should be indented, although it doesn't have to be.
 
-==Preprocessor==
+# Preprocessor
 The preprocessor uses lines starting with a question mark.
 
 Some directives take a block as an argument. These are always ended by a line containing a single question mark.
-Inside of a preprocessor block, "?!" is replaced by "?". This of course means that "?!!" is replaced by just "?!", allowing you to nest preprocessor blocks
+Inside of a preprocessor block, `?!` is replaced by `?`. This of course means that `?!!` is replaced by just `?!`, allowing you to nest preprocessor blocks
 when that is necessary.
 
 The preprocessor runs in cycles, running over and over again until there are no more lines starting with a question mark.
 This means preprocessor directives can manufacture other preprocessor directives.
 
-"?File" <filename>
+#### `?File <filename>`
   Reads the file into the source code for the next cycle. (Somewhat like #include in C/C++).
 
-"?Define" <name>
+#### The following command
+```
+?Define <name>
 <block>
 ?
-  Defines the long macro with the name as the block. On each line, everything preceding the first colon is considered a comment.
-  When called, ?n? will be replaced with the nth argument.
-  For example:
-    ?Define Print
-      Print the line :C# - Console.WriteLine("?!1?!")
-    ?
+```
+Defines the long macro with the name as the block. On each line, everything preceding and including the first colon is considered a comment.
+When called, `?n?` will be replaced with the nth argument.
+For example:
+```
+?Define Print
+  Print the line :C# - Console.WriteLine("?!1?!")
+?
+```
 
-"?Call" <name> !!arg1!!arg2!!arg3!!etc.
-  Calls the long macro with the name.
+#### `?Call <name> !!arg1!!arg2!!arg3!!etc.`
+Calls the long macro with the name.
 
-"?DefineShort" <name> <content>
-  Defines a short macro. They have the same ?n? substitution and can be called with [[name !!arg1!!arg2!!etc.]]
-  Note that short macro calls cannot be deferred with ?Defer, and the substitution applies immediately across the entire remaining code,
-  including within strings and comments.
+#### `?DefineShort <name> <content>`
+Defines a short macro. They have the same `?n?` substitution and can be called with `[[name !!arg1!!arg2!!etc.]]`
+Note that short macro calls cannot be deferred with `?Defer`, and the substitution applies immediately across the entire remaining code,
+including within strings and comments.
 
-  One way of deferring a short macro call is to do something like this:
-  ?Define DeferredShort
+One way of deferring a short macro call is to do something like this:
+```
+?Define DeferredShort
     :?!1?!ShortMacro !!argument 1!!argument 2]]
-  ?
-  ?Call DeferredShort !![[
+?
+?Call DeferredShort !![[
+```
 
-  If you want to defer it twice you can just defer all of those likes like this:
-  ?Defer ?Define DeferredShort
-  ?Defer   :?!1?!ShortMacro !!argument 1!!argument 2]]
-  ?Defer ?
-  ?Defer ?Call DeferredShort !![[
+If you want to defer it twice you can just defer all of those likes like this:
+```
+?Defer ?Define DeferredShort
+?Defer   :?!1?!ShortMacro !!argument 1!!argument 2]]
+?Defer ?
+?Defer ?Call DeferredShort !![[
+```
 
-  Note that these methods will not apply the short macro later (it has already been run and never will again).
-  In order to apply it, you will also need to defer another copy of the "?DefineShort" command.
-  The best use of these methods is simply to escape the short macro so it can be used literally in the code.
+Note that these methods will not apply the short macro later (it has already been run and never will again).
+In order to apply it, you will also need to defer another copy of the `?DefineShort` command.
+The best use of these methods is simply to escape the short macro so it can be used literally in the code.
 
-"?Rewrite" <Out|Err>
+#### The following command
+```
+?Rewrite <Out|Err>
 <block>
 ?
 <block>
 ?
-  Rewrites the second block with either the standard output or standard error of the first when supplied the second block as standard input.
-  This compiles and runs the first block separately, so too many of these can make compiling slow.
+```
+Rewrites the second block with either the standard output or standard error of the first when supplied the second block as standard input.
+This compiles and runs the first block separately, so too many of these can make compiling slow.
 
-"?Undefine" <name>
-  Undefines the long macro with the name.
-  You cannot undefine a short macro because it's never really defined in the first place,
-  it has immediate and permanent effects on the code in the same cycle and then doesn't do anything anymore.
+#### `?Undefine <name>`
+Undefines the long macro with the name.
+You cannot undefine a short macro because it's never really defined in the first place,
+it has immediate and permanent effects on the code in the same cycle and then doesn't do anything anymore.
 
-"?IfDefined" <name>
+#### The following command
+```
+?IfDefined <name>
 <block>
 ?
 <block>
 ?
-  If the long macro with the name is defined, it will preprocess/include/compile the first block, otherwise the second.
+```
+If the long macro with the name is defined, it will preprocess/include/compile the first block, otherwise the second.
 
-"?Defer" <line>
-  Defers the line to the next cycle. Mainly useful for directives and their blocks so that they have an effect later.
-  You can stack these indefinitely.
+#### `?Defer <line>`
+Defers the line to the next cycle. Mainly useful for directives and their blocks so that they have an effect later.
+You can stack these indefinitely.
 
-"?WriteToFile" <filename> <macro name>
-  Writes the contents of the macro with the name to the file. No arguments (?n?) are substituted.
+#### `?WriteToFile <filename> <macro name>`
+Writes the contents of the macro with the name to the file. No arguments (`?n?`) are substituted.
 
-"?PreprocessorEnclose"
+#### The following command
+```
+?PreprocessorEnclose
 <block>
 ?
-  Runs the block in a separate environment with different macros (none of them carry over in either direction.)
+```
+Runs the block in a separate environment with different macros (none of them carry over in either direction.)
 
-"?CondenseLines" <lines>
-  Allows you to have multiple lines in a single line, since unpreprocessed Y1 has only one command per line with continuations.
-  The lines are separated by "!!". In the line, "`E" is replaced with an exclamation point and "`G" is replaced with a grave accent mark.
-  So:
-    ?CondenseLines !!DefineVariable Str "hello"!!C# - Console.WriteLine(Str + "`E`G" + "`GE");
-  Effectively means:
-    DefineVariable Str "hello"
-    C# - Console.WriteLine(Str + "!`" + "`E");
-  This also defers each of the lines to the next cycle, so if you put a macro in here, it won't immediately be executed.
+#### `?CondenseLines <lines>`
+Allows you to have multiple lines in a single line, since unpreprocessed Y1 has only one command per line with continuations.
+The lines are separated by `!!`. In the line, `` `E `` is replaced with an exclamation point and `` `G `` is replaced with a grave accent mark.
+So:
+```
+?CondenseLines !!DefineVariable Str "hello"!!C# - Console.WriteLine(Str + "`E`G" + "`GE");
+```
+Effectively means:
+```
+DefineVariable Str "hello"
+C# - Console.WriteLine(Str + "!`" + "`E");
+```
+This also defers each of the lines to the next cycle, so if you put a macro in here, it won't immediately be executed.
 
-"?User_Diagnostic" <message>
-  Prints the message to the console, with `U(four digit hex code) replaced with the corresponding Unicode character.
-  Note that spaces are not allowed unless escaped (with `U0020). (same deal with vertical whitespace and grave accent marks)
-  This should ideally end with `U000A, because it does not automatically print a newline (this is to allow compile-time binary output)
+#### `?User_Diagnostic <message>`
+Prints the message to the console, with `` `U(four digit hex code) `` replaced with the corresponding Unicode character.
+Note that spaces are not allowed unless escaped (with `` `U0020 ``). (same deal with vertical whitespace and grave accent marks)
+This should ideally end with `` `U000A ``, because it does not automatically print a newline (this is to allow compile-time binary output)
 
-"?User_Read"
-  Reads a single character from the user (at preprocessing time, not runtime) and puts it into a queue.
+#### `?User_Read`
+Reads a single character from the user (at preprocessing time, not runtime) and puts it into a queue.
 
-"?User_IfChar" <char>
+#### The following command
+```
+?User_IfChar <char>
 <block>
 ?
 <block>
 ?
-  Looks at the front character of the input queue (without dequeueing it) and checks it against the given character.
-  The character can be `U(four digit hex code) for the corresponding Unicode character.
-  If the character matches, runs the first block, otherwise runs the second.
+```
+Looks at the front character of the input queue (without dequeueing it) and checks it against the given character.
+The character can be `` `U(four digit hex code) `` for the corresponding Unicode character.
+If the character matches, runs the first block, otherwise runs the second.
 
-"?User_DequeueInput"
+#### `?User_DequeueInput`
   Dequeues a character from the input queue.
 
-==Prepreprocessor==
+# Prepreprocessor
 A prepreprocessor exists that processes the input in terms of strings and regex rather than lines. 
-The full extent will be documented later but you can call these functions with the yen symbol (¥). 
+The full extent will be documented later but you can call these functions with the yen symbol (`¥`). 
 Note that this doesn't really work on ANSI-encoded documents, so you'll have to encode it in UTF-8 or UTF-16. 
-Also, if the program begins with "^^$", any instances of "###Yen;" will be replaced with the yen symbol BEFORE prepreprocessing, meaning you can use this
-  if you don't want to have a literal yen symbol in the program.
+Also, if the program begins with `^^$`, any instances of `###Yen;` will be replaced with the yen symbol BEFORE prepreprocessing, meaning you can use this
+if you don't want to have a literal yen symbol in the program.
