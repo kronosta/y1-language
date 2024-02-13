@@ -239,7 +239,7 @@ Ends the local scope for the method and goes back to run mode.
 #### `\<arg>`
 Normally this emits an opcode. 
 It can also have `, ` followed by an argument after it for opcodes with arguments.
-However, it simply prefixes arg with `il.Emit(OpCodes.` and suffixes the result with `);`. 
+However, it simply prefixes arg with `y1__il.Emit(OpCodes.` and suffixes the result with `);`. 
 This means if you emit a `Nop` instruction and finish it yourself, you can insert arbitrary C# code into Methodbuilder mode with line continuations. 
 You must have the implicit `);` suffix not be a syntax error 
 (A good way to do this is to end the C# injection with `Console.Write(""`, with no ending parenthesis or semicolons. 
