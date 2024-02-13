@@ -10,7 +10,7 @@
     new Type[]{typeof(List<int>)}
     l2
     new object[] {,,
-      stack[stack.Count - 2].Item2["l1"],,
+      y1__stack_0[y1__stack_0.Count - 2].Item2["l1"],,
     }
   C# - Console.WriteLine("no errors");
 \|
