@@ -208,6 +208,7 @@ Any syntax error is simply not compiled, and the compiler will move on to the ne
   The results of each iteration will all be added up, either using the normal + operation or the "op_Addition" method if it has one. 
   It adds them starting with start and then in increasing order, 
     (this might matter if the op_Addition function is non-associative or non-commutative, or if the block can return multiple different types). 
+  y1__result_(outer depth) will be set to the result of the summation.
   This function increments the depth while in the block.
 
 "DefineVariable" <name> <expression>
