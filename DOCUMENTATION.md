@@ -295,6 +295,17 @@ when that is necessary.
 The preprocessor runs in cycles, running over and over again until there are no more lines starting with a question mark.
 This means preprocessor directives can manufacture other preprocessor directives.
 
+## Grave escapes
+Certain preprocessor directives use grave escapes, which use the grave accent mark/backtick (`` ` ``) as an escape.
+
+The following escape sequences are available:
+- `` `E `` : exclamation mark
+- `` `S `` : space
+- `` `N `` : linefeed
+- `` `T `` : horizontal tab
+- `` `R `` : carriage return
+- `` `Uxxxx `` : hexadecimal unicode escape
+
 #### `?File <filename>`
   Reads the file into the source code for the next cycle. (Somewhat like #include in C/C++).
 
@@ -305,7 +316,7 @@ This means preprocessor directives can manufacture other preprocessor directives
 ?
 ```
 Defines the long macro with the name as the block. On each line, everything preceding and including the first colon is considered a comment.
-When called, `?n?` will be replaced with the nth argument.
+When called, `?n?` will be replaced with the nth argument. (Note that this is handled before the `?!` -> `?` replacement, so `?!1?!` behaves identically to `?1?`. Encoding `?n?` literally is unfortunately impossible in `?Define` currently, you'll need to encode it in every `?Call` that uses it. To encode `?!n?!` just put `?!!n?!!`.)
 For example:
 ```
 ?Define Print
@@ -314,7 +325,7 @@ For example:
 ```
 
 #### `?Call <name> !!arg1!!arg2!!arg3!!etc.`
-Calls the long macro with the name.
+Calls the long macro with the name. Currently it is not possible to encode `!!` in a parameter, or `!` at the beginning or end of a parameter.
 
 #### `?DefineShort <name> <content>`
 Defines a short macro. They have the same `?n?` substitution and can be called with `[[name !!arg1!!arg2!!etc.]]`
@@ -380,11 +391,11 @@ Writes the contents of the macro with the name to the file. No arguments (`?n?`)
 <block>
 ?
 ```
-Runs the block in a separate environment with different macros (none of them carry over in either direction.)
+Runs the block in a separate environment with different macros (none of them carry over in either direction.) The inside still has `?!` replaced with `?`, so watch out for that.
 
 #### `?CondenseLines <lines>`
 Allows you to have multiple lines in a single line, since unpreprocessed Y1 has only one command per line with continuations.
-The lines are separated by `!!`. In the line, `` `E `` is replaced with an exclamation point and `` `G `` is replaced with a grave accent mark.
+The lines are separated by `!!`. They support grave escapes.
 So:
 ```
 ?CondenseLines !!DefineVariable Str "hello"!!C# - Console.WriteLine(Str + "`E`G" + "`GE");
@@ -397,9 +408,7 @@ C# - Console.WriteLine(Str + "!`" + "`E");
 This also defers each of the lines to the next cycle, so if you put a macro in here, it won't immediately be executed.
 
 #### `?User_Diagnostic <message>`
-Prints the message to the console, with `` `U(four digit hex code) `` replaced with the corresponding Unicode character.
-Note that spaces are not allowed unless escaped (with `` `U0020 ``). (same deal with vertical whitespace and grave accent marks)
-This should ideally end with `` `U000A ``, because it does not automatically print a newline (this is to allow compile-time binary output)
+Prints the message to the console, with grave escapes supported.
 
 #### `?User_Read`
 Reads a single character from the user (at preprocessing time, not runtime) and puts it into a queue.
@@ -412,16 +421,33 @@ Reads a single character from the user (at preprocessing time, not runtime) and 
 <block>
 ?
 ```
-Looks at the front character of the input queue (without dequeueing it) and checks it against the given character.
-The character can be `` `U(four digit hex code) `` for the corresponding Unicode character.
-If the character matches, runs the first block, otherwise runs the second.
+Looks at the front character of the input queue (without dequeueing it) and checks it against the given character, with grave escapes supported.
 
 #### `?User_DequeueInput`
   Dequeues a character from the input queue.
 
 # Prepreprocessor
 A prepreprocessor exists that processes the input in terms of strings and regex rather than lines. 
-The full extent will be documented later but you can call these functions with the yen symbol (`¥`). 
+You can call these functions with the yen symbol (`¥`), followed by any number of symbols other than the closing square bracket (`]`), followed by a closing square bracket. 
 Note that this doesn't really work on ANSI-encoded documents, so you'll have to encode it in UTF-8 or UTF-16. 
-Also, if the program begins with `^^$`, any instances of `###Yen;` will be replaced with the yen symbol BEFORE prepreprocessing, meaning you can use this
-if you don't want to have a literal yen symbol in the program.
+Also, if the program begins with `^^$`, any instances of `###Yen;` will be replaced with the yen symbol BEFORE prepreprocessing, meaning you can use this in ASCII documents.
+
+## Char escapes
+`¥\(base 10 character code)]` escapes the character notated by the character code.
+
+## Shell commands
+`¥$(stuff)]` is a bit complex:
+- The stuff between `$` and `]` is split into section by semicolons (`;`).
+- Each section is split by a colon (`:`) into a stack-based language subsection with commands delimited by spaces, and a command consisting of two parts, the executable name and one argument (on Windows, this means the full argument structure; on Unix systems, this is pretty hard to deal with, but using an external shell script or executable works, so does using an awk call with a literal program (since that can use just a single argument)), separated by a space, with grave escapes for each.
+- The stack based language has the following commands:
+  - `@FileExists` : pops a string off the stack, if a file with that name/path exists, push "true", otherwise "false"
+  - `@OSVersion` : pops a regex, tests if it matches the result of `Environment.OSVersion.Platform.ToString() + "-" + Environment.OSVersion.Version.ToString()`, pushes "true" if it is a match, otherwise "false"
+  - `@OSVersionMatch` : pops a string off the stack containing an operator concatenated with a representation of the version number. The operator can be `=` (equal), `>` (greater than), `<` (less than), `{` (less than or equal), or `}` (greater than or equal). The string popped goes on the right side, while the OS version goes on the left. Returns "true" if a match, otherwise "false".
+  - `@And` : pops two values, either "true" or "false", does an AND gate, pushes the result
+  - `@Or` : pops two values, either "true" or "false", does an OR gate, pushes the result
+  - `@Not` : pops a values, either "true" or "false", does a NOT gate, pushes the result
+  - Anything else : pushes it to the stack
+- After the stack-based language finishes, a value is popped from the top of the stack. If it is exactly "true", the command will be run, with its output being placed into the program where this prepreprocessor directive used to be.
+ 
+
+
