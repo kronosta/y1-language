@@ -73,7 +73,7 @@ You can also use the pre-existing names for manipulation.
   * If you want to choose the Assembly name for some reason, you can reassign y1__aName, although you will also have to reassign y1__ab and y1__mb.
 * `y1__ab`: An AssemblyBuilder with y1__aName as its name and AssemblyBuilderAccess.Run as its run type.
 * `y1__mb`: A ModuleBuilder contained within y1__ab which contains all dynamic classes. 
-* `y1__il`: The ILGenerator. It gets redefined every time a new dynamic method is declared, to that method's ILGenerator.
+* `y1__il`: The ILGenerator. It gets reassigned every time a new dynamic method is declared, to that method's ILGenerator.
 * `y1__stack`: A List<Tuple<Type, Dictionary<string, object>, TypeBuilder, Dictionary<string, Type>>>. 
   * `Item1` is the finished type.
   * `Item2` is the objects of the type.
