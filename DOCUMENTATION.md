@@ -70,7 +70,7 @@ New variables should not be declared with these names, but they can be.
 You can also use the pre-existing names for manipulation.
 
 * `y1__aName`: An AssemblyName which normally contains "Y1_" followed by a random number.
-  * If you want to choose the Assembly name for some reason, you can redeclare y1__aName, although you will also have to redeclare y1__ab and y1__mb.
+  * If you want to choose the Assembly name for some reason, you can reassign y1__aName, although you will also have to reassign y1__ab and y1__mb.
 * `y1__ab`: An AssemblyBuilder with y1__aName as its name and AssemblyBuilderAccess.Run as its run type.
 * `y1__mb`: A ModuleBuilder contained within y1__ab which contains all dynamic classes. 
 * `y1__il`: The ILGenerator. It gets redefined every time a new dynamic method is declared, to that method's ILGenerator.
