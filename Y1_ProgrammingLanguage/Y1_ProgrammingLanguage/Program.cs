@@ -12,7 +12,7 @@ namespace Y1
 {
     public class Compiler
     {
-        public static string filename, y1Code;
+        public static string? filename, y1Code;
         public static List<string> assemblyRefs = new List<string>(), assemblyPaths = new List<string>(),
             standardY1Libs = new List<string>();
         public static string framework = "net6.0", platform = "anycpu", sdk = "Microsoft.NET.Sdk";
@@ -298,7 +298,7 @@ namespace Y1
                 }
                 else if (trimmed.Split(' ')[0] == "?Rewrite")
                 {
-                    string originalFilename = filename;
+                    string? originalFilename = filename;
                     string outputStreamName = trimmed.Split(' ')[1];
                     List<string> rewriter = new List<string>();
                     List<string> toRewrite = new List<string>();
@@ -328,22 +328,26 @@ namespace Y1
                     info.RedirectStandardInput = true;
                     info.RedirectStandardOutput = true;
                     info.CreateNoWindow = true;
-                    Process process = Process.Start(info);
-                    StreamWriter standardIn = process.StandardInput;
-                    StreamReader standardOut = null;
+                    Process? process = Process.Start(info);
+                    StreamWriter? standardIn = process?.StandardInput;
+                    StreamReader? standardOut = null;
                     if (outputStreamName == "Out")
-                        standardOut = process.StandardOutput;
+                        standardOut = process?.StandardOutput;
                     else if (outputStreamName == "Err")
-                        standardOut = process.StandardError;
+                        standardOut = process?.StandardError;
                     foreach (var j in toRewrite)
                     {
-                        standardIn.WriteLine(j);
-                        standardIn.Flush();
-                        standardIn.Dispose();
+                        standardIn?.WriteLine(j);
+                        standardIn?.Flush();
+                        standardIn?.Dispose();
                     }
-                    process.WaitForExit();
-                    List<string> rewritten = new List<string>(standardOut.ReadToEnd().Split(new char[] { '\n', '\r', '\v', '\f' }));
-                    result.AddRange(rewritten);
+                    process?.WaitForExit();
+                    List<string> rewritten = 
+                        new List<string>(standardOut?.ReadToEnd()?.Split(
+                            new char[] { '\n', '\r', '\v', '\f' }
+                        ) ?? new string[]{}
+                    );
+                    result.AddRange(rewritten ?? new List<string>());
                     Directory.Delete(ToIdentifier(name), true);
                     File.Delete(name);
                     filename = originalFilename;
@@ -1145,7 +1149,7 @@ namespace Y1
                         int lfkDepth = 1;
                         List<Tuple<string,List<string>>> lines = new List<Tuple<string, List<string>>>
                         {
-                            { new Tuple<string, List<string>>(null, new List<string>()) }
+                            { new Tuple<string, List<string>>("", new List<string>()) }
                         };
                         i++;
                         while (lfkDepth > 0)
@@ -1321,7 +1325,9 @@ namespace Y1
             }
             else
             {
-                filename = Console.ReadLine();
+                filename = Console.ReadLine() ?? "";
+                if (filename == "")
+                    throw new Exception("Filename passed to compiler was empty.");
             }
             bool isLibrary = false;
             if (args.Contains("-lib"))
@@ -1392,8 +1398,8 @@ namespace Y1
             }
             ProcessStartInfo si = new ProcessStartInfo("dotnet", "build " + csprojName);
             si.UseShellExecute = false;
-            Process p = Process.Start(si);
-            p.WaitForExit();
+            Process? p = Process.Start(si);
+            p?.WaitForExit();
             if (Directory.Exists(ToIdentifier(filename)))
             {
                 Directory.Delete(ToIdentifier(filename), true);
