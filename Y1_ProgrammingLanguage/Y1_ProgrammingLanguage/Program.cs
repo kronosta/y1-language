@@ -1369,45 +1369,6 @@ namespace Y1
                 sw.Write(csCode);
             }
 
-            //Your path here
-            /*
-            string compiler;
-            using (StreamReader sr = new StreamReader("compiler_path.txt"))
-            {
-                compiler = sr.ReadToEnd();
-            }
-
-            string compiler_args = "\"" + compiler + "\"";
-
-            if (!isLibrary)
-            {
-                compiler_args += " \"-out:" + filename + ".exe\" ";
-            }
-            else
-            {
-                compiler_args += " -t:library \"-out:" + filename + ".dll\" ";
-            }
-            compiler_args += "\"-lib:C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.8\" ";
-            foreach (var i in assemblyPaths)
-            {
-                compiler_args += "\"-lib:" + i + "\" ";
-            }
-            foreach (var i in assemblyRefs)
-            {
-                compiler_args += "\"-r:" + i + "\" ";
-            }
-            compiler_args += "\"-r:System.Private.CoreLib.dll\" ";
-            compiler_args += "\"-r:C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.8\\System.Core.dll\" ";
-            compiler_args += "\"-r:C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.8\\System.Reflection.dll\" ";
-            compiler_args += "\"-r:C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.8\\System.Reflection.Emit.dll\" ";
-            compiler_args += "\"-r:C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.8\\System.Linq.Expressions.dll\" ";
-            compiler_args += "\"-r:C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.8\\System.Collections.dll\" ";
-            compiler_args += "\"-r:C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.8\\System.Runtime.dll\" ";
-            compiler_args += "\"-r:C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\6.0.8\\System.Console.dll\" "; 
-            compiler_args += "\"-r:Microsoft.CSharp.dll\" ";
-            compiler_args += " compiled.cs";
-            Console.WriteLine(compiler_args);
-            */
             using (StreamWriter sw = new StreamWriter(csprojName))
             {
                 sw.WriteLine($"<Project Sdk=\"{sdk}\">");
@@ -1422,12 +1383,6 @@ namespace Y1
                 sw.WriteLine($"<PlatformTarget>{platform}</PlatformTarget>");
                 sw.WriteLine("</PropertyGroup>");
                 sw.WriteLine("<ItemGroup>");
-                /*sw.WriteLine("<Reference Include=\"System.Core.dll\" />");
-                sw.WriteLine("<Reference Include=\"System.Reflection.dll\" />");
-                sw.WriteLine("<Reference Include=\"System.Reflection.Emit.dll\" />");
-                sw.WriteLine("<Reference Include=\"System.Collections.dll\" />");
-                sw.WriteLine("<Reference Include=\"System.Console.dll\" />");
-                sw.WriteLine("<Reference Include=\"System.Threading.Tasks.dll\" />");*/
                 foreach (var i in assemblyRefs)
                 {
                     sw.WriteLine("<Reference Include=\"" + i + "\" />");
