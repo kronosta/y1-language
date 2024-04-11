@@ -45,8 +45,8 @@ Anything that can be expressed in C# can be used here.
 ## Comments
 A single-line comment starts with `'$.` or `'$:` with optional preceding whitespace. These cannot be on the same line as other code.
 
-A multi-line comment starts with `[#` and ends with `#]`. `[#` can have stuff after it, and `#]` can have stuff before it, but they must not be on the same line and no regular code
-can be on the same line. 
+A multi-line comment starts with `[#` and ends with `#]`. `[#` can have stuff after it, and `#]` can have stuff before it,
+but they must not be on the same line and no regular code can be on the same line. 
 
 Comments are processed AFTER the code is already preprocessed. This means you can use comments to signify data to a `?Rewrite` preprocessor command.
 
@@ -171,7 +171,8 @@ Creates a local variable that is the field with name name from the type of the t
 #### `DefineComplexMethod <name> <var-name>`
 Next line should be the parameter types. 
 Next line should be the return type. 
-Next line should be the method attributes else (`public`, `private`, and/or `static`)
+Next line should be the method attributes (`public`, `private`, and/or `static`)
+The mode is then switched to method-building mode.
 
 #### `DefineComplexField <name> <type>`
 Next line should be the field attributes (`public`, `private`, and/or `static`).
@@ -187,7 +188,7 @@ Like `DefineComplexMethod`, but before the other arguments, the subclass name sh
 Like `DefineComplexField`, but before the other arguments, the subclass name should be given.
 
 #### `FinishSubclass <subclass-name>`
-Changes the `TypeBuilder` to `Type`.
+Uses TypeBuilder.CreateType() to transfer the `TypeBuilder` to a `Type` in the subclasses section of `y1__stack_(depth)`.
 
 #### `CreateSubclassObject <object-name> <subclass-name>`
 Creates an object of a subclass. 
@@ -243,11 +244,9 @@ It can also have `, ` followed by an argument after it for opcodes with argument
 However, it simply prefixes arg with `y1__il.Emit(OpCodes.` and suffixes the result with `);`. 
 This means if you emit a `Nop` instruction and finish it yourself, you can insert arbitrary C# code into Methodbuilder mode with line continuations. 
 You must have the implicit `);` suffix not be a syntax error 
-(A good way to do this is to end the C# injection with `Console.Write(""`, with no ending parenthesis or semicolons. 
-The parenthesis and semicolon will be added automatically, and since nothing is printed, it effectively does nothing. 
-You could also make a custom method that simply returns, and run that instead for a true no-op.) 
-This also allows any expression to be used for the argument. 
-(For any expression for the opcode, you can prefix your expression with `Nop == OpCodes.Nop ? (` and suffix with `) : OpCodes.Nop`.)
+(A good way to do this is to end the C# injection with `//` to comment out the ending in the compiled C#)
+This also allows any C# expression to be used for the argument. 
+(For any expression for the opcode, you can prefix your C# expression with `Nop == OpCodes.Nop ? (` and suffix with `) : OpCodes.Nop`.)
 
 #### `->(name)`
 Declares a local variable named name containing a new label. 
@@ -445,7 +444,7 @@ Also, if the program begins with `^^$`, any instances of `###Yen;` will be repla
   - `@OSVersionMatch` : pops a string off the stack containing an operator concatenated with a representation of the version number. The operator can be `=` (equal), `>` (greater than), `<` (less than), `{` (less than or equal), or `}` (greater than or equal). The string popped goes on the right side, while the OS version goes on the left. Returns "true" if a match, otherwise "false".
   - `@And` : pops two values, either "true" or "false", does an AND gate, pushes the result
   - `@Or` : pops two values, either "true" or "false", does an OR gate, pushes the result
-  - `@Not` : pops a values, either "true" or "false", does a NOT gate, pushes the result
+  - `@Not` : pops a value, either "true" or "false", does a NOT gate, pushes the result
   - Anything else : pushes it to the stack
 - After the stack-based language finishes, a value is popped from the top of the stack. If it is exactly "true", the command will be run, with its output being placed into the program where this prepreprocessor directive used to be.
  
