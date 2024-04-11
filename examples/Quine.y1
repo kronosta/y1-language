@@ -1,11 +1,17 @@
+<IMPORTS>
+  System
+<END_IMPORTS>
 @[Program
     C# - public static string[] strs = {,,
+        "<IMPORTS>",,,
+        "  System",,,
+        "<END_IMPORTS>",,,
         "@[Program\n",,,
         "    C# - public static string[] strs = {,,\n",,,
         "    };\n",,,
         "    |/Main\n",,,
         "        DefineVariable Total new String(new char[]{})\n",,,
-        "        C# - Total += strs[0] + strs[1];\n",,,
+        "        C# - Total += strs[0] + strs[1] + strs[2] + strs[3] + strs[4];\n",,,
         "        Summation 0 30 I\n",,,
         "            C# - Total += new string(new char[]{,,\n",,,
         "                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', (char)34}) +,,\n",,,
@@ -14,7 +20,7 @@
         "            C# - Total += (char)10;\n",,,
         "            C# - return 0;\n",,,
         "        EndSummation\n",,,
-        "        Summation 2 30 I\n",,,
+        "        Summation 5 30 I\n",,,
         "            C# - Total += strs[I];\n",,,
         "            C# - return 0;\n",,,
         "        EndSummation\n",,,
@@ -33,7 +39,7 @@
     };
     |/Main
         DefineVariable Total new String(new char[]{})
-        C# - Total += strs[0] + strs[1];
+        C# - Total += strs[0] + strs[1] + strs[2] + strs[3] + strs[4];
         Summation 0 30 I
             C# - Total += new string(new char[]{,,
                 ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', (char)34}) +,,
@@ -42,7 +48,7 @@
             C# - Total += (char)10;
             C# - return 0;
         EndSummation
-        Summation 2 30 I
+        Summation 5 30 I
             C# - Total += strs[I];
             C# - return 0;
         EndSummation

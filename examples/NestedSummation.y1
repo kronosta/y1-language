@@ -1,3 +1,7 @@
+<IMPORTS>
+  System
+<END_IMPORTS>
+
 @[NestedSummation
   |/Main
     Summation 1 10 I

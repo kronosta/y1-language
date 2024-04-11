@@ -1,3 +1,7 @@
+<IMPORTS>
+  System
+<END_IMPORTS>
+
 @[Program
     |/Main
         C# - Console.WriteLine(¥\34]¥$Win32NT-.* @OSMatch : cmd /C`Secho`S|`Sset`S/P`Sdummy="Hello,`SWorld!"]¥\34]);

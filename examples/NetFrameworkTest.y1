@@ -4,6 +4,10 @@
 	SDK:Microsoft.Net.Sdk
 <END_ATTRIBUTES>
 
+<IMPORTS>
+  System
+<END_IMPORTS>
+
 @[Program
 	|/Main
 		C# - Console.WriteLine(".net framework appears to be working");

@@ -1,3 +1,7 @@
+<IMPORTS>
+  System
+<END_IMPORTS>
+
 <STANDARD_Y1_LIBS>
     KeyListener
 <END_STANDARD_Y1_LIBS>

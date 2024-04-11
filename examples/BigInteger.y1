@@ -4,6 +4,7 @@
 
 <IMPORTS>
   System.Numerics
+  System
 <END_IMPORTS>
 
 @[BigIntegerTest

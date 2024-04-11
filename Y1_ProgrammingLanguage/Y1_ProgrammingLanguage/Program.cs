@@ -492,16 +492,26 @@ namespace Y1
             Func<int, string, string> startScope = (depth, prevCode) =>
             {
                 string csCode = prevCode;
-                csCode += "#pragma warning disable CS0168\n";
-                csCode += "var y1__stack_" + depth + " = new List<Tuple<Type, Dictionary<string, object>, TypeBuilder, " +
-            "Dictionary<string, Type>>>();\n";
-                csCode += "AssemblyName y1__aName_" + depth + " = new AssemblyName(\"y1__DynamicAssembly\");\n";
-                csCode += "AssemblyBuilder y1__ab_" + depth + " = AssemblyBuilder.DefineDynamicAssembly(y1__aName_" + depth + ", AssemblyBuilderAccess.RunAndCollect);\n";
-                csCode += "ModuleBuilder y1__mb_" + depth + " = y1__ab_" + depth + ".DefineDynamicModule(y1__aName_" + depth + ".Name);\n";
-                csCode += "ILGenerator y1__il_" + depth + ";\n";
-                csCode += "dynamic y1__func_" + depth + ";\n";
-                csCode += "dynamic y1__result_" + depth + ";\n";
-                csCode += "#pragma warning restore CS0168\n";
+                csCode += @$"#pragma warning disable CS0168
+var y1__stack_{depth} = new System.Collections.Generic.List<
+    System.Tuple<
+        System.Type, 
+        System.Collections.Generic.Dictionary<string, object>, 
+        System.Reflection.Emit.TypeBuilder, 
+        System.Collections.Generic.Dictionary<string, System.Type>
+    >
+>();
+System.Reflection.AssemblyName y1__aName_{depth} = new System.Reflection.AssemblyName(""y1__DynamicAssembly"");
+System.Reflection.Emit.AssemblyBuilder y1__ab_{depth} = 
+    System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(y1__aName_{depth}, 
+    System.Reflection.Emit.AssemblyBuilderAccess.RunAndCollect
+);
+System.Reflection.Emit.ModuleBuilder y1__mb_{depth} = y1__ab_{depth}.DefineDynamicModule(y1__aName_{depth}.Name);
+System.Reflection.Emit.ILGenerator y1__il_{depth};
+dynamic y1__func_{depth};
+dynamic y1__result_{depth};
+#pragma warning restore CS0168
+";
                 return csCode;
             };
             string csCode = "";
@@ -509,11 +519,6 @@ namespace Y1
             int startingPos = 0;
             if (outer)
             {
-                csCode += "using System;\n";
-                csCode += "using System.Reflection;\n";
-                csCode += "using System.Reflection.Emit;\n";
-                csCode += "using System.Collections.Generic;\n";
-                csCode += "using System.Threading.Tasks;\n";
                 if (y1CodeSplit[startingPos].Trim() == "<ATTRIBUTES>")
                 {
                     startingPos++;
@@ -581,21 +586,21 @@ namespace Y1
   {
     public class KeyPressedEventArgs
     {
-      public ConsoleKeyInfo key;
+      public System.ConsoleKeyInfo key;
 
-      public KeyPressedEventArgs(ConsoleKeyInfo key)
+      public KeyPressedEventArgs(System.ConsoleKeyInfo key)
       {
         this.key = key;
       }
     }
 
-    public static event EventHandler<KeyPressedEventArgs> KeyPressed;
+    public static event System.EventHandler<KeyPressedEventArgs> KeyPressed;
     public static bool ShouldContinue = true;
     public static void ListenForKeys()
     {
       while (ShouldContinue)
       {
-        KeyPressed?.Invoke(null, new KeyPressedEventArgs(Console.ReadKey(false)));
+        KeyPressed?.Invoke(null, new KeyPressedEventArgs(System.Console.ReadKey(false)));
       }
       ShouldContinue = true;
     }
@@ -661,8 +666,12 @@ namespace Y1
                     }
                     else if (trimmed == "PushNew")
                     {
-                        csCode += "y1__stack_" + depth + ".Add(new Tuple<Type, Dictionary<string, object>, TypeBuilder, " +
-                            "Dictionary<string, Type>>(" +
+                        csCode += "y1__stack_" + depth + @".Add(new System.Tuple<
+        System.Type, 
+        System.Collections.Generic.Dictionary<string, object>, 
+        System.Reflection.Emit.TypeBuilder, 
+        System.Collections.Generic.Dictionary<string, System.Type>
+    >(" +
                             "null, null, null, null" +
                             "));\n";
                     }
@@ -671,20 +680,24 @@ namespace Y1
                         csCode += "{\n";
                         csCode += "var y1__arg = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1];\n";
                         csCode += "y1__stack_" + depth + ".RemoveAt(y1__stack_" + depth + ".Count - 1);\n";
-                        csCode += "y1__stack_" + depth + ".Add(new Tuple<Type, Dictionary<string, object>, TypeBuilder, " +
-                            "Dictionary<string, Type>>(y1__arg.Item1, y1__arg.Item2, y1__mb_" + depth + ".DefineType(" +
+                        csCode += "y1__stack_" + depth + @".Add(new System.Tuple<
+        System.Type, 
+        System.Collections.Generic.Dictionary<string, object>, 
+        System.Reflection.Emit.TypeBuilder, 
+        System.Collections.Generic.Dictionary<string, System.Type>
+    >(y1__arg.Item1, y1__arg.Item2, y1__mb_" + depth + ".DefineType(" +
                             "\"" + ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
-                            "TypeAttributes.Public" +
+                            "System.Reflection.TypeAttributes.Public" +
                             "), y1__arg.Item4));\n";
                         csCode += "}\n";
                     }
                     else if (trimmed.Split(' ')[0] == "DefineMethod")
                     {
-                        csCode += "MethodBuilder " + ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineMethod(" +
+                        csCode += "System.Reflection.Emit.MethodBuilder " + ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineMethod(" +
                             "\"" + ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
-                            "MethodAttributes.Public, " +
+                            "System.Reflection.MethodAttributes.Public, " +
                             "typeof(void), " +
-                            "Type.EmptyTypes" +
+                            "System.Type.EmptyTypes" +
                             ");\n";
                         csCode += "y1__il_" + depth + " = " + ToIdentifier(trimmed.Split(' ')[2]) + ".GetILGenerator();\n";
                         csCode += "{\n";
@@ -697,8 +710,16 @@ namespace Y1
                         csCode += "var y1__arg = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1];\n";
                         csCode += "y1__stack_" + depth + ".RemoveAt(y1__stack_" + depth + ".Count - 1);\n";
                         csCode += "y1__stack_" + depth + ".Add(" +
-                            "new Tuple<Type, Dictionary<string, object>, TypeBuilder, Dictionary<string, Type>>(" +
-                            "y1__arg.Item3.CreateType(), new Dictionary<string, object>(), y1__arg.Item3, new Dictionary<string, Type>()" +
+                            @"new System.Tuple<
+        System.Type, 
+        System.Collections.Generic.Dictionary<string, object>, 
+        System.Reflection.Emit.TypeBuilder, 
+        System.Collections.Generic.Dictionary<string, System.Type>
+    >(" +
+                            "y1__arg.Item3.CreateType(), " +
+                            "new System.Collections.Generic.Dictionary<string, object>(), " +
+                            "y1__arg.Item3, " +
+                            "new System.Collections.Generic.Dictionary<string, System.Type>()" +
                             "));\n";
                         csCode += "}\n";
                     }
@@ -706,7 +727,7 @@ namespace Y1
                     {
                         csCode += "y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item2.Add(" +
                             "\"" + ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
-                            "Activator.CreateInstance(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item1, null" +
+                            "System.Activator.CreateInstance(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item1, null" +
                             "));\n";
                     }
                     else if (trimmed.Split(' ')[0] == "CallMethod")
@@ -731,9 +752,13 @@ namespace Y1
                     }
                     else if (trimmed.Split(' ')[0] == "LoadType")
                     {
-                        csCode += "y1__stack_" + depth + ".Add(new Tuple<Type, Dictionary<string, object>, TypeBuilder, " +
-                            "Dictionary<string, Type>>(typeof(" + trimmed.Split(' ')[1] + "), new Dictionary<string,object>(), " +
-                            "null, new Dictionary<string, Type>()));\n";
+                        csCode += "y1__stack_" + depth + @".Add(new System.Tuple<
+        System.Type, 
+        System.Collections.Generic.Dictionary<string, object>, 
+        System.Reflection.Emit.TypeBuilder, 
+        System.Collections.Generic.Dictionary<string, System.Type>
+    >(typeof(" + trimmed.Split(' ')[1] + "), new System.Collections.Generic.Dictionary<string,object>(), " +
+                            "null, new System.Collections.Generic.Dictionary<string, Type>()));\n";
                     }
                     else if (trimmed == "ObjParams")
                     {
@@ -755,7 +780,7 @@ namespace Y1
                         }
                         csCode += "y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item2.Add(" +
                            "\"" + name + "\", " +
-                           "Activator.CreateInstance(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item1, " + parameters +
+                           "System.Activator.CreateInstance(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item1, " + parameters +
                            "));\n";
                     }
                     else if (trimmed == "MethodParams")
@@ -789,9 +814,9 @@ namespace Y1
                     }
                     else if (trimmed.Split(' ')[0] == "DefineField")
                     {
-                        csCode += "FieldBuilder " + ToIdentifier(trimmed.Split(' ')[1]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineField(\"" +
+                        csCode += "System.Reflection.Emit.FieldBuilder " + ToIdentifier(trimmed.Split(' ')[1]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineField(\"" +
                             ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
-                            trimmed.Split(' ')[2] + ", FieldAttributes.Public);\n";
+                            trimmed.Split(' ')[2] + ", System.Reflection.FieldAttributes.Public);\n";
                     }
                     else if (trimmed.Split(' ')[0] == "DefineParamMethod")
                     {
@@ -807,9 +832,9 @@ namespace Y1
                             }
                             paramTypes += y1CodeSplit[i].Trim();
                         }
-                        csCode += "MethodBuilder " + ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineMethod(" +
+                        csCode += "System.Reflection.Emit.MethodBuilder " + ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineMethod(" +
                            "\"" + ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
-                           "MethodAttributes.Public, " +
+                           "System.Reflection.MethodAttributes.Public, " +
                            "typeof(void), " +
                            paramTypes +
                            ");\n";
@@ -820,7 +845,7 @@ namespace Y1
                     }
                     else if (trimmed.Split(' ')[0] == "LoadField")
                     {
-                        csCode += "FieldInfo " + ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item1.GetField(\"" +
+                        csCode += "System.Reflection.FieldInfo " + ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item1.GetField(\"" +
                             trimmed.Split(' ')[1] + "\");\n";
                     }
                     else if (trimmed.Split(' ')[0] == "DefineComplexMethod")
@@ -843,33 +868,33 @@ namespace Y1
                         string methodAttributes = "0";
                         if (y1CodeSplit[i].Contains("public"))
                         {
-                            methodAttributes += " | MethodAttributes.Public";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Public";
                         }
                         if (y1CodeSplit[i].Contains("private"))
                         {
-                            methodAttributes += " | MethodAttributes.Private";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Private";
                         }
                         if (y1CodeSplit[i].Contains("static"))
                         {
-                            methodAttributes += " | MethodAttributes.Static";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Static";
                         }
                         if (y1CodeSplit[i].Contains("abstract"))
                         {
-                            methodAttributes += " | MethodAttributes.Abstract";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Abstract";
                         }
                         if (y1CodeSplit[i].Contains("protected"))
                         {
-                            methodAttributes += " | MethodAttributes.Family";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Family";
                         }
                         if (y1CodeSplit[i].Contains("virtual"))
                         {
-                            methodAttributes += " | MethodAttributes.Virtual";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Virtual";
                         }
                         if (y1CodeSplit[i].Contains("final"))
                         {
-                            methodAttributes += " | MethodAttributes.Final";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Final";
                         }
-                        csCode += "MethodBuilder " + ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineMethod(" +
+                        csCode += "System.Reflection.Emit.MethodBuilder " + ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineMethod(" +
                            "\"" + ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
                            methodAttributes + ", " +
                            returnType + ", " +
@@ -877,10 +902,10 @@ namespace Y1
                            ");\n";
                         if (!y1CodeSplit[i].Contains("abstract"))
                         {
-                            csCode += "y1__il_" + depth + " = " + ToIdentifier(trimmed.Split(' ')[3]) + ".GetILGenerator();\n";
+                            csCode += "y1__il_" + depth + " = " + ToIdentifier(trimmed.Split(' ')[2]) + ".GetILGenerator();\n";
                             csCode += "{\n";
                             mode = "methodbuild";
-                            modeArg = ToIdentifier(trimmed.Split(' ')[3]);
+                            modeArg = ToIdentifier(trimmed.Split(' ')[2]);
                         }
                     }
                     else if (trimmed.Split(' ')[0] == "DefineComplexField")
@@ -889,17 +914,17 @@ namespace Y1
                         string fieldAttributes = "0";
                         if (y1CodeSplit[i].Contains("public"))
                         {
-                            fieldAttributes += " | FieldAttributes.Public";
+                            fieldAttributes += " | System.Reflection.FieldAttributes.Public";
                         }
                         if (y1CodeSplit[i].Contains("private"))
                         {
-                            fieldAttributes += " | FieldAttributes.Private";
+                            fieldAttributes += " | System.Reflection.FieldAttributes.Private";
                         }
                         if (y1CodeSplit[i].Contains("static"))
                         {
-                            fieldAttributes += " | FieldAttributes.Static";
+                            fieldAttributes += " | System.Reflection.FieldAttributes.Static";
                         }
-                        csCode += "FieldBuilder " + ToIdentifier(trimmed.Split(' ')[1]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineField(\"" +
+                        csCode += "System.Reflection.Emit.FieldBuilder " + ToIdentifier(trimmed.Split(' ')[1]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineField(\"" +
                             ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
                             trimmed.Split(' ')[2] + ", " + fieldAttributes + ");\n";
                     }
@@ -907,7 +932,7 @@ namespace Y1
                     {
                         csCode += "y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item4.Add(\"" +
                              trimmed.Split(' ')[2] + "\", y1__mb_" + depth + ".DefineType(\"" + trimmed.Split(' ')[1] +
-                             "\", TypeAttributes.Public, y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item1));\n";
+                             "\", System.Reflection.TypeAttributes.Public, y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item1));\n";
                     }
                     else if (trimmed.Split(' ')[0] == "DefineSubclassMethod")
                     {
@@ -929,33 +954,33 @@ namespace Y1
                         string methodAttributes = "0";
                         if (y1CodeSplit[i].Contains("public"))
                         {
-                            methodAttributes += " | MethodAttributes.Public";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Public";
                         }
                         if (y1CodeSplit[i].Contains("private"))
                         {
-                            methodAttributes += " | MethodAttributes.Private";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Private";
                         }
                         if (y1CodeSplit[i].Contains("static"))
                         {
-                            methodAttributes += " | MethodAttributes.Static";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Static";
                         }
                         if (y1CodeSplit[i].Contains("abstract"))
                         {
-                            methodAttributes += " | MethodAttributes.Abstract";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Abstract";
                         }
                         if (y1CodeSplit[i].Contains("protected"))
                         {
-                            methodAttributes += " | MethodAttributes.Family";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Family";
                         }
                         if (y1CodeSplit[i].Contains("virtual"))
                         {
-                            methodAttributes += " | MethodAttributes.Virtual";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Virtual";
                         }
                         if (y1CodeSplit[i].Contains("final"))
                         {
-                            methodAttributes += " | MethodAttributes.Final";
+                            methodAttributes += " | System.Reflection.MethodAttributes.Final";
                         }
-                        csCode += "MethodBuilder " + ToIdentifier(trimmed.Split(' ')[3]) + " = ((TypeBuilder)(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1]" +
+                        csCode += "System.Reflection.Emit.MethodBuilder " + ToIdentifier(trimmed.Split(' ')[3]) + " = ((System.Reflection.Emit.TypeBuilder)(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1]" +
                            ".Item4[\"" + trimmed.Split(' ')[1] + "\"])).DefineMethod(" +
                            "\"" + ToIdentifier(trimmed.Split(' ')[2]) + "\", " +
                            methodAttributes + ", " +
@@ -976,17 +1001,17 @@ namespace Y1
                         string fieldAttributes = "0";
                         if (y1CodeSplit[i].Contains("public"))
                         {
-                            fieldAttributes += " | FieldAttributes.Public";
+                            fieldAttributes += " | System.Reflection.FieldAttributes.Public";
                         }
                         if (y1CodeSplit[i].Contains("private"))
                         {
-                            fieldAttributes += " | FieldAttributes.Private";
+                            fieldAttributes += " | System.Reflection.FieldAttributes.Private";
                         }
                         if (y1CodeSplit[i].Contains("static"))
                         {
-                            fieldAttributes += " | FieldAttributes.Static";
+                            fieldAttributes += " | System.Reflection.FieldAttributes.Static";
                         }
-                        csCode += "FieldBuilder " + ToIdentifier(trimmed.Split(' ')[2]) + " = ((TypeBuilder)(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item4[\"" +
+                        csCode += "System.Reflection.Emit.FieldBuilder " + ToIdentifier(trimmed.Split(' ')[2]) + " = ((System.Reflection.Emit.TypeBuilder)(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item4[\"" +
                             trimmed.Split(' ')[1] + "\"])).DefineField(\"" +
                             ToIdentifier(trimmed.Split(' ')[2]) + "\", " +
                             trimmed.Split(' ')[3] + ", " + fieldAttributes + ");\n";
@@ -994,14 +1019,14 @@ namespace Y1
                     else if (trimmed.Split(' ')[0] == "FinishSubclass")
                     {
                         csCode += "y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item4[\"" + trimmed.Split(' ')[1] +
-                            "\"] = ((TypeBuilder)(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item4[\"" + trimmed.Split(' ')[1] +
+                            "\"] = ((System.Reflection.Emit.TypeBuilder)(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item4[\"" + trimmed.Split(' ')[1] +
                             "\"])).CreateType();\n";
                     }
                     else if (trimmed.Split(' ')[0] == "CreateSubclassObject")
                     {
                         csCode += "y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item2.Add(\"" +
                             ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
-                            "Activator.CreateInstance(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item4[\"" + trimmed.Split(' ')[2] + "\"], null" +
+                            "System.Activator.CreateInstance(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item4[\"" + trimmed.Split(' ')[2] + "\"], null" +
                             "));\n";
                     }
                     else if (trimmed.Split(' ')[0] == "CallSubclassMethod")
@@ -1027,7 +1052,7 @@ namespace Y1
                         }
                         funcLines.RemoveAt(funcLines.Count - 1);
                         string seqCode = ConvertToCSharp(funcLines, depth + 1);
-                        csCode += "y1__func_" + depth + " = (Func<int, dynamic>)((" + paramName + ") => {\n";
+                        csCode += "y1__func_" + depth + " = (System.Func<int, dynamic>)((" + paramName + ") => {\n";
                         csCode = startScope(depth + 1, csCode);
                         csCode += seqCode;
                         csCode += "});\n";
@@ -1087,7 +1112,7 @@ namespace Y1
                     }
                     else if (trimmed == "DoMulti")
                     {
-                        csCode += "Task.WaitAll(new Task[] {\n";
+                        csCode += "System.Threading.Tasks.Task.WaitAll(new System.Threading.Tasks.Task[] {\n";
                         List<string> lines = new List<string>();
                         int multiDepth = 1;
                         i++;
@@ -1099,7 +1124,7 @@ namespace Y1
                             if (multiDepth == 1 && y1CodeSplit[i].Trim() == "AndMulti")
                             {
                                 lines.RemoveAt(lines.Count - 1);
-                                csCode += "Task.Run(((Action)(() => {\n";
+                                csCode += "System.Threading.Tasks.Task.Run(((System.Action)(() => {\n";
                                 csCode = startScope(depth + 1, csCode);
                                 csCode += ConvertToCSharp(lines, depth + 1);
                                 csCode += "}))),\n";
@@ -1109,7 +1134,7 @@ namespace Y1
                         }
                         i--;
                         lines.RemoveAt(lines.Count - 1);
-                        csCode += "Task.Run(((Action)(() => {\n";
+                        csCode += "System.Threading.Tasks.Task.Run(((Action)(() => {\n";
                         csCode = startScope(depth + 1, csCode);
                         csCode += ConvertToCSharp(lines, depth + 1);
                         csCode += "}))),\n";
@@ -1126,25 +1151,29 @@ namespace Y1
                         string typeAttributes = "0";
                         if (y1CodeSplit[i].Contains("public"))
                         {
-                            typeAttributes += " | TypeAttributes.Public";
+                            typeAttributes += " | System.Reflection.TypeAttributes.Public";
                         }
                         if (y1CodeSplit[i].Contains("abstract"))
                         {
-                            typeAttributes += " | TypeAttributes.Abstract";
+                            typeAttributes += " | System.Reflection.TypeAttributes.Abstract";
                         }
                         if (y1CodeSplit[i].Contains("sealed"))
                         {
-                            typeAttributes += " | TypeAttributes.Sealed";
+                            typeAttributes += " | System.Reflection.TypeAttributes.Sealed";
                         }
                         if (y1CodeSplit[i].Contains("interface"))
                         {
-                            typeAttributes += " | TypeAttributes.Interface";
+                            typeAttributes += " | System.Reflection.TypeAttributes.Interface";
                         }
                         csCode += "{\n";
                         csCode += "var y1__arg = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1];\n";
                         csCode += "y1__stack_" + depth + ".RemoveAt(y1__stack_" + depth + ".Count - 1);\n";
-                        csCode += "y1__stack_" + depth + ".Add(new Tuple<Type, Dictionary<string, object>, TypeBuilder, " +
-                            "Dictionary<string, Type>>(y1__arg.Item1, y1__arg.Item2, y1__mb_" + depth + ".DefineType(" +
+                        csCode += "y1__stack_" + depth + @".Add(new System.Tuple<
+        System.Type, 
+        System.Collections.Generic.Dictionary<string, object>, 
+        System.Reflection.Emit.TypeBuilder, 
+        System.Collections.Generic.Dictionary<string, System.Type>
+    >(y1__arg.Item1, y1__arg.Item2, y1__mb_" + depth + ".DefineType(" +
                             "\"" + name + "\", " +
                             typeAttributes + ", " + superclass + ", " + interfaces + "), y1__arg.Item4));\n";
                         csCode += "}\n";
@@ -1172,7 +1201,7 @@ namespace Y1
                         lines[lines.Count - 1].Item2.RemoveAt(lines[lines.Count - 1].Item2.Count - 1);
                         i--;
                         csCode += "{\n";
-                        csCode += "EventHandler<Y1.KeyListener.KeyPressedEventArgs> y1__keyListenerHandler_" + depth + 
+                        csCode += "System.EventHandler<Y1.KeyListener.KeyPressedEventArgs> y1__keyListenerHandler_" + depth + 
                             " = (y1__keyListenerHandlerSender_" + depth + ", y1__keyListenerHandlerArgs_" + depth + 
                             ") => {\n";
                         csCode = startScope(depth + 1, csCode);
@@ -1217,11 +1246,11 @@ namespace Y1
                     }
                     else if (trimmed.StartsWith("\\"))
                     {
-                        csCode += "y1__il_" + depth + ".Emit(OpCodes." + trimmed.Substring(1) + ");\n";
+                        csCode += "y1__il_" + depth + ".Emit(System.Reflection.Emit.OpCodes." + trimmed.Substring(1) + ");\n";
                     }
                     else if (trimmed.StartsWith("->"))
                     {
-                        csCode += "Label " + trimmed.Substring(2) + " = y1__il_" + depth + ".DefineLabel();\n";
+                        csCode += "System.Reflection.Emit.Label " + trimmed.Substring(2) + " = y1__il_" + depth + ".DefineLabel();\n";
                     }
                     else if (trimmed.StartsWith("-->"))
                     {
@@ -1240,7 +1269,7 @@ namespace Y1
                     }
                     else if (trimmed.StartsWith("<TRY>"))
                     {
-                        csCode += "Label " + trimmed.Substring(5).Trim() + " = y1__il_" + depth + ".BeginExceptionBlock();\n";
+                        csCode += "System.Reflection.Emit.Label " + trimmed.Substring(5).Trim() + " = y1__il_" + depth + ".BeginExceptionBlock();\n";
                     }
                     else if (trimmed.StartsWith("<CATCH>"))
                     {

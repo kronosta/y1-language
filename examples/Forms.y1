@@ -1,3 +1,7 @@
+<IMPORTS>
+  System
+<END_IMPORTS>
+
 <ATTRIBUTES>
     Framework:net48
     Platform:x64

@@ -1,14 +1,18 @@
+<IMPORTS>
+  System
+<END_IMPORTS>
+
 @[ComplexTypeTest
   |/Main
     PushNew
     DefineComplexType ITest
-        typeof(object)
+        null
         Type.EmptyTypes
         public interface abstract
       DefineComplexMethod TestM ITest_TestM
           Type.EmptyTypes
           typeof(void)
-          public abstract
+          public abstract virtual
     FinishType
     C# - Type ITest = y1__stack_0[y1__stack_0.Count - 1].Item1;
     PushNew
@@ -16,11 +20,15 @@
         typeof(object)
         new Type[]{ITest}
         public
-      DefineMethod TestM Test_TestM
+      DefineComplexMethod TestM Test_TestM
+        Type.EmptyTypes
+        typeof(void)
+        public virtual
         \Ldstr, "Hello from interface method."
         \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
         \Ret
       \/
+    C# - y1__stack_0[y1__stack_0.Count - 1].Item3.DefineMethodOverride(Test_TestM, ITest_TestM);
     FinishType
     CreateObject o
     CallMethod TestM o

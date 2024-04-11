@@ -1,6 +1,13 @@
+<IMPORTS>
+    System
+<END_IMPORTS>
+
 @[Program
     |/Main
         ?Rewrite Out
+            <IMPORTS>
+                System
+            <END_IMPORTS>
             @[Program
                 |/Main
                     DefineVariable Line ""

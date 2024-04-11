@@ -1,8 +1,12 @@
+<IMPORTS>
+  System
+<END_IMPORTS>
+
 @[ComplexMethods
 
 |/Main
-  C# - MethodInfo cwl = typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)});
-  C# - MethodInfo cwli = typeof(Console).GetMethod("WriteLine", new Type[]{typeof(int)});
+  C# - System.Reflection.MethodInfo cwl = typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)});
+  C# - System.Reflection.MethodInfo cwli = typeof(Console).GetMethod("WriteLine", new Type[]{typeof(int)});
   PushNew
   DefineType T
     DefineComplexField T_privateField typeof(int)

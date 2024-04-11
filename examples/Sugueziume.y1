@@ -4,6 +4,7 @@
 
 <IMPORTS>
     System.IO
+    System
 <END_IMPORTS>
 
 '$. @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -26,7 +27,7 @@ Namespace Kronosta.Esolangs.Sugueziume
             DefineType SugueziumeInterpreter
                 DefineComplexMethod InterleaveStrings SugueziumeInterpreter_InterleaveStrings
                         new Type[]{typeof(string[])}
-                        string
+                        typeof(string)
                         public static
                     '$. The total string.
                     _!!string

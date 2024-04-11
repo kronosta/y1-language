@@ -1,5 +1,6 @@
 <IMPORTS>
   System.Threading
+  System
 <END_IMPORTS>
 
 @[DoMultiTest
