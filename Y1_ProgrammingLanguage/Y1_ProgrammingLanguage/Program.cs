@@ -323,8 +323,9 @@ namespace Y1
                         }
                     }
                     Main(new string[] { name });
+
                     ProcessStartInfo info = new ProcessStartInfo();
-                    info.FileName = ToIdentifier(name) + "/contents/" + name + ".exe";
+                    info.FileName = ToIdentifier(name) + "/" + name + ".exe";
                     info.RedirectStandardInput = true;
                     info.RedirectStandardOutput = true;
                     info.CreateNoWindow = true;
@@ -350,6 +351,8 @@ namespace Y1
                     result.AddRange(rewritten ?? new List<string>());
                     Directory.Delete(ToIdentifier(name), true);
                     File.Delete(name);
+                    File.Delete($"{name}.csproj");
+                    File.Delete($"{name}.~cs");
                     filename = originalFilename;
                 }
                 else if (trimmed.Split(' ')[0] == "?Undefine")
@@ -489,6 +492,7 @@ namespace Y1
             Func<int, string, string> startScope = (depth, prevCode) =>
             {
                 string csCode = prevCode;
+                csCode += "#pragma warning disable CS0168\n";
                 csCode += "var y1__stack_" + depth + " = new List<Tuple<Type, Dictionary<string, object>, TypeBuilder, " +
             "Dictionary<string, Type>>>();\n";
                 csCode += "AssemblyName y1__aName_" + depth + " = new AssemblyName(\"y1__DynamicAssembly\");\n";
@@ -497,6 +501,7 @@ namespace Y1
                 csCode += "ILGenerator y1__il_" + depth + ";\n";
                 csCode += "dynamic y1__func_" + depth + ";\n";
                 csCode += "dynamic y1__result_" + depth + ";\n";
+                csCode += "#pragma warning restore CS0168\n";
                 return csCode;
             };
             string csCode = "";
@@ -1345,7 +1350,7 @@ namespace Y1
             }
             catch
             {
-                Console.WriteLine("File " + filename + "not found. Press any key to continue.");
+                Console.WriteLine("File " + filename + " not found. Press any key to continue.");
                 Console.ReadKey();
                 Environment.Exit(1);
             }
@@ -1364,10 +1369,13 @@ namespace Y1
             string csCode = ConvertToCSharp(Preprocess(y1CodeSplitBlankLinesRemoved), 0, true);
             int filenameSlashLastIndex = filename.LastIndexOf("/");
             string filenameLast = filename;
-            if (filenameSlashLastIndex >= 0)
-                filenameLast = filename.Substring(filenameSlashLastIndex);
-            string csprojName = "./" + filenameLast + ".csproj";
-            string csName = "./" + filenameLast + ".cs";
+            if (filenameSlashLastIndex >= 0 && filename.Length > filenameSlashLastIndex + 1)
+                filenameLast = filename.Substring(filenameSlashLastIndex + 1);
+            string csprojName = filenameLast + ".csproj";
+            string csName = filenameLast + ".~cs";
+            if (File.Exists(csprojName)) File.Delete(csprojName);
+            if (File.Exists(csName)) File.Delete(csName);
+
             using (var file = File.Create(csName)) { }
 
             using (var sw = new StreamWriter(csName))
@@ -1389,25 +1397,27 @@ namespace Y1
                 sw.WriteLine($"<PlatformTarget>{platform}</PlatformTarget>");
                 sw.WriteLine("</PropertyGroup>");
                 sw.WriteLine("<ItemGroup>");
+                sw.WriteLine($"<Compile Remove=\"*.cs\"/>");
+                sw.WriteLine($"<Compile Include=\"{csName}\"/>");
                 foreach (var i in assemblyRefs)
                 {
                     sw.WriteLine("<Reference Include=\"" + i + "\" />");
                 }
                 sw.WriteLine("</ItemGroup>");
                 sw.WriteLine("</Project>");
-            }
-            ProcessStartInfo si = new ProcessStartInfo("dotnet", "build " + csprojName);
-            si.UseShellExecute = false;
-            Process? p = Process.Start(si);
+            };
+            Process? p = Process.Start("dotnet", new string[]{"build", csprojName});
             p?.WaitForExit();
-            if (Directory.Exists(ToIdentifier(filename)))
+            if (Directory.Exists(ToIdentifier(filenameLast)))
             {
-                Directory.Delete(ToIdentifier(filename), true);
+                Directory.Delete(ToIdentifier(filenameLast), true);
             }
-            Directory.CreateDirectory(ToIdentifier(filename));
-            Directory.Move($"bin/Debug/{framework}", ToIdentifier(filename) + "/contents");
-            //File.Delete(csprojName);
-            Directory.Delete("bin", true);
+            Directory.CreateDirectory(ToIdentifier(filenameLast));
+            try { File.Move($"bin/Debug/{framework}/{filenameLast}.deps.json",          $"{ToIdentifier(filenameLast)}/{filenameLast}.deps.json"); } catch {}
+            try { File.Move($"bin/Debug/{framework}/{filenameLast}.dll",                $"{ToIdentifier(filenameLast)}/{filenameLast}.dll"); } catch {}
+            try { File.Move($"bin/Debug/{framework}/{filenameLast}.exe",                $"{ToIdentifier(filenameLast)}/{filenameLast}.exe"); } catch {}
+            try { File.Move($"bin/Debug/{framework}/{filenameLast}.pdb",                $"{ToIdentifier(filenameLast)}/{filenameLast}.pdb"); } catch {}
+            try { File.Move($"bin/Debug/{framework}/{filenameLast}.runtimeconfig.json", $"{ToIdentifier(filenameLast)}/{filenameLast}.runtimeconfig.json"); } catch {}
         }
     }
 }
