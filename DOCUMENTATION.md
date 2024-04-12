@@ -22,9 +22,7 @@ Windows line sequences composed of both a Carriage Return and a Linefeed are tre
 but blank lines are pretty much removed from the stored-in-memory source-code before it is even processed into C# by the compiler.
 
 ## Imports
-The namespaces `System`, `System.Reflection`, `System.Reflection.Emit`, `System.Collections.Generic`, and `System.Threading.Tasks` namespaces are imported automatically, 
-and there is no way to stop this. Unfortunately, this means that any namespaces that share a single identifier with one that the compiler uses will throw errors if imported, 
-so you have to fully qualify EVERY NAME. I would like to change this by removing these imports and having the compiler fully qualify all the names it uses instead.
+The namespaces `System`, `System.Collections.Generic`, `System.Reflection`, `System.Reflection.Emit`, and `System.Threading.Tasks` used to be automatically imported, causing conflicts with any imported namespace that shared type names and requiring you to fully qualify every name from that namespace. This has been fixed, so now all internally used libraries are fully qualified. This does mean, however, that any programs that use any of those namespaces (such as ones that print to the console), will need to have the namespace added to the `<IMPORTS>` section, as discussed in the Starting Lines section.
 
 ## Starting Lines
 There is a natural progression of beginning sections (although this only applies after the preprocessor is run). All elements are optional.
@@ -69,7 +67,7 @@ Any name beginning with `y1__` is reserved for use by compiled programs.
 New variables should not be declared with these names, but they can be. 
 You can also use the pre-existing names for manipulation.
 
-* `y1__aName`: An AssemblyName which normally contains "Y1_" followed by a random number.
+* `y1__aName`: An AssemblyName which normally contains `y1__DynamicAssembly`.
   * If you want to choose the Assembly name for some reason, you can reassign y1__aName, although you will also have to reassign y1__ab and y1__mb.
 * `y1__ab`: An AssemblyBuilder with y1__aName as its name and AssemblyBuilderAccess.Run as its run type.
 * `y1__mb`: A ModuleBuilder contained within y1__ab which contains all dynamic classes. 
