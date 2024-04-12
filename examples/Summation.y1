@@ -1,3 +1,7 @@
+<IMPORTS>
+  System
+<END_IMPORTS>
+
 @[SummationTest
   |/Main
     Summation 1 10 i
