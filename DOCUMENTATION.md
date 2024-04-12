@@ -349,6 +349,18 @@ Note that these methods will not apply the short macro later (it has already bee
 In order to apply it, you will also need to defer another copy of the `?DefineShort` command.
 The best use of these methods is simply to escape the short macro so it can be used literally in the code.
 
+A weird trick if you want comments on the same line as other code is to use:
+```
+?DefineShort Comment ?1?
+```
+
+Now you can just write something like:
+```
+[[Comment !!!!This is C# code.]] C# - Console.WriteLine("hi world!");
+```
+
+Effectively that replaces your comment with the empty string, as long as you put 4 exclamation points (not two).
+
 #### The following command
 ```
 ?Rewrite <Out|Err>
