@@ -9,6 +9,11 @@
     System.Windows.Forms.dll
 <END_REFS>
 
+<IMPORTS>
+  System
+  System.Windows.Forms
+<END_IMPORTS>
+
 '$. @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 '$. Currently unfinished.              @
 '$. @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
