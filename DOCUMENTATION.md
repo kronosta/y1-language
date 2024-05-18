@@ -158,6 +158,7 @@ Calls a parameterized method. Only the parameters support line continuations.
 Creates a local variable with name that is a field in the `TypeBuilder` of the top element of `y1__stack` with the same name. 
 The type should be a C# expression evaluating to a `Type`, and should not have spaces. 
 This can be replaced with a C# call for the ability to have the field and local variable have separate names, or to have spaces in the expression.
+The field will be public and not static.
 
 #### `DefineParamMethod <name> <var-name>`
 On the next line should be a C# expression that evaluates to a `Type[]`. 
