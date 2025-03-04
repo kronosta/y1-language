@@ -200,15 +200,15 @@ namespace Kronosta.Language.Y1
                             {
                                 if (k != "")
                                 {
-                                    contents.Add(k.Replace("?" + j + "?", trimmed.Split("!!")[j]).Replace("?!", "?"));
+                                    contents.Add(
+                                        k.Replace(
+                                            "?" + j + "?",
+                                            Utils.GraveUnescape(trimmed.Split("!!")[j])
+                                        ).Replace("?!", "?"));
                                 }
                             }
                         }
                         result.AddRange(contents);
-                    }
-                    else
-                    {
-                        result.Add(trimmed);
                     }
                 }
                 else if (trimmed.Split(' ')[0] == "?DefineShort")
@@ -223,15 +223,22 @@ namespace Kronosta.Language.Y1
                     while (i < y1CodeSplit.Count)
                     {
                         string newContents = contents;
-                        Regex macroRegex = new Regex($"\\[\\[{name} (\\!\\!.*)*\\]\\]");
+                        Regex macroRegex = new Regex($@"\[\[\s*{name}(\s+(!!.*)+)?\s*]]");
                         Match macroMatch = macroRegex.Match(y1CodeSplit[i]);
-                        Group paramGroup = macroMatch.Groups[1];
-                        string[] paramGroupValues = paramGroup.Value.Split("!!");
-                        for (int j = 1; j < paramGroupValues.Length; j++)
+                        if (macroMatch.Success)
                         {
-                            newContents = newContents.Replace($"?{j}?", paramGroupValues[j]);
+                            Group paramGroup = macroMatch.Groups[2];
+                            string[] paramGroupValues = paramGroup.Value.Split("!!");
+                            for (int j = 1; j < paramGroupValues.Length; j++)
+                            {
+                                newContents = newContents.Replace($"?{j}?", Utils.GraveUnescape(paramGroupValues[j]));
+                            }
+                            result.Add(macroRegex.Replace(y1CodeSplit[i], newContents));
                         }
-                        result.Add(macroRegex.Replace(y1CodeSplit[i], newContents));
+                        else
+                        {
+                            result.Add(y1CodeSplit[i]);
+                        }
                         i++;
                     }
                 }
@@ -402,7 +409,7 @@ namespace Kronosta.Language.Y1
                     }
                     catch { }
                 }
-                else
+                else if (trimmed[0] != '?')
                 {
                     result.Add(trimmed);
                 }
@@ -420,6 +427,10 @@ namespace Kronosta.Language.Y1
                 result = new List<string>();
                 goto TryAgain;
             }
+            Console.WriteLine("[[PREPROCESSOR OUTPUT]]");
+            foreach (var i in result)
+                Console.WriteLine(i);
+            Console.WriteLine("[[END OUTPUT]]");
             return result;
         }
         public static string ConvertToCSharp(

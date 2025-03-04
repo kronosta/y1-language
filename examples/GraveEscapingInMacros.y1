@@ -1,0 +1,10 @@
+?Define TestConsole
+  :C# - System.Console.WriteLine("?1?, ?2?, ?3?");
+?
+@[Program
+  |/Main
+    ?Call TestConsole !!`EHello`E!!oo`E`E`Eoo!!Third parameter
+    ?DefineShort TestString "[?1?][?2?][?3?]"
+    C# - System.Console.WriteLine([[TestString !!`E`E!!OOH`E`E`E SHINY`E!!i'm a normal string]]);
+  \|
+]@
