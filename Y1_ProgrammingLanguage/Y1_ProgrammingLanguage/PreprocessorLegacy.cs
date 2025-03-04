@@ -2,75 +2,27 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Kronosta.Language.Y1
 {
     public partial class Preprocessor
     {
-        public class PreprocessorException : Exception
+        public List<string> PreprocessLegacy(List<string> y1CodeSplit)
         {
-            public PreprocessorException()
+            string input = "";
+            List<string> filesToDelete = new List<string>();
+            List<string> result = new List<string>();
+        TryAgain:
+            for (int i = 0; i < y1CodeSplit.Count; i++)
             {
-            }
-
-            public PreprocessorException(string message)
-                : base(message)
-            {
-            }
-
-            public PreprocessorException(string message, Exception inner)
-                : base(message, inner)
-            {
-            }
-        }
-
-        public class IntRef
-        {
-            public int Value;
-
-            public IntRef(int value) { this.Value = value; }
-        }
-
-        public delegate void Directive(
-                Preprocessor prep,
-                List<string> codeSplit,
-                List<string> result,
-                IntRef lineIndex,
-                object state
-            );
-
-        public IDictionary<string, List<string>> Macros { get; set; }
-        public CompilerSettings CompilerSettings { get; set; }
-
-        public readonly Registry<Directive> Directives;
-
-        public bool DoLogging { get; set; } = false;
-
-        public IDictionary<string, object> customState = new Dictionary<string, object>();
-
-        public Preprocessor()
-        {
-            Macros = new Dictionary<string, List<string>>();
-            CompilerSettings = new CompilerSettings();
-            Directives = new Registry<Directive>();
-            RegisterDefaultDirectives();
-        }
-
-        public void RegisterDefaultDirectives()
-        {
-            Directives.Register(
-                "", "File",
-                static (prep, y1CodeSplit, result, ii, state) =>
+                string trimmed = y1CodeSplit[i].Trim();
+                if (trimmed.Split(' ')[0] == "?File")
                 {
-                    int i = ii.Value;
-                    string trimmed = y1CodeSplit[i].Trim();
                     string contents;
                     using (StreamReader sr = new StreamReader(trimmed.Split(' ')[1]))
                     {
                         contents = sr.ReadToEnd();
-                        contents = contents.Replace("\r\n", "\n");
                     }
                     foreach (var j in contents.Split(new char[] { '\n', '\r', '\f', '\v' }))
                     {
@@ -80,37 +32,25 @@ namespace Kronosta.Language.Y1
                         }
                     }
                 }
-            );
-
-            Directives.Register(
-                "", "Define",
-                static (prep, codeSplit, result, lineIndexR, state) =>
+                else if (trimmed.Split(' ')[0] == "?Define")
                 {
-                    int lineIndex = lineIndexR.Value;
                     List<string> contents = new List<string>();
-                    string name = codeSplit[lineIndex].Split(' ')[1];
-                    lineIndex++;
-                    while (codeSplit[lineIndex].Trim() != "?")
+                    string name = trimmed.Split(' ')[1];
+                    i++;
+                    while (y1CodeSplit[i].Trim() != "?")
                     {
                         contents.Add(
-                          codeSplit[lineIndex].Substring(codeSplit[lineIndex].IndexOf(":") + 1).Trim()
+                          y1CodeSplit[i].Substring(y1CodeSplit[i].IndexOf(":") + 1).Trim()
                         );
-                        lineIndex++;
+                        i++;
                     }
-                    prep.Macros.Add(name, contents);
-                    lineIndexR.Value = lineIndex;
+                    Macros.Add(name, contents);
                 }
-            );
-
-            Directives.Register(
-                "", "Call",
-                static (prep, y1CodeSplit, result, ii, state) =>
+                else if (trimmed.Split(' ')[0] == "?Call")
                 {
-                    int i = ii.Value;
-                    string trimmed = y1CodeSplit[i].Trim();
-                    if (prep.Macros.ContainsKey(trimmed.Split(' ')[1]))
+                    if (Macros.ContainsKey(trimmed.Split(' ')[1]))
                     {
-                        List<string> contents = prep.Macros[trimmed.Split(' ')[1]];
+                        List<string> contents = Macros[trimmed.Split(' ')[1]];
                         for (int j = 1; j < trimmed.Split("!!").Length; j++)
                         {
                             List<string> unreplaced = contents;
@@ -130,14 +70,8 @@ namespace Kronosta.Language.Y1
                         result.AddRange(contents);
                     }
                 }
-            );
-
-            Directives.Register(
-                "", "DefineShort",
-                static (prep, y1CodeSplit, result, ii, state) =>
+                else if (trimmed.Split(' ')[0] == "?DefineShort")
                 {
-                    int i = ii.Value;
-                    string trimmed = y1CodeSplit[i].Trim();
                     string name = trimmed.Split(' ')[1];
                     string contents = "";
                     for (int j = 2; j < trimmed.Split(' ').Length; j++)
@@ -166,16 +100,9 @@ namespace Kronosta.Language.Y1
                         }
                         i++;
                     }
-                    ii.Value = i;
                 }
-            );
-
-            Directives.Register(
-                "", "Rewrite",
-                static (prep, y1CodeSplit, result, ii, state) =>
+                else if (trimmed.Split(' ')[0] == "?Rewrite")
                 {
-                    int i = ii.Value;
-                    string trimmed = y1CodeSplit[i].Trim();
                     string? originalFilename = Program.filename;
                     string outputStreamName = trimmed.Split(' ')[1];
                     List<string> rewriter = new List<string>();
@@ -232,25 +159,13 @@ namespace Kronosta.Language.Y1
                     try { File.Delete($"{name}.csproj"); } catch { }
                     try { File.Delete($"{name}.~cs"); } catch { }
                     Program.filename = originalFilename;
-                    ii.Value = i;
                 }
-            );
-
-            Directives.Register(
-                "", "Undefine",
-                static (prep, y1CodeSplit, result, ii, state) =>
+                else if (trimmed.Split(' ')[0] == "?Undefine")
                 {
-                    string trimmed = y1CodeSplit[ii.Value].Trim();
-                    prep.Macros.Remove(trimmed.Split(' ')[1]);
+                    Macros.Remove(trimmed.Split(' ')[1]);
                 }
-            );
-
-            Directives.Register(
-                "", "IfDefined",
-                static (prep, y1CodeSplit, result, ii, state) =>
+                else if (trimmed.Split(' ')[0] == "?IfDefined")
                 {
-                    int i = ii.Value;
-                    string trimmed = y1CodeSplit[i].Trim();
                     List<string> ifContents = new List<string>();
                     List<string> elseContents = new List<string>();
                     i++;
@@ -265,45 +180,30 @@ namespace Kronosta.Language.Y1
                         elseContents.Add(y1CodeSplit[i].Replace("?!", "?"));
                         i++;
                     }
-                    if (prep.Macros.ContainsKey(trimmed.Split(' ')[1]))
+                    if (Macros.ContainsKey(trimmed.Split(' ')[1]))
                         result.AddRange(ifContents);
                     else
                         result.AddRange(elseContents);
-                    ii.Value = i;
                 }
-            );
-
-            Directives.Register(
-                "", "Defer",
-                static (prep, y1CodeSplit, result, i, state) =>
+                else if (trimmed.Split(' ')[0] == "?Defer")
                 {
-                    string trimmed = y1CodeSplit[i.Value].Trim();
                     result.Add(trimmed.Substring(7));
                 }
-            );
-
-            Directives.Register(
-                "", "WriteToFile",
-                static (prep, y1CodeSplit, result, i, state) =>
+                else if (trimmed.Split(' ')[0] == "?WriteToFile")
                 {
-                    string trimmed = y1CodeSplit[i.Value].Trim();
+                    if (!File.Exists(trimmed.Split(' ')[1]))
+                        filesToDelete.Add(trimmed.Split(' ')[1]);
                     using (var sw = new StreamWriter(trimmed.Split(' ')[1]))
                     {
-                        foreach (var j in prep.Macros[trimmed.Split(' ')[2]])
+                        foreach (var j in Macros[trimmed.Split(' ')[2]])
                         {
                             sw.WriteLine(j.Replace("?!", "?"));
                         }
                         sw.Flush();
                     }
                 }
-            );
-
-            Directives.Register(
-                "", "PreprocessorEnclose",
-                static (prep, y1CodeSplit, result, ii, state) =>
+                else if (trimmed.Split(' ')[0] == "?PreprocessorEnclose")
                 {
-                    int i = ii.Value;
-                    string trimmed = y1CodeSplit[i].Trim();
                     List<string> contents = new List<string>();
                     i++;
                     while (y1CodeSplit[i].Trim() != "?")
@@ -314,15 +214,9 @@ namespace Kronosta.Language.Y1
                     Preprocessor callee = new Preprocessor();
                     List<string> innerResult = callee.Preprocess(contents);
                     result.AddRange(innerResult);
-                    ii.Value = i;
                 }
-            );
-
-            Directives.Register(
-                "", "CondenseLines",
-                static (prep, y1CodeSplit, result, i, state) =>
+                else if (trimmed.Split(' ')[0] == "?CondenseLines")
                 {
-                    string trimmed = y1CodeSplit[i.Value].Trim();
                     string[] contents = trimmed.Split("!!");
                     for (int j = 1; j < contents.Length; j++)
                     {
@@ -331,36 +225,18 @@ namespace Kronosta.Language.Y1
                         );
                     }
                 }
-            );
-
-            Directives.Register(
-                "", "User_Diagnostic",
-                static (prep, y1CodeSplit, result, i, state) =>
+                else if (trimmed.Split(' ')[0] == "?User_Diagnostic")
                 {
-                    string trimmed = y1CodeSplit[i.Value].Trim();
-
                     string contents = trimmed.Split(' ')[1];
                     Console.Write(Utils.GraveUnescape(contents));
                 }
-            );
-
-
-            Directives.Register(
-                "", "User_Read",
-                static (prep, y1CodeSplit, result, i, state) =>
+                else if (trimmed.Split(' ')[0] == "?User_Read")
                 {
-                    prep.customState["input"] = (string)prep.customState["input"] + Console.Read();
+                    input += Console.Read();
                 }
-            );
-
-            Directives.Register(
-                "", "User_IfChar",
-                static (prep, y1CodeSplit, result, ii, state) =>
+                else if (trimmed.Split(' ')[0] == "?User_IfChar")
                 {
-                    int i = ii.Value;
-                    string trimmed = y1CodeSplit[i].Trim();
-
-                    char inputChar = ((string)prep.customState["input"])[0];
+                    char inputChar = input[0];
                     char test = Utils.GraveUnescape(trimmed.Split(' ')[1])[0];
                     List<string> ifContents = new List<string>();
                     List<string> elseContents = new List<string>();
@@ -384,57 +260,16 @@ namespace Kronosta.Language.Y1
                         result.AddRange(ifContents);
                     else
                         result.AddRange(elseContents);
-                    ii.Value = i;
                 }
-            );
-
-            Directives.Register(
-                "", "User_DequeueInput",
-                static (prep, y1CodeSplit, result, i, state) =>
+                else if (trimmed.Split(' ')[0] == "?User_DequeueInput")
                 {
                     try
                     {
-                        prep.customState["input"] = ((string)prep.customState["input"]).Substring(1);
+                        input = input.Substring(1);
                     }
                     catch { }
                 }
-            );
-
-#if Y1_NonexistentSymbol
-            // Template for copy-paste
-        Directives.Register(
-            "", "Call",
-            static (prep, y1CodeSplit, result, i, state) =>
-            {
-                string trimmed = y1CodeSplit[i].Trim();
-            }
-        );
-#endif
-        }
-
-        public List<string> Preprocess(List<string> y1CodeSplit)
-        {
-            List<string> result = new List<string>();
-        TryAgain:
-            for (int i = 0; i < y1CodeSplit.Count; i++)
-            {
-                string trimmed = y1CodeSplit[i].Trim();
-                if (trimmed.StartsWith("?"))
-                {
-                    int spacePos = trimmed.IndexOf(' ');
-                    string qualified = spacePos < 1 ? trimmed.Substring(1) : trimmed.Substring(1, spacePos - 1);
-                    ValueTuple<string,string> ID = Directives.GetIDFromLocalizedQualified(
-                        CompilerSettings.LanguageCode,
-                        CompilerSettings.NamespaceSeparator,
-                        qualified
-                    );
-                    IntRef ii = new IntRef(i);
-                    Directives
-                         .GetEntry(ID.Item1, ID.Item2)
-                        ?.Invoke(this, y1CodeSplit, result, ii, Directives.GetState(ID.Item1, ID.Item2) ?? false);
-                    i = ii.Value;
-                }
-                else
+                else if (trimmed[0] != '?')
                 {
                     result.Add(trimmed);
                 }
@@ -463,47 +298,5 @@ namespace Kronosta.Language.Y1
             return result;
         }
 
-        public List<string> QuestionMarkBracketSubstitution(List<string> input)
-        {
-            List<string> result = new List<string>();
-            for (int i = 0; i < input.Count; i++)
-            {
-                if (input[i].Trim() == "[<?>]")
-                {
-                    i++;
-                    String line = input[i].Trim();
-                    switch (line[0])
-                    {
-                        case 'Q':
-                            result.Add("?" + line.Substring(1));
-                            break;
-                        case 'W':
-                            try
-                            {
-                                int[] space = line.Substring(1).Split(',').Select(x => int.Parse(x)).Take(2).ToArray();
-                                i++;
-                                result.Add(
-                                    new String(Enumerable.Repeat(' ', space[0]).ToArray()) +
-                                    input[i].Trim() +
-                                    new String(Enumerable.Repeat(' ', space[0]).ToArray()));
-                            }
-                            catch
-                            {
-                                throw new PreprocessorException("Invalid whitespace specifier: " + line);
-                            }
-                            break;
-                        case 'G':
-                            String unescaped = Utils.GraveUnescape(line.Substring(1));
-                            result.Add(unescaped);
-                            break;
-                    }
-                }
-                else
-                {
-                    result.Add(input[i]);
-                }
-            }
-            return result;
-        }
     }
 }
