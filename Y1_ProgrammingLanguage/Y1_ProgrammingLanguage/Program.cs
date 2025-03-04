@@ -1011,6 +1011,7 @@ namespace Y1
         public static void Main(string[] args)
         {
             //Fix old versions having "multiple entry points"
+            bool logging = false;
             try 
             {
                 File.Delete("./compiled.cs");
@@ -1030,9 +1031,9 @@ namespace Y1
             }
             bool isLibrary = false;
             if (args.Contains("-lib"))
-            {
                 isLibrary = true;
-            }
+            if (args.Contains("-log"))
+                logging = true;
             Encoding encoding = Encoding.UTF8;
             try
             {
@@ -1061,6 +1062,7 @@ namespace Y1
                 }
             }
             Preprocessor pp = new Preprocessor();
+            if (logging) pp.DoLogging = true;
             string csCode = ConvertToCSharp(pp.Preprocess(y1CodeSplitBlankLinesRemoved), 0, true);
             int filenameSlashLastIndex = filename.LastIndexOf("/");
             string filenameLast = filename;

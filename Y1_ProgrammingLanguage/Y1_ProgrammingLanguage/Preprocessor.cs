@@ -11,6 +11,23 @@ namespace Kronosta.Language.Y1
 {
     public class Preprocessor
     {
+        public class PreprocessorException : Exception
+        {
+            public PreprocessorException()
+            {
+            }
+
+            public PreprocessorException(string message)
+                : base(message)
+            {
+            }
+
+            public PreprocessorException(string message, Exception inner)
+                : base(message, inner)
+            {
+            }
+        }
+
         public bool DoLogging { get; set; } = false;
         public List<string> Preprocess(List<string> y1CodeSplit)
         {
@@ -291,12 +308,52 @@ namespace Kronosta.Language.Y1
                 result = new List<string>();
                 goto TryAgain;
             }
+            result = QuestionMarkBracketSubstitution(result);
             if (DoLogging)
             {
                 Console.WriteLine("[[PREPROCESSOR OUTPUT]]");
                 foreach (var i in result)
                     Console.WriteLine(i);
                 Console.WriteLine("[[END OUTPUT]]");
+            }
+            return result;
+        }
+
+        public List<string> QuestionMarkBracketSubstitution(List<string> input)
+        {
+            List<string> result = new List<string>();
+            for (int i = 0; i < input.Count; i++)
+            {
+                if (input[i].Trim() == "[<?>]")
+                {
+                    i++;
+                    String line = input[i].Trim();
+                    switch (line[0])
+                    {
+                        case 'Q':
+                            result.Add("?" + line.Substring(1));
+                            break;
+                        case 'W':
+                            try
+                            {
+                                int[] space = line.Substring(1).Split(',').Select(x => int.Parse(x)).Take(2).ToArray();
+                                i++;
+                                result.Add(
+                                    new String(Enumerable.Repeat(' ', space[0]).ToArray()) +
+                                    input[i].Trim() +
+                                    new String(Enumerable.Repeat(' ', space[0]).ToArray()));
+                            }
+                            catch
+                            {
+                                throw new PreprocessorException("Invalid whitespace specifier: " + line);
+                            }
+                            break;
+                    }
+                }
+                else
+                {
+                    result.Add(input[i]);
+                }
             }
             return result;
         }

@@ -1,0 +1,13 @@
+@[Program
+  |/Main
+    C# - System.Console.WriteLine(,,
+    @",,
+    Hello!,,
+    [<?>]
+    Q Question mark at start of line.,,
+    [<?>]
+    W4,0
+    [<?>],,
+    ");
+  \|
+]@
