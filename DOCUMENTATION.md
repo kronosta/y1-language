@@ -326,11 +326,12 @@ The `?!` -> `?` replacement works a bit differently, as it happens at the `?Call
 and not at the define. This means that `?!2?!` can be used to encode `?2?`, for example.
 
 #### `?Call <name> !!arg1!!arg2!!arg3!!etc.`
-Calls the long macro with the name. Currently it is not possible to encode `!!` in a parameter, or `!` at the beginning or end of a parameter.
-I plan to fix this with grave escapes in the parameters.
+Calls the long macro with the name. Grave escapes are supported
+for inserting exclamation points.
 
 #### `?DefineShort <name> <content>`
-Defines a short macro. They have the same `?n?` substitution and can be called with `[[name !!arg1!!arg2!!etc.]]`
+Defines a short macro. They have the same `?n?` substitution and can be called with `[[name !!arg1!!arg2!!etc.]]`.
+Grave escapes are supported for inserting exclamation points.
 Note that short macro calls cannot be deferred with `?Defer`, and the substitution applies immediately across the entire remaining code,
 including within strings and comments.
 
