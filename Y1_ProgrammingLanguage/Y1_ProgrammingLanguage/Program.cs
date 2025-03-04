@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using System.Text;
 
-namespace Y1
+namespace Kronosta.Language.Y1
 {
     public class Compiler
     {
@@ -17,66 +16,6 @@ namespace Y1
             standardY1Libs = new List<string>();
         public static string framework = "net6.0", platform = "anycpu", sdk = "Microsoft.NET.Sdk";
         public static Random rand = new Random((int)DateTime.Now.ToBinary());
-
-        public static string GraveEscape(string escaped)
-        {
-            escaped = escaped
-                .Replace("`E", "!")
-                .Replace("`S", " ")
-                .Replace("`N", "\n")
-                .Replace("`T", "\t")
-                .Replace("`R", "\r");
-            string total = "";
-            for (int i = 0; i < escaped.Length; i++)
-            {
-                if (escaped[i] == '`')
-                {
-                    i++;
-                    if (escaped[i] == 'U')
-                    {
-                        string hexCode = "0x";
-                        i++;
-                        hexCode += escaped[i];
-                        i++;
-                        hexCode += escaped[i];
-                        i++;
-                        hexCode += escaped[i];
-                        i++;
-                        hexCode += escaped[i];
-                        total += "" + (char)(Convert.ToInt32(hexCode, 16));
-                    }
-                    else if (escaped[i] == 'G')
-                    {
-                        total += "`";
-                    }
-                }
-                else
-                {
-                    total += escaped[i];
-                }
-            }
-            return total;
-        }
-        public static string ToIdentifier(string unprocessed)
-        {
-            if (unprocessed.Contains('.'))
-            {
-                unprocessed = unprocessed.Substring(0, unprocessed.LastIndexOf('.'));
-            }
-            string result = "";
-            for (int i = 0; i < unprocessed.Length; i++)
-            {
-                if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_".Contains(unprocessed[i]))
-                {
-                    result += unprocessed[i];
-                }
-                else if (i > 0 && "0123456789".Contains(unprocessed[i]))
-                {
-                    result += unprocessed[i];
-                }
-            }
-            return result;
-        }
 
         public static string HandleYen(string match, string soFar)
         {
@@ -104,7 +43,7 @@ namespace Y1
                         .Item1
                         .Trim()
                         .Split(' ')
-                        .Select(x => GraveEscape(x))
+                        .Select(x => Utils.GraveUnescape(x))
                         .ToArray();
                     Stack<string> stack = new Stack<string>();
                     foreach (string piece in lifoPieces)
@@ -177,11 +116,11 @@ namespace Y1
                 }
                 if (command != "")
                 {
-                    string[] commandParts = command.Split(' ').Select(x => GraveEscape(x)).ToArray();
+                    string[] commandParts = command.Split(' ').Select(x => Utils.GraveUnescape(x)).ToArray();
                     ProcessStartInfo psi = new ProcessStartInfo();
                     psi.RedirectStandardOutput = true;
-                    psi.FileName = GraveEscape(commandParts[0]);
-                    psi.Arguments = GraveEscape(commandParts[1]);
+                    psi.FileName = Utils.GraveUnescape(commandParts[0]);
+                    psi.Arguments = Utils.GraveUnescape(commandParts[1]);
                     Process process = new Process();
                     process.StartInfo = psi;
                     process.Start();
@@ -325,7 +264,7 @@ namespace Y1
                     Main(new string[] { name });
 
                     ProcessStartInfo info = new ProcessStartInfo();
-                    info.FileName = ToIdentifier(name) + "/" + name + ".exe";
+                    info.FileName = Utils.ToIdentifier(name) + "/" + name + ".exe";
                     info.RedirectStandardInput = true;
                     info.RedirectStandardOutput = true;
                     info.CreateNoWindow = true;
@@ -349,7 +288,7 @@ namespace Y1
                         ) ?? new string[]{}
                     );
                     result.AddRange(rewritten ?? new List<string>());
-                    Directory.Delete(ToIdentifier(name), true);
+                    Directory.Delete(Utils.ToIdentifier(name), true);
                     File.Delete(name);
                     File.Delete($"{name}.csproj");
                     File.Delete($"{name}.~cs");
@@ -415,14 +354,14 @@ namespace Y1
                     for (int j = 1; j < contents.Length; j++)
                     {
                         result.Add(
-                          GraveEscape(contents[j])
+                          Utils.GraveUnescape(contents[j])
                         );
                     }
                 }
                 else if (trimmed.Split(' ')[0] == "?User_Diagnostic")
                 {
                     string contents = trimmed.Split(' ')[1];
-                    Console.Write(GraveEscape(contents));
+                    Console.Write(Utils.GraveUnescape(contents));
                 }
                 else if (trimmed.Split(' ')[0] == "?User_Read")
                 {
@@ -431,7 +370,7 @@ namespace Y1
                 else if (trimmed.Split(' ')[0] == "?User_IfChar")
                 {
                     char inputChar = input[0];
-                    char test = GraveEscape(trimmed.Split(' ')[1])[0];
+                    char test = Utils.GraveUnescape(trimmed.Split(' ')[1])[0];
                     List<string> ifContents = new List<string>();
                     List<string> elseContents = new List<string>();
                     i++;
@@ -656,7 +595,7 @@ namespace Y1
                     }
                     else if (trimmed.StartsWith("@["))
                     {
-                        csCode += "public class " + ToIdentifier(trimmed.Substring(2)) + "\n";
+                        csCode += "public class " + Utils.ToIdentifier(trimmed.Substring(2)) + "\n";
                         csCode += "{\n";
                     }
                     //multi-line comment starter
@@ -686,23 +625,23 @@ namespace Y1
         System.Reflection.Emit.TypeBuilder, 
         System.Collections.Generic.Dictionary<string, System.Type>
     >(y1__arg.Item1, y1__arg.Item2, y1__mb_" + depth + ".DefineType(" +
-                            "\"" + ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
+                            "\"" + Utils.ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
                             "System.Reflection.TypeAttributes.Public" +
                             "), y1__arg.Item4));\n";
                         csCode += "}\n";
                     }
                     else if (trimmed.Split(' ')[0] == "DefineMethod")
                     {
-                        csCode += "System.Reflection.Emit.MethodBuilder " + ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineMethod(" +
-                            "\"" + ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
+                        csCode += "System.Reflection.Emit.MethodBuilder " + Utils.ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineMethod(" +
+                            "\"" + Utils.ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
                             "System.Reflection.MethodAttributes.Public, " +
                             "typeof(void), " +
                             "System.Type.EmptyTypes" +
                             ");\n";
-                        csCode += "y1__il_" + depth + " = " + ToIdentifier(trimmed.Split(' ')[2]) + ".GetILGenerator();\n";
+                        csCode += "y1__il_" + depth + " = " + Utils.ToIdentifier(trimmed.Split(' ')[2]) + ".GetILGenerator();\n";
                         csCode += "{\n";
                         mode = "methodbuild";
-                        modeArg = ToIdentifier(trimmed.Split(' ')[2]);
+                        modeArg = Utils.ToIdentifier(trimmed.Split(' ')[2]);
                     }
                     else if (trimmed == "FinishType")
                     {
@@ -726,7 +665,7 @@ namespace Y1
                     else if (trimmed.Split(' ')[0] == "CreateObject")
                     {
                         csCode += "y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item2.Add(" +
-                            "\"" + ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
+                            "\"" + Utils.ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
                             "System.Activator.CreateInstance(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item1, null" +
                             "));\n";
                     }
@@ -734,7 +673,7 @@ namespace Y1
                     {
                         csCode += "y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item1.GetMethod(\"" +
                             trimmed.Split(' ')[1] + "\").Invoke(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item2[\"" +
-                            ToIdentifier(trimmed.Split(' ')[2]) + "\"], null);\n";
+                            Utils.ToIdentifier(trimmed.Split(' ')[2]) + "\"], null);\n";
                     }
                     else if (trimmed.Split(' ')[0] == "Roll")
                     {
@@ -814,8 +753,8 @@ namespace Y1
                     }
                     else if (trimmed.Split(' ')[0] == "DefineField")
                     {
-                        csCode += "System.Reflection.Emit.FieldBuilder " + ToIdentifier(trimmed.Split(' ')[1]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineField(\"" +
-                            ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
+                        csCode += "System.Reflection.Emit.FieldBuilder " + Utils.ToIdentifier(trimmed.Split(' ')[1]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineField(\"" +
+                            Utils.ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
                             trimmed.Split(' ')[2] + ", System.Reflection.FieldAttributes.Public);\n";
                     }
                     else if (trimmed.Split(' ')[0] == "DefineParamMethod")
@@ -832,20 +771,20 @@ namespace Y1
                             }
                             paramTypes += y1CodeSplit[i].Trim();
                         }
-                        csCode += "System.Reflection.Emit.MethodBuilder " + ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineMethod(" +
-                           "\"" + ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
+                        csCode += "System.Reflection.Emit.MethodBuilder " + Utils.ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineMethod(" +
+                           "\"" + Utils.ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
                            "System.Reflection.MethodAttributes.Public, " +
                            "typeof(void), " +
                            paramTypes +
                            ");\n";
-                        csCode += "y1__il_" + depth + " = " + ToIdentifier(trimmed.Split(' ')[2]) + ".GetILGenerator();\n";
+                        csCode += "y1__il_" + depth + " = " + Utils.ToIdentifier(trimmed.Split(' ')[2]) + ".GetILGenerator();\n";
                         csCode += "{\n";
                         mode = "methodbuild";
-                        modeArg = ToIdentifier(trimmed.Split(' ')[2]);
+                        modeArg = Utils.ToIdentifier(trimmed.Split(' ')[2]);
                     }
                     else if (trimmed.Split(' ')[0] == "LoadField")
                     {
-                        csCode += "System.Reflection.FieldInfo " + ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item1.GetField(\"" +
+                        csCode += "System.Reflection.FieldInfo " + Utils.ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item1.GetField(\"" +
                             trimmed.Split(' ')[1] + "\");\n";
                     }
                     else if (trimmed.Split(' ')[0] == "DefineComplexMethod")
@@ -894,18 +833,18 @@ namespace Y1
                         {
                             methodAttributes += " | System.Reflection.MethodAttributes.Final";
                         }
-                        csCode += "System.Reflection.Emit.MethodBuilder " + ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineMethod(" +
-                           "\"" + ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
+                        csCode += "System.Reflection.Emit.MethodBuilder " + Utils.ToIdentifier(trimmed.Split(' ')[2]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineMethod(" +
+                           "\"" + Utils.ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
                            methodAttributes + ", " +
                            returnType + ", " +
                            types +
                            ");\n";
                         if (!y1CodeSplit[i].Contains("abstract"))
                         {
-                            csCode += "y1__il_" + depth + " = " + ToIdentifier(trimmed.Split(' ')[2]) + ".GetILGenerator();\n";
+                            csCode += "y1__il_" + depth + " = " + Utils.ToIdentifier(trimmed.Split(' ')[2]) + ".GetILGenerator();\n";
                             csCode += "{\n";
                             mode = "methodbuild";
-                            modeArg = ToIdentifier(trimmed.Split(' ')[2]);
+                            modeArg = Utils.ToIdentifier(trimmed.Split(' ')[2]);
                         }
                     }
                     else if (trimmed.Split(' ')[0] == "DefineComplexField")
@@ -924,8 +863,8 @@ namespace Y1
                         {
                             fieldAttributes += " | System.Reflection.FieldAttributes.Static";
                         }
-                        csCode += "System.Reflection.Emit.FieldBuilder " + ToIdentifier(trimmed.Split(' ')[1]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineField(\"" +
-                            ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
+                        csCode += "System.Reflection.Emit.FieldBuilder " + Utils.ToIdentifier(trimmed.Split(' ')[1]) + " = y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item3.DefineField(\"" +
+                            Utils.ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
                             trimmed.Split(' ')[2] + ", " + fieldAttributes + ");\n";
                     }
                     else if (trimmed.Split(' ')[0] == "Subclass")
@@ -980,19 +919,19 @@ namespace Y1
                         {
                             methodAttributes += " | System.Reflection.MethodAttributes.Final";
                         }
-                        csCode += "System.Reflection.Emit.MethodBuilder " + ToIdentifier(trimmed.Split(' ')[3]) + " = ((System.Reflection.Emit.TypeBuilder)(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1]" +
+                        csCode += "System.Reflection.Emit.MethodBuilder " + Utils.ToIdentifier(trimmed.Split(' ')[3]) + " = ((System.Reflection.Emit.TypeBuilder)(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1]" +
                            ".Item4[\"" + trimmed.Split(' ')[1] + "\"])).DefineMethod(" +
-                           "\"" + ToIdentifier(trimmed.Split(' ')[2]) + "\", " +
+                           "\"" + Utils.ToIdentifier(trimmed.Split(' ')[2]) + "\", " +
                            methodAttributes + ", " +
                            returnType + ", " +
                            types +
                            ");\n";
                         if (!y1CodeSplit[i].Contains("abstract"))
                         {
-                            csCode += "y1__il_" + depth + " = " + ToIdentifier(trimmed.Split(' ')[3]) + ".GetILGenerator();\n";
+                            csCode += "y1__il_" + depth + " = " + Utils.ToIdentifier(trimmed.Split(' ')[3]) + ".GetILGenerator();\n";
                             csCode += "{\n";
                             mode = "methodbuild";
-                            modeArg = ToIdentifier(trimmed.Split(' ')[3]);
+                            modeArg = Utils.ToIdentifier(trimmed.Split(' ')[3]);
                         }
                     }
                     else if (trimmed.Split(' ')[0] == "DefineSubclassField")
@@ -1011,9 +950,9 @@ namespace Y1
                         {
                             fieldAttributes += " | System.Reflection.FieldAttributes.Static";
                         }
-                        csCode += "System.Reflection.Emit.FieldBuilder " + ToIdentifier(trimmed.Split(' ')[2]) + " = ((System.Reflection.Emit.TypeBuilder)(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item4[\"" +
+                        csCode += "System.Reflection.Emit.FieldBuilder " + Utils.ToIdentifier(trimmed.Split(' ')[2]) + " = ((System.Reflection.Emit.TypeBuilder)(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item4[\"" +
                             trimmed.Split(' ')[1] + "\"])).DefineField(\"" +
-                            ToIdentifier(trimmed.Split(' ')[2]) + "\", " +
+                            Utils.ToIdentifier(trimmed.Split(' ')[2]) + "\", " +
                             trimmed.Split(' ')[3] + ", " + fieldAttributes + ");\n";
                     }
                     else if (trimmed.Split(' ')[0] == "FinishSubclass")
@@ -1025,7 +964,7 @@ namespace Y1
                     else if (trimmed.Split(' ')[0] == "CreateSubclassObject")
                     {
                         csCode += "y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item2.Add(\"" +
-                            ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
+                            Utils.ToIdentifier(trimmed.Split(' ')[1]) + "\", " +
                             "System.Activator.CreateInstance(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item4[\"" + trimmed.Split(' ')[2] + "\"], null" +
                             "));\n";
                     }
@@ -1033,7 +972,7 @@ namespace Y1
                     {
                         csCode += "y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item4[\"" + trimmed.Split(' ')[3] + "\"].GetMethod(\"" +
                             trimmed.Split(' ')[1] + "\").Invoke(y1__stack_" + depth + "[y1__stack_" + depth + ".Count - 1].Item2[\"" +
-                            ToIdentifier(trimmed.Split(' ')[2]) + "\"], null);\n";
+                            Utils.ToIdentifier(trimmed.Split(' ')[2]) + "\"], null);\n";
                     }
                     else if (trimmed.Split(' ')[0] == "Summation")
                     {
@@ -1437,16 +1376,16 @@ namespace Y1
             };
             Process? p = Process.Start("dotnet", new string[]{"build", csprojName});
             p?.WaitForExit();
-            if (Directory.Exists(ToIdentifier(filenameLast)))
+            if (Directory.Exists(Utils.ToIdentifier(filenameLast)))
             {
-                Directory.Delete(ToIdentifier(filenameLast), true);
+                Directory.Delete(Utils.ToIdentifier(filenameLast), true);
             }
-            Directory.CreateDirectory(ToIdentifier(filenameLast));
-            try { File.Move($"bin/Debug/{framework}/{filenameLast}.deps.json",          $"{ToIdentifier(filenameLast)}/{filenameLast}.deps.json"); } catch {}
-            try { File.Move($"bin/Debug/{framework}/{filenameLast}.dll",                $"{ToIdentifier(filenameLast)}/{filenameLast}.dll"); } catch {}
-            try { File.Move($"bin/Debug/{framework}/{filenameLast}.exe",                $"{ToIdentifier(filenameLast)}/{filenameLast}.exe"); } catch {}
-            try { File.Move($"bin/Debug/{framework}/{filenameLast}.pdb",                $"{ToIdentifier(filenameLast)}/{filenameLast}.pdb"); } catch {}
-            try { File.Move($"bin/Debug/{framework}/{filenameLast}.runtimeconfig.json", $"{ToIdentifier(filenameLast)}/{filenameLast}.runtimeconfig.json"); } catch {}
+            Directory.CreateDirectory(Utils.ToIdentifier(filenameLast));
+            try { File.Move($"bin/Debug/{framework}/{filenameLast}.deps.json",          $"{Utils.ToIdentifier(filenameLast)}/{filenameLast}.deps.json"); } catch {}
+            try { File.Move($"bin/Debug/{framework}/{filenameLast}.dll",                $"{Utils.ToIdentifier(filenameLast)}/{filenameLast}.dll"); } catch {}
+            try { File.Move($"bin/Debug/{framework}/{filenameLast}.exe",                $"{Utils.ToIdentifier(filenameLast)}/{filenameLast}.exe"); } catch {}
+            try { File.Move($"bin/Debug/{framework}/{filenameLast}.pdb",                $"{Utils.ToIdentifier(filenameLast)}/{filenameLast}.pdb"); } catch {}
+            try { File.Move($"bin/Debug/{framework}/{filenameLast}.runtimeconfig.json", $"{Utils.ToIdentifier(filenameLast)}/{filenameLast}.runtimeconfig.json"); } catch {}
         }
     }
 }
