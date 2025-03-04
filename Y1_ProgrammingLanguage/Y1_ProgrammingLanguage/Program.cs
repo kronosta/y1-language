@@ -17,137 +17,6 @@ namespace Kronosta.Language.Y1
         public static string framework = "net6.0", platform = "anycpu", sdk = "Microsoft.NET.Sdk";
         public static Random rand = new Random((int)DateTime.Now.ToBinary());
 
-        public static string HandleYen(string match, string soFar)
-        {
-            string result = soFar;
-            string matchContents = match;
-            if (matchContents[1] == '\\')
-            {
-                char value = (char)int.Parse(matchContents.Substring(2, matchContents.Length - 3));
-                result += value;
-            }
-            else if (matchContents[1] == '$')
-            {
-                string contents = matchContents.Substring(2, matchContents.Length - 3);
-                Tuple<string, string>[] conditionedCommands =
-                    contents.Split(";")
-                    .Select(x => x.Trim())
-                    .Select(x => new Tuple<string, string>(x.Split(':')[0], x.Split(':')[1]))
-                    .ToArray();
-                string command = "";
-                int i = 0;
-                while (true)
-                {
-                    if (i >= conditionedCommands.Length) break;
-                    string[] lifoPieces = conditionedCommands[i]
-                        .Item1
-                        .Trim()
-                        .Split(' ')
-                        .Select(x => Utils.GraveUnescape(x))
-                        .ToArray();
-                    Stack<string> stack = new Stack<string>();
-                    foreach (string piece in lifoPieces)
-                    {
-                        if (piece == "@FileExists")
-                        {
-                            stack.Push(File.Exists(stack.Pop()) ? "true" : "false");
-                        }
-                        else if (piece == "@OSMatch")
-                        {
-                            OperatingSystem os = Environment.OSVersion;
-                            string osString = os.Platform.ToString() + "-" + os.Version.ToString();
-                            stack.Push(Regex.IsMatch(osString, stack.Pop()) ? "true" : "false");
-                        }
-                        else if (piece == "@OSVersionMatch")
-                        {
-                            Version version = Environment.OSVersion.Version;
-                            string matcher = stack.Pop();
-                            Version matcherVersion = new Version(matcher.Substring(1));
-                            if (matcher[0] == '=')
-                            {
-                                stack.Push(version == matcherVersion ? "true" : "false");
-                            }
-                            else if (matcher[0] == '>')
-                            {
-                                stack.Push(version > matcherVersion ? "true" : "false");
-                            }
-                            else if (matcher[0] == '<')
-                            {
-                                stack.Push(version < matcherVersion ? "true" : "false");
-                            }
-                            if (matcher[0] == '{')
-                            {
-                                stack.Push(version <= matcherVersion ? "true" : "false");
-                            }
-                            if (matcher[0] == '}')
-                            {
-                                stack.Push(version >= matcherVersion ? "true" : "false");
-                            }
-                        }
-                        else if (piece == "@And")
-                        {
-                            string a = stack.Pop();
-                            string b = stack.Pop();
-                            stack.Push((a == "true" && b == "true") ? "true" : "false");
-                        }
-                        else if (piece == "@Or")
-                        {
-                            string a = stack.Pop();
-                            string b = stack.Pop();
-                            stack.Push((a == "true" || b == "true") ? "true" : "false");
-                        }
-                        else if (piece == "@Not")
-                        {
-                            string a = stack.Pop();
-                            stack.Push(a == "true" ? "false" : "true");
-                        }
-                        else
-                        {
-                            stack.Push(piece);
-                        }
-                    }
-                    string boolean = stack.Pop();
-                    if (boolean == "true")
-                    {
-                        command = conditionedCommands[i].Item2.Trim();
-                        break;
-                    }
-                    i++;
-                }
-                if (command != "")
-                {
-                    string[] commandParts = command.Split(' ').Select(x => Utils.GraveUnescape(x)).ToArray();
-                    ProcessStartInfo psi = new ProcessStartInfo();
-                    psi.RedirectStandardOutput = true;
-                    psi.FileName = Utils.GraveUnescape(commandParts[0]);
-                    psi.Arguments = Utils.GraveUnescape(commandParts[1]);
-                    Process process = new Process();
-                    process.StartInfo = psi;
-                    process.Start();
-                    StreamReader reader = process.StandardOutput;
-                    string output = reader.ReadToEnd();
-                    process.WaitForExit();
-                    result += output;
-                }
-            }
-            return result;
-        }
-
-        public static string Prepreprocess(string unpp)
-        {
-            string result = "";
-            Regex yenRegex = new Regex("¥.[^\\]]*]");
-            MatchCollection yenMatches = yenRegex.Matches(unpp);
-            foreach (Match yenMatch in yenMatches) Console.WriteLine("PPP Match: " + yenMatch.Value);
-            string[] withoutYen = yenRegex.Split(unpp);
-            for (int i = 0; i < withoutYen.Length; i++)
-            {
-                result += withoutYen[i];
-                if (i < yenMatches.Count) result = HandleYen(yenMatches[i].Value, result);
-            }
-            return result;
-        }
-
         public static string ConvertToCSharp(
             List<string> y1CodeSplit, 
             int depth, 
@@ -1050,8 +919,8 @@ namespace Y1
                 Environment.Exit(1);
             }
             Encoding.UTF8.GetString(Encoding.Convert(encoding, Encoding.UTF8, encoding.GetBytes(y1Code)));
-            if (y1Code.StartsWith("^^$")) y1Code = y1Code.Substring(3).Replace("###Yen;", "¥");
-            y1Code = Prepreprocess(y1Code);
+            Preprocessor pp = new Preprocessor();
+            y1Code = pp.Prepreprocess(y1Code);
             string[] y1CodeSplitBlankLines = y1Code.Split('\n', '\r', '\f', '\v');
             List<string> y1CodeSplitBlankLinesRemoved = new List<string>();
             foreach (string i in y1CodeSplitBlankLines)
@@ -1061,7 +930,7 @@ namespace Y1
                     y1CodeSplitBlankLinesRemoved.Add(i);
                 }
             }
-            Preprocessor pp = new Preprocessor();
+            
             if (logging) pp.DoLogging = true;
             string csCode = ConvertToCSharp(pp.Preprocess(y1CodeSplitBlankLinesRemoved), 0, true);
             int filenameSlashLastIndex = filename.LastIndexOf("/");
