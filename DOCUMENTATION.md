@@ -21,9 +21,6 @@ if the line ends with the line continuation `,,`. Blank lines are completely ign
 Windows line sequences composed of both a Carriage Return and a Linefeed are treated as having a blank line in the middle, 
 but blank lines are pretty much removed from the stored-in-memory source-code before it is even processed into C# by the compiler.
 
-## Imports
-The namespaces `System`, `System.Collections.Generic`, `System.Reflection`, `System.Reflection.Emit`, and `System.Threading.Tasks` used to be automatically imported, causing conflicts with any imported namespace that shared type names and requiring you to fully qualify every name from that namespace. This has been fixed, so now all internally used libraries are fully qualified. This does mean, however, that any programs that use any of those namespaces (such as ones that print to the console), will need to have the namespace added to the `<IMPORTS>` section, as discussed in the Starting Lines section.
-
 ## Starting Lines
 There is a natural progression of beginning sections (although this only applies after the preprocessor is run). All elements are optional.
 
