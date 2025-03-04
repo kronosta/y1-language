@@ -354,6 +354,11 @@ Note that these methods will not apply the short macro later (it has already bee
 In order to apply it, you will also need to defer another copy of the `?DefineShort` command.
 The best use of these methods is simply to escape the short macro so it can be used literally in the code.
 
+Also note that `?ShortMacro`, due to the way it works internally, will immediately restart the preprocessor cycle
+with the macro applied to everything after this call, and all directives ignored until the new cycle.
+This means that the short macro can be used in other directives, but it also means that the later directives will effectively have
+one extra `?Defer` and the earlier ones will run again before getting to this point.
+
 A weird trick if you want comments on the same line as other code is to use:
 ```
 ?DefineShort Comment ?1?
