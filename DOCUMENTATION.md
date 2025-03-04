@@ -304,6 +304,30 @@ The following escape sequences are available:
 - `` `R `` : carriage return
 - `` `Uxxxx `` : hexadecimal unicode escape
 
+## Post-processing
+Preprocessor directives have a tendency to trim whitespace off the input,
+which in very specific situations might matter (plus I want my preprocessor to
+be more general-purpose). Also, the way it was previously set up, question marks
+could never be the first non-whitespace character in a line.
+
+To fix this, an extra step gets applied after all Preprocessing cycles finish and
+no lines are left starting with question marks. This step will also be applied inside
+of `?PreprocessorEnclose` blocks.
+
+When a line contains only `[<?>]` surrounded by optional whitespace, it takes the
+first non-whitespace character of the next line to decide what to do:
+- `Q` - Replace the Q with a question mark
+- `W` - The rest of the line should be two comma-separated integers,
+  the first being the number of leading spaces and the second being the number of trailing spaces.
+  Consume one more line and apply the whitespace.
+
+To escape `[<?>]`, you can use W since it treats the third line literally:
+```
+[<?>]
+W0,0
+[<?>]
+```
+
 #### `?File <filename>`
   Reads the file into the source code for the next cycle. (Somewhat like #include in C/C++).
 
