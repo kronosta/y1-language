@@ -28,13 +28,15 @@ namespace Kronosta.Language.Y1
             }
         }
 
+        public Dictionary<string, List<string>> macros { get; set; } =
+            new Dictionary<string, List<string>>();
+
         public bool DoLogging { get; set; } = false;
         public List<string> Preprocess(List<string> y1CodeSplit)
         {
             string input = "";
             List<string> filesToDelete = new List<string>();
             List<string> result = new List<string>();
-            var macros = new Dictionary<string, List<string>>();
         TryAgain:
             for (int i = 0; i < y1CodeSplit.Count; i++)
             {
@@ -233,7 +235,8 @@ namespace Kronosta.Language.Y1
                         contents.Add(y1CodeSplit[i].Replace("?!", "?"));
                         i++;
                     }
-                    List<string> innerResult = Preprocess(contents);
+                    Preprocessor callee = new Preprocessor();
+                    List<string> innerResult = callee.Preprocess(contents);
                     result.AddRange(innerResult);
                 }
                 else if (trimmed.Split(' ')[0] == "?CondenseLines")

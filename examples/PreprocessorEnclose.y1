@@ -1,0 +1,14 @@
+?Define Test
+  :C# - System.Console.WriteLine("hello");
+?
+
+@[Program
+  |/Main
+    ?Call Test
+    ?PreprocessorEnclose
+      ?Call Test
+      C# - System.Console.WriteLine("middle");
+    ?
+    ?Call Test
+  \|
+]@
