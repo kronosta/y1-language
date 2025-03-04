@@ -317,6 +317,8 @@ first non-whitespace character of the next line to decide what to do:
 - `W` - The rest of the line should be two comma-separated integers,
   the first being the number of leading spaces and the second being the number of trailing spaces.
   Consume one more line and apply the whitespace.
+- `G` - The most powerful out of all of them, it uses the rest of the line as a grave-escaped string,
+  allowing you to mix tabs, spaces, question marks, odd Unicode characters, etc.
 
 To escape `[<?>]`, you can use W since it treats the third line literally:
 ```

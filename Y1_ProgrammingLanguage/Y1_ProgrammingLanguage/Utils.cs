@@ -12,6 +12,7 @@ namespace Kronosta.Language.Y1
         {
             escaped = escaped
                 .Replace("`E", "!")
+                .Replace("`Q", "?")
                 .Replace("`S", " ")
                 .Replace("`N", "\n")
                 .Replace("`T", "\t")

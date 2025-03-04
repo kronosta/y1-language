@@ -348,6 +348,10 @@ namespace Kronosta.Language.Y1
                                 throw new PreprocessorException("Invalid whitespace specifier: " + line);
                             }
                             break;
+                        case 'G':
+                            String unescaped = Utils.GraveUnescape(line.Substring(1));
+                            result.Add(unescaped);
+                            break;
                     }
                 }
                 else

@@ -1,0 +1,12 @@
+@[Program
+  |/Main
+    C# - System.Console.WriteLine(,,
+    @",,
+    Hello!,,
+    [<?>]
+    G`Q Question mark at start of line.,,
+    [<?>]
+    G`S`S`S`S[<?>],,
+    ");
+  \|
+]@
