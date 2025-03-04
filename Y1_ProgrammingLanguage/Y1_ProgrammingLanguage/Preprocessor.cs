@@ -10,6 +10,7 @@ namespace Kronosta.Language.Y1
 {
     public partial class Preprocessor
     {
+        #region Helper classes
         public class PreprocessorException : Exception
         {
             public PreprocessorException()
@@ -41,14 +42,13 @@ namespace Kronosta.Language.Y1
                 IntRef lineIndex,
                 object state
             );
+        #endregion
 
-        public IDictionary<string, List<string>> Macros { get; set; }
-        public CompilerSettings CompilerSettings { get; set; }
-
+        #region Pre(1)processing
+        public IDictionary<string, List<string>> Macros;
+        public CompilerSettings CompilerSettings;
         public readonly Registry<Directive> Directives;
-
-        public bool DoLogging { get; set; } = false;
-
+        public bool DoLogging = false;
         public IDictionary<string, object> customState = new Dictionary<string, object>();
 
         public Preprocessor()
@@ -506,14 +506,15 @@ namespace Kronosta.Language.Y1
             }
             return result;
         }
+        #endregion
 
+        #region Prepre(2)processing
         public string Prepreprocess(string unpp)
         {
             if (unpp.StartsWith("^^$")) unpp = unpp.Substring(3).Replace("###Yen;", "¥");
             string result = "";
             Regex yenRegex = new Regex("¥.[^\\]]*]");
             MatchCollection yenMatches = yenRegex.Matches(unpp);
-            //foreach (Match yenMatch in yenMatches) Console.WriteLine("PPP Match: " + yenMatch.Value);
             string[] withoutYen = yenRegex.Split(unpp);
             for (int i = 0; i < withoutYen.Length; i++)
             {
@@ -638,5 +639,6 @@ namespace Kronosta.Language.Y1
             }
             return result;
         }
+        #endregion
     }
 }
