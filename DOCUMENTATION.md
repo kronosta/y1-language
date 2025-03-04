@@ -314,16 +314,20 @@ The following escape sequences are available:
 ?
 ```
 Defines the long macro with the name as the block. On each line, everything preceding and including the first colon is considered a comment.
-When called, `?n?` will be replaced with the nth argument. (Note that this is handled before the `?!` -> `?` replacement, so `?!1?!` behaves identically to `?1?`. Encoding `?n?` literally is unfortunately impossible in `?Define` currently, you'll need to encode it in every `?Call` that uses it. To encode `?!n?!` just put `?!!n?!!`.)
+When called, `?n?` will be replaced with the nth argument.
 For example:
 ```
 ?Define Print
-  Print the line :C# - Console.WriteLine("?!1?!")
+  Print the line :C# - Console.WriteLine("?1?")
 ?
 ```
 
+The `?!` -> `?` replacement works a bit differently, as it happens at the `?Call`
+and not at the define. This means that `?!2?!` can be used to encode `?2?`, for example.
+
 #### `?Call <name> !!arg1!!arg2!!arg3!!etc.`
 Calls the long macro with the name. Currently it is not possible to encode `!!` in a parameter, or `!` at the beginning or end of a parameter.
+I plan to fix this with grave escapes in the parameters.
 
 #### `?DefineShort <name> <content>`
 Defines a short macro. They have the same `?n?` substitution and can be called with `[[name !!arg1!!arg2!!etc.]]`
