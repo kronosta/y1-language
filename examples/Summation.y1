@@ -4,7 +4,7 @@
 
 @[SummationTest
   |/Main
-    Summation 1 10 i
+    Summation 1 10 i int
       C# - Console.WriteLine($"Stage {i}: {i * 5}");
       C# - return i * 5;
     EndSummation  

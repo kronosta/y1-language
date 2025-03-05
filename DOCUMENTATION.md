@@ -14,6 +14,34 @@ superclasses have a link to their subclasses, and subclasses are only accessible
 Type-oriented programming also focuses on defining types dynamically for small differences in storage, 
 rather than generic types or fields.
 
+# Invocation
+Y1's command-line has never been documented before, but I completely redid it from scratch recently after
+making Y1's compiler usable in memory using Roslyn to compile the resulting C#. This means that .NET Framework is
+no longer officially supported, but there is a "Legacy" compiler that works mostly how it used to with a few
+language additions. New features will not be added to these, I implemented the new system to make it more
+modular and customizable.
+
+Anyway, the way Y1's command line interface parses arguments is the following:
+- If there are exactly two arguments and the first argument is exactly `@@FILE`, the second argument is
+  taken as a file path to load arguments from, one per line.
+- Otherwise, all recognized arguments begin with a forward slash `/`, then a name, then an equals sign `=`, and then
+  a value. If multiple arguments appear with the same name, it's treated as a list of arguments which may be interpreted
+  in varying ways.
+
+Currently, the options are:
+- `/Source=[File]`, a Y1 source code file. Multiple `/Source` arguments are meant to compile multiple files into one assembly,
+though I haven't actually tested that. There must always be at least one `/Source` argument.
+- `/Name=[name]`, specifies the assembly name, as well as the name of the folder the assembly gets put in.
+  It will silently fall back to the default if you specify this flag more than once, same deal if you omit it.
+  The default is `TestY1`.
+- `/Version=[tfm];[framework name];[framework version]`, this option doesn't currently specify the .NET target,
+  but it does affect the generated `runtimeconfig.json` which defaults to .NET 8.0 if you don't specify.
+
+After invocation, the dll will be compiled and stored into `[Name]/[Name].dll` in the current directory
+(the `[Name]` directory will be created if it doesn't already exist). A file called `[Name]/[Name].runtimeconfig.json`
+is also generated, this is necessary to run the dll with `dotnet` (the program doesn't generate an executable
+so you have to use the .NET tool for now).
+
 # Y1 Syntax and Semantics
 A newline sequence is one of: Linefeed, Carriage Return, Form Feed, Vertical Tab.
 Each command is normally on its own line, although they can be split across multiple lines in most circumstances 
@@ -25,13 +53,17 @@ but blank lines are pretty much removed from the stored-in-memory source-code be
 There is a natural progression of beginning sections (although this only applies after the preprocessor is run). All elements are optional.
 
 1. A line containing `<ATTRIBUTES>` denotes some special content until a line containing `<END_ATTRIBUTES>`.
-Inside `Framework:`, `Platform:`, or `SDK:` followed by something denote the corresponding info in the .csproj file
-(There are currently no `.y1proj` files; the compiler creates a `.csproj` from the Y1 source code)
+Inside are `Framework:`, `Platform:`, or `SDK:`, but as of the current update these are ignored unless you
+use the legacy compiler through code.
 2. A line containing `<REFS>` denotes a list of .dll references until a line containing `<END_REFS>`.
-A line starting with a single quote denotes a folder to look for .dlls, while anything else is the path to a single .dll.
+When using the new compiler, a line starting with a single quote loads it automagically from the assembly name,
+while other lines will be treated as paths.
 3. A line containing `<IMPORTS>` denotes a list of C# using statements without the "using" or the semicolon, until `<END_IMPORTS>`.
 4. A line containing `<STANDARD_Y1_LIBS>` denotes a list of standard Y1 libraries to include until `<END_STANDARD_Y1_LIBS>`. 
 This is currently only used for the `KeyListener` class which is required for the `ListenForKeys` statement.
+
+In older versions blank lines were accidentally/badly supported between the entries, headers and footers of these.
+This has been fixed, and blank lines are supported anywhere in these starting sections. The order still matters though.
 
 ## Direct C# Calls
 A line beginning with optional whitespace followed by `C# - ` directly compiles to the C# code following it. 
@@ -74,8 +106,8 @@ You can also use the pre-existing names for manipulation.
   * `Item2` is the objects of the type.
   * `Item3` is the TypeBuilder while the class is being dynamically defined,.
   * `Item4` is the subclasses. 
-* `y1__func`: Intended to hold temporary functions for internal usage. Currently used for summations.
-* `y1__result`: Intended to hold the temporary result of operations. Currently used for summations.
+* `y1__func`: Intended to hold temporary functions for internal usage. Currently used for summations. Type Object.
+* `y1__result`: Intended to hold the temporary result of operations. Currently used for summations. Type Object
 
 All of these variables are followed by an underscore followed by the depth. 
 The depth increases inside of internally created lambda expressions, such as summations. 
@@ -194,7 +226,7 @@ In any further commands, you are required to add the square bracket section.
 #### `CallSubclassMethod <method-name> <object-name> <subclass-name>`
 Calls a method of a subclass.
 
-#### `Summation <start> <end> <index-name>`
+#### `Summation <start> <end> <index-name> <type>`
 Followed by a block of code ending with `EndSummation`. 
 Inside of that block of code, the variable index-name will be assigned an integer. 
 Each integer starting at start inclusively and ending at end exclusively will be passed to the block. 
@@ -202,10 +234,12 @@ The results of each iteration will all be added up, either using the normal + op
 It adds them starting with start and then in increasing order, 
 (this might matter if the `op_Addition` function is non-associative or non-commutative, or if the block can return multiple different types). 
 `y1__result_(outer depth)` will be set to the result of the summation.
+The type specifies the result type, it's no longer `dynamic` like it was previously since that isn't well
+supported on some platforms.
 This function increments the depth while in the block.
 
-#### `DefineVariable <name> <expression>`
-Declares a dynamically typed (C#'s `dynamic`) variable with the name, and assigns it the expression. 
+#### `DefineVariable <name> <type> <expression>`
+Declares a variable with the name and the type, and assigns it the expression. 
 There is currently no built-in way to reassign this variable, other than C# calls.
 
 #### `Condition <boolean expression>`

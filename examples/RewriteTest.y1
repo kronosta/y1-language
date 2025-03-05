@@ -10,7 +10,7 @@
             <END_IMPORTS>
             @[Program
                 |/Main
-                    DefineVariable Line ""
+                    DefineVariable Line String ""
                     While (Line = Console.ReadLine()) != null
                         C# - Console.WriteLine(Line.Replace("hello", "Greetings, mortal!"));
                     EndWhile

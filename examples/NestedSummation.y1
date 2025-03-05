@@ -4,8 +4,8 @@
 
 @[NestedSummation
   |/Main
-    Summation 1 10 I
-      Summation 1 10 J
+    Summation 1 10 I int
+      Summation 1 10 J int
         C# - Console.WriteLine($"I,J: {I},{J}.");
         C# - return J;
       EndSummation

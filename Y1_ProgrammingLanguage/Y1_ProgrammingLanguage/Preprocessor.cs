@@ -28,33 +28,29 @@ namespace Kronosta.Language.Y1
             }
         }
 
-        public class IntRef
-        {
-            public int Value;
-
-            public IntRef(int value) { this.Value = value; }
-        }
-
         public delegate void Directive(
                 Preprocessor prep,
                 List<string> codeSplit,
                 List<string> result,
-                IntRef lineIndex,
+                FauxRefParameter<int> lineIndex,
                 object state
             );
         #endregion
 
-        #region Pre(1)processing
-        public IDictionary<string, List<string>> Macros;
-        public CompilerSettings CompilerSettings;
-        public readonly Registry<Directive> Directives;
+        #region Common fields
         public bool DoLogging = false;
         public IDictionary<string, object> customState = new Dictionary<string, object>();
+        public Compiler Compiler;
+        #endregion
+
+        #region Pre(1)processing
+        public IDictionary<string, List<string>> Macros;
+        public readonly Registry<Directive> Directives;
+
 
         public Preprocessor()
         {
             Macros = new Dictionary<string, List<string>>();
-            CompilerSettings = new CompilerSettings();
             Directives = new Registry<Directive>();
             RegisterDefaultDirectives();
         }
@@ -67,11 +63,19 @@ namespace Kronosta.Language.Y1
                 {
                     int i = ii.Value;
                     string trimmed = y1CodeSplit[i].Trim();
+                    string filename = trimmed.Split(' ')[1];
                     string contents;
-                    using (StreamReader sr = new StreamReader(trimmed.Split(' ')[1]))
+                    if (prep.Compiler.FakeFiles.ContainsKey(filename))
                     {
-                        contents = sr.ReadToEnd();
-                        contents = contents.Replace("\r\n", "\n");
+                        contents = prep.Compiler.FakeFiles[filename];
+                    }
+                    else
+                    {
+                        using (StreamReader sr = new StreamReader(filename))
+                        {
+                            contents = sr.ReadToEnd();
+                            contents = contents.Replace("\r\n", "\n");
+                        }
                     }
                     foreach (var j in contents.Split(new char[] { '\n', '\r', '\f', '\v' }))
                     {
@@ -171,25 +175,32 @@ namespace Kronosta.Language.Y1
                 static (prep, y1CodeSplit, result, ii, state) =>
                 {
                     int i = ii.Value;
+                    List<string> sourceFiles = Program.sourceFiles, sourceTexts = Program.sourceTexts;
+                    string assemblyName = Program.AssemblyName;
                     string trimmed = y1CodeSplit[i].Trim();
-                    string? originalFilename = Program.filename;
                     string outputStreamName = trimmed.Split(' ')[1];
                     i++;
                     List<string> rewriter = Preprocessor.QuestionBlock(y1CodeSplit, ref i, false);
                     i++;
                     List<string> toRewrite = Preprocessor.QuestionBlock(y1CodeSplit, ref i, false);
-                    string name = $"__Rewrite__{Program.rand.NextInt64()}.y1";
-                    using (var sw = new StreamWriter(name))
+                    string name = $"Y1__Rewrite__{Program.rand.NextInt64()}";
+                    using (var sw = new StreamWriter(name + ".y1"))
                     {
                         foreach (var j in rewriter)
                         {
                             sw.WriteLine(j);
                         }
                     }
-                    Program.Main(new string[] { name });
+                    Program.Main(new string[] { "/Source=" + name + ".y1", "/Name=" + name });
 
-                    ProcessStartInfo info = new ProcessStartInfo();
-                    info.FileName = Utils.ToIdentifier(name) + "/" + name + ".exe";
+                    ProcessStartInfo info = new ProcessStartInfo()
+                    {
+                        ArgumentList =
+                        {
+                            $"{name}/{name}.dll"
+                        }
+                    };
+                    info.FileName = "dotnet";
                     info.RedirectStandardInput = true;
                     info.RedirectStandardOutput = true;
                     info.CreateNoWindow = true;
@@ -213,11 +224,13 @@ namespace Kronosta.Language.Y1
                         ) ?? new string[] { }
                     );
                     result.AddRange(rewritten ?? new List<string>());
+                    File.Delete(name + ".y1");
+                    File.Delete($"{name}/{name}.dll");
+                    File.Delete($"{name}/{name}.runtimeconfig.json");
                     Directory.Delete(Utils.ToIdentifier(name), true);
-                    try { File.Delete(name); } catch { }
-                    try { File.Delete($"{name}.csproj"); } catch { }
-                    try { File.Delete($"{name}.~cs"); } catch { }
-                    Program.filename = originalFilename;
+                    Program.sourceFiles = sourceFiles;
+                    Program.sourceTexts = sourceTexts;
+                    Program.AssemblyName = assemblyName;
                     ii.Value = i;
                 }
             );
@@ -444,11 +457,11 @@ namespace Kronosta.Language.Y1
                     int spacePos = trimmed.IndexOf(' ');
                     string qualified = spacePos < 1 ? trimmed.Substring(1) : trimmed.Substring(1, spacePos - 1);
                     ValueTuple<string,string> ID = Directives.GetIDFromLocalizedQualified(
-                        CompilerSettings.LanguageCode,
-                        CompilerSettings.NamespaceSeparator,
+                        Compiler.CompilerSettings.LanguageCode,
+                        Compiler.CompilerSettings.NamespaceSeparator,
                         qualified
                     );
-                    IntRef ii = new IntRef(i);
+                    FauxRefParameter<int> ii = new FauxRefParameter<int>(i);
                     Directives
                          .GetEntry(ID.Item1, ID.Item2)
                         ?.Invoke(this, y1CodeSplit, result, ii, Directives.GetState(ID.Item1, ID.Item2) ?? false);

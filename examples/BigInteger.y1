@@ -1,5 +1,5 @@
 <REFS>
-  System.Numerics.dll
+  'System.Runtime.Numerics
 <END_REFS>
 
 <IMPORTS>
