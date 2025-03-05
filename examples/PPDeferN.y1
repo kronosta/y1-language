@@ -1,0 +1,49 @@
+?DefineShort Comment ?1?
+
+[[Comment !!!!This outermost ?Defer layer will define a macro called test which will print "Hello World!"]]
+?DeferN 3 ?Define Test
+  [[Comment !!!!This layer takes code and rewrites it so each line begins with a colon.]]
+  ?DeferN 2 ?Rewrite Out
+    [[Comment !!!!This layer takes code and replaces "Vessel" with "Console".]]
+    ?DeferN 1 ?Rewrite Out
+      ?CondenseLines !! @[Program !! |/Main
+          C# - string?! line = "";
+          C# - while ((line = System.Console.ReadLine()) != null) { 
+            C# - System.Console.WriteLine(line.Replace("Vessel","Console"));
+          C# - }
+      ?CondenseLines !! \|        !! ]@
+    ?DeferN 1 ?
+      @[Program
+        |/Main
+          C# - string?! line = "";
+          C# - while ((line = System.Vessel.ReadLine()) != null) { 
+            C# - System.Vessel.WriteLine(":" + line);
+          C# - }
+        \|
+      ]@
+    ?DeferN 1 ?
+  ?DeferN 2 ?
+    C# - System.Console.WriteLine("Hello ?1?!");
+  ?DeferN 2 ?
+?DeferN 3 ?
+
+@[Program
+  |/Main
+    ?DeferN 3 ?Call Test !!World!
+    ?DeferN 3 ?Call Test !!dolphins.
+    ?DeferN 3 ?Call Test !!Mario
+  \|
+]@
+
+?User_Diagnostic =======================================================`N
+    ?PrintPPResults
+?User_Diagnostic =======================================================`N
+?DeferN 1 ?User_Diagnostic =======================================================`N
+    ?DeferN 1 ?PrintPPResults
+?DeferN 1 ?User_Diagnostic =======================================================`N
+?DeferN 2 ?User_Diagnostic =======================================================`N
+    ?DeferN 2 ?PrintPPResults
+?DeferN 2 ?User_Diagnostic =======================================================`N
+?DeferN 3 ?User_Diagnostic =======================================================`N
+    ?DeferN 3 ?PrintPPResults
+?DeferN 3 ?User_Diagnostic =======================================================`N

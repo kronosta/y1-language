@@ -204,11 +204,11 @@ namespace Kronosta.Language.Y1
                     {
                         standardIn?.WriteLine(j);
                         standardIn?.Flush();
-                        standardIn?.Dispose();
                     }
+                    standardIn?.Dispose();
                     process?.WaitForExit();
                     List<string> rewritten =
-                        new List<string>(standardOut?.ReadToEnd()?.Split(
+                        new List<string>(standardOut?.ReadToEnd()?.Replace("\r\n","\n").Split(
                             new char[] { '\n', '\r', '\v', '\f' }
                         ) ?? new string[] { }
                     );
@@ -373,6 +373,33 @@ namespace Kronosta.Language.Y1
                 }
             );
 
+            Directives.Register(
+                "", "DeferN",
+                static (prep, y1CodeSplit, result, ii, state) =>
+                {
+                    string trimmed = y1CodeSplit[ii.Value].Trim();
+                    string numberStr = trimmed.Substring(8);
+                    numberStr = numberStr.Substring(0, numberStr.IndexOf(' '));
+                    int number;
+                    try { number = int.Parse(numberStr); } catch { number = 1; }
+                    string toDefer = trimmed.Substring(8 + numberStr.Length + 1);
+                    number--;
+                    if (number == 0)
+                        result.Add(toDefer);
+                    else
+                        result.Add($"?DeferN {number} {toDefer}");
+                    //Console.WriteLine($"Deferred '{toDefer}' {number} times.");
+                }
+            );
+
+            Directives.Register(
+                "", "PrintPPResults",
+                 static (prep, y1CodeSplit, result, ii, state) =>
+                 {
+                     result.ForEach(x => Console.WriteLine(x));
+                 }
+            );
+
 #if Y1_NonexistentSymbol
             // Template for copy-paste
         Directives.Register(
@@ -383,7 +410,7 @@ namespace Kronosta.Language.Y1
             }
         );
 #endif
-        }
+                 }
 
         public static List<string> QuestionBlock(
             List<string> codeSplit,
