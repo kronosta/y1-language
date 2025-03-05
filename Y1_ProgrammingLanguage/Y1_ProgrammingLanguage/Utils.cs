@@ -6,18 +6,19 @@ namespace Kronosta.Language.Y1
     internal class Utils
     {
         /*
-        Escapes:
-        - "`E", '!'
-        - "`Q", '?'
-        - "`S", space
-        - "`N", newline
-        - "`T", tab
-        - "`R", carriage return
-        - "`}", ']'
-        - "`G", '`'
-        - "`Uxxxx" (where x is a hexadecimal digit) - UTF-16 unicode codepoint
-        - ('`' followed by a newline, carriage return, form feed, or vertical tab),
-          escapes a newline. This only matters in very specific scenarios  
+        - `` `E ``, `!`
+        - `` `Q ``, `?`
+        - `` `S ``, space
+        - `` `N ``, newline
+        - `` `T ``, tab
+        - `` `R ``, carriage return
+        - `` `} ``, `]`
+        - `` `G ``, `` ` ``
+        - `` `Uxxxx `` (where x is a hexadecimal digit) - UTF-16 unicode codepoint
+        - (`` ` `` followed by a newline, carriage return, form feed, or vertical tab),
+          escapes a newline. This only matters in very specific scenarios, such as
+          when grave escaping in Yen interpolations or if you somehow inject line breaks
+          into a line.
              
          */
         public static string GraveUnescape(string escaped)

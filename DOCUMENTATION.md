@@ -294,12 +294,20 @@ This means preprocessor directives can manufacture other preprocessor directives
 Certain preprocessor directives use grave escapes, which use the grave accent mark/backtick (`` ` ``) as an escape.
 
 The following escape sequences are available:
-- `` `E `` : exclamation mark
-- `` `S `` : space
-- `` `N `` : linefeed
-- `` `T `` : horizontal tab
-- `` `R `` : carriage return
-- `` `Uxxxx `` : hexadecimal unicode escape
+Escapes:
+- `` `E ``, `!`
+- `` `Q ``, `?`
+- `` `S ``, space
+- `` `N ``, newline
+- `` `T ``, tab
+- `` `R ``, carriage return
+- `` `} ``, `]`
+- `` `G ``, `` ` ``
+- `` `Uxxxx `` (where x is a hexadecimal digit) - UTF-16 unicode codepoint
+- (`` ` `` followed by a newline, carriage return, form feed, or vertical tab),
+  escapes a newline. This only matters in very specific scenarios, such as
+  when grave escaping in Yen interpolations or if you somehow inject line breaks
+  into a line.
 
 ## Post-processing
 Preprocessor directives have a tendency to trim whitespace off the input,
@@ -467,7 +475,22 @@ Reads a single character from the user (at preprocessing time, not runtime) and 
 Looks at the front character of the input queue (without dequeueing it) and checks it against the given character, with grave escapes supported.
 
 #### `?User_DequeueInput`
-  Dequeues a character from the input queue.
+Dequeues a character from the input queue.
+
+#### `?RunPre2Processor`
+This takes one argument, which is two binary digits. If the first is 1, the lines of the following block will be stripped of whitespace. If the second is 1,
+`?!` will be replaced with `?`.
+
+What follows is a normal Preprocessor block. The stuff inside will be joined together by newlines and fed through the Prepreprocessor (with 2 "pre"s),
+then split by linefeeds, carriage returns, vertical tabs, and form feeds, back into the multi-string 1-per-line format.
+
+#### `?DeferN`
+Like `?Defer`, but before the directive/line to defer, there's a number of times that it should be deferred. This is mainly just to save users the pain of
+stacking `?Defers` into horrifically long lines, but it accomplishes the same thing.
+
+#### `?PrintPPResults`
+Simply prints the lines already outputted during the current preprocessor cycle. Thus, it is advised that you put this directive at the bottom of your source code file.
+Also, it only does this for one cycle, so you have to DeferN some copies if you want more (alternatively you could set up some sort of self-replicating thing with ?Rewrite).
 
 # Prepreprocessor
 A prepreprocessor exists that processes the input in terms of strings and regex rather than lines. 
@@ -492,5 +515,11 @@ Also, if the program begins with `^^$`, any instances of `###Yen;` will be repla
   - Anything else : pushes it to the stack
 - After the stack-based language finishes, a value is popped from the top of the stack. If it is exactly "true", the command will be run, with its output being placed into the program where this prepreprocessor directive used to be.
  
+## Pre(pre)processor calls
+`¥P1(stuff)]` calls the Preprocessor (with 1 "pre"). It's interpreted as a list of lines separated by `!`, each supporting full grave escapes.
+This is one of the situations where the line continuation feature of grave escapes comes in handy. The preprocessor will run on it and the lines will
+join together with \n in between them.
+
+`¥P2(stuff])` calls the Prepreprocessor (with 2 "pre"s). It's interpreted as one big grave-escaped string which gets prepreprocessed and stuck right back in.
 
 
