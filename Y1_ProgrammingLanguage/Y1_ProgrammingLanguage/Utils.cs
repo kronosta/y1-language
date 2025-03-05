@@ -5,6 +5,21 @@ namespace Kronosta.Language.Y1
 {
     internal class Utils
     {
+        /*
+        Escapes:
+        - "`E", '!'
+        - "`Q", '?'
+        - "`S", space
+        - "`N", newline
+        - "`T", tab
+        - "`R", carriage return
+        - "`}", ']'
+        - "`G", '`'
+        - "`Uxxxx" (where x is a hexadecimal digit) - UTF-16 unicode codepoint
+        - ('`' followed by a newline, carriage return, form feed, or vertical tab),
+          escapes a newline. This only matters in very specific scenarios  
+             
+         */
         public static string GraveUnescape(string escaped)
         {
             escaped = escaped
@@ -13,7 +28,12 @@ namespace Kronosta.Language.Y1
                 .Replace("`S", " ")
                 .Replace("`N", "\n")
                 .Replace("`T", "\t")
-                .Replace("`R", "\r");
+                .Replace("`R", "\r")
+                .Replace("`}", "]")
+                .Replace("`\n", "")
+                .Replace("`\r", "")
+                .Replace("`\f", "")
+                .Replace("`\v", "");
             string total = "";
             for (int i = 0; i < escaped.Length; i++)
             {

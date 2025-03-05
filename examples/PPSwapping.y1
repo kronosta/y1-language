@@ -1,0 +1,8 @@
+@[Program
+  |/Main
+    ¥P1?DefineShort W "Hello, world`E"!`S`S`S`SC# - System.Console.WriteLine([[W`}`});]
+    ?Defer ?RunPre2Processor 00
+      ?CondenseLines !!C# - System.Console.WriteLine("`U00A5\188]");
+    ?Defer ?
+  \|
+]@

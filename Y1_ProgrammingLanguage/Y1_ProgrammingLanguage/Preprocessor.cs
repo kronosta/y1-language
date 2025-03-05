@@ -347,7 +347,7 @@ namespace Kronosta.Language.Y1
 
             Directives.Register(
                 "", "User_DequeueInput",
-                static (prep, y1CodeSplit, result, i, state) =>
+                static (prep, y1CodeSplit, result, ii, state) =>
                 {
                     try
                     {
@@ -359,9 +359,17 @@ namespace Kronosta.Language.Y1
 
             Directives.Register(
                 "", "RunPre2Processor",
-                static (prep, y1CodeSplit, result, i, state) =>
+                static (prep, y1CodeSplit, result, ii, state) =>
                 {
-                    
+                    int i = ii.Value;
+                    string[] trimmed = y1CodeSplit[i].Trim().Split(' ');
+                    bool shouldTrim = trimmed[1][0] == '1';
+                    bool shouldEscape = trimmed[1][1] == '1';
+                    i++;
+                    List<string> block = Preprocessor.QuestionBlock(y1CodeSplit, ref i, shouldTrim, shouldEscape);
+                    string toPPP = block.Aggregate((s1, s2) => s1 + "\n" + s2);
+                    result.AddRange(prep.Prepreprocess(toPPP).Split('\n', '\r', '\f', '\v'));
+                    ii.Value = i;
                 }
             );
 
@@ -503,123 +511,147 @@ namespace Kronosta.Language.Y1
             for (int i = 0; i < withoutYen.Length; i++)
             {
                 result += withoutYen[i];
-                if (i < yenMatches.Count) result = HandleYen(yenMatches[i].Value, result);
+                if (i < yenMatches.Count) result = HandleYen(yenMatches[i].Value, result, i, withoutYen, yenMatches);
             }
             return result;
         }
 
-        public string HandleYen(string match, string soFar)
+        // There's some extra parameters in here in case I make this extendable later
+        public string HandleYen(string match, string soFar, int index, string[] withoutYen, MatchCollection yenMatches)
         {
             string result = soFar;
             string matchContents = match;
-            if (matchContents[1] == '\\')
+            char yenType = matchContents[1];
+            matchContents = matchContents.Substring(2, matchContents.Length - 3);
+            switch (yenType)
             {
-                char value = (char)int.Parse(matchContents.Substring(2, matchContents.Length - 3));
-                result += value;
-            }
-            else if (matchContents[1] == '$')
-            {
-                string contents = matchContents.Substring(2, matchContents.Length - 3);
-                Tuple<string, string>[] conditionedCommands =
-                    contents.Split(";")
-                    .Select(x => x.Trim())
-                    .Select(x => new Tuple<string, string>(x.Split(':')[0], x.Split(':')[1]))
-                    .ToArray();
-                string command = "";
-                int i = 0;
-                while (true)
-                {
-                    if (i >= conditionedCommands.Length) break;
-                    string[] lifoPieces = conditionedCommands[i]
-                        .Item1
-                        .Trim()
-                        .Split(' ')
-                        .Select(x => Utils.GraveUnescape(x))
+                case '\\':
+                    char value;
+                    try { value = (char)int.Parse(matchContents); } catch { value = '0'; }
+                    result += value;
+                    break;
+                case '$':
+                    string contents = matchContents;
+                    Tuple<string, string>[] conditionedCommands =
+                        contents.Split(";")
+                        .Select(x => x.Trim())
+                        .Select(x => new Tuple<string, string>(x.Split(':')[0], x.Split(':')[1]))
                         .ToArray();
-                    Stack<string> stack = new Stack<string>();
-                    foreach (string piece in lifoPieces)
+                    string command = "";
+                    int i = 0;
+                    while (true)
                     {
-                        if (piece == "@FileExists")
+                        if (i >= conditionedCommands.Length) break;
+                        string[] lifoPieces = conditionedCommands[i]
+                            .Item1
+                            .Trim()
+                            .Split(' ')
+                            .Select(x => Utils.GraveUnescape(x))
+                            .ToArray();
+                        Stack<string> stack = new Stack<string>();
+                        foreach (string piece in lifoPieces)
                         {
-                            stack.Push(File.Exists(stack.Pop()) ? "true" : "false");
-                        }
-                        else if (piece == "@OSMatch")
-                        {
-                            OperatingSystem os = Environment.OSVersion;
-                            string osString = os.Platform.ToString() + "-" + os.Version.ToString();
-                            stack.Push(Regex.IsMatch(osString, stack.Pop()) ? "true" : "false");
-                        }
-                        else if (piece == "@OSVersionMatch")
-                        {
-                            Version version = Environment.OSVersion.Version;
-                            string matcher = stack.Pop();
-                            Version matcherVersion = new Version(matcher.Substring(1));
-                            if (matcher[0] == '=')
+                            if (piece == "@FileExists")
                             {
-                                stack.Push(version == matcherVersion ? "true" : "false");
+                                stack.Push(File.Exists(stack.Pop()) ? "true" : "false");
                             }
-                            else if (matcher[0] == '>')
+                            else if (piece == "@OSMatch")
                             {
-                                stack.Push(version > matcherVersion ? "true" : "false");
+                                OperatingSystem os = Environment.OSVersion;
+                                string osString = os.Platform.ToString() + "-" + os.Version.ToString();
+                                stack.Push(Regex.IsMatch(osString, stack.Pop()) ? "true" : "false");
                             }
-                            else if (matcher[0] == '<')
+                            else if (piece == "@OSVersionMatch")
                             {
-                                stack.Push(version < matcherVersion ? "true" : "false");
+                                Version version = Environment.OSVersion.Version;
+                                string matcher = stack.Pop();
+                                Version matcherVersion = new Version(matcher.Substring(1));
+                                if (matcher[0] == '=')
+                                {
+                                    stack.Push(version == matcherVersion ? "true" : "false");
+                                }
+                                else if (matcher[0] == '>')
+                                {
+                                    stack.Push(version > matcherVersion ? "true" : "false");
+                                }
+                                else if (matcher[0] == '<')
+                                {
+                                    stack.Push(version < matcherVersion ? "true" : "false");
+                                }
+                                if (matcher[0] == '{')
+                                {
+                                    stack.Push(version <= matcherVersion ? "true" : "false");
+                                }
+                                if (matcher[0] == '}')
+                                {
+                                    stack.Push(version >= matcherVersion ? "true" : "false");
+                                }
                             }
-                            if (matcher[0] == '{')
+                            else if (piece == "@And")
                             {
-                                stack.Push(version <= matcherVersion ? "true" : "false");
+                                string a = stack.Pop();
+                                string b = stack.Pop();
+                                stack.Push((a == "true" && b == "true") ? "true" : "false");
                             }
-                            if (matcher[0] == '}')
+                            else if (piece == "@Or")
                             {
-                                stack.Push(version >= matcherVersion ? "true" : "false");
+                                string a = stack.Pop();
+                                string b = stack.Pop();
+                                stack.Push((a == "true" || b == "true") ? "true" : "false");
+                            }
+                            else if (piece == "@Not")
+                            {
+                                string a = stack.Pop();
+                                stack.Push(a == "true" ? "false" : "true");
+                            }
+                            else
+                            {
+                                stack.Push(piece);
                             }
                         }
-                        else if (piece == "@And")
+                        string boolean = stack.Pop();
+                        if (boolean == "true")
                         {
-                            string a = stack.Pop();
-                            string b = stack.Pop();
-                            stack.Push((a == "true" && b == "true") ? "true" : "false");
+                            command = conditionedCommands[i].Item2.Trim();
+                            break;
                         }
-                        else if (piece == "@Or")
-                        {
-                            string a = stack.Pop();
-                            string b = stack.Pop();
-                            stack.Push((a == "true" || b == "true") ? "true" : "false");
-                        }
-                        else if (piece == "@Not")
-                        {
-                            string a = stack.Pop();
-                            stack.Push(a == "true" ? "false" : "true");
-                        }
-                        else
-                        {
-                            stack.Push(piece);
-                        }
+                        i++;
                     }
-                    string boolean = stack.Pop();
-                    if (boolean == "true")
+                    if (command != "")
                     {
-                        command = conditionedCommands[i].Item2.Trim();
-                        break;
+                        string[] commandParts = command.Split(' ').Select(x => Utils.GraveUnescape(x)).ToArray();
+                        ProcessStartInfo psi = new ProcessStartInfo();
+                        psi.RedirectStandardOutput = true;
+                        psi.FileName = Utils.GraveUnescape(commandParts[0]);
+                        psi.Arguments = Utils.GraveUnescape(commandParts[1]);
+                        Process process = new Process();
+                        process.StartInfo = psi;
+                        process.Start();
+                        StreamReader reader = process.StandardOutput;
+                        string output = reader.ReadToEnd();
+                        process.WaitForExit();
+                        result += output;
                     }
-                    i++;
-                }
-                if (command != "")
-                {
-                    string[] commandParts = command.Split(' ').Select(x => Utils.GraveUnescape(x)).ToArray();
-                    ProcessStartInfo psi = new ProcessStartInfo();
-                    psi.RedirectStandardOutput = true;
-                    psi.FileName = Utils.GraveUnescape(commandParts[0]);
-                    psi.Arguments = Utils.GraveUnescape(commandParts[1]);
-                    Process process = new Process();
-                    process.StartInfo = psi;
-                    process.Start();
-                    StreamReader reader = process.StandardOutput;
-                    string output = reader.ReadToEnd();
-                    process.WaitForExit();
-                    result += output;
-                }
+                    break;
+                case 'P':
+                    if (matchContents[0] == '1')
+                    {
+                        matchContents = matchContents.Substring(1);
+                        List<string> lines = matchContents.Split('!')
+                            .Select(s => s.Replace("\r\n", "\n"))
+                            .Select(s => Utils.GraveUnescape(s))
+                            .ToList();
+                        string ppresult = this.Preprocess(lines)
+                            .Aggregate((s1, s2) => s1 + "\n" + s2);
+                        result += ppresult;
+                    }
+                    else if (matchContents[0] == '2')
+                    {
+                        matchContents = Utils.GraveUnescape(matchContents.Substring(1));
+                        result += this.Prepreprocess(matchContents);
+                    }
+                    break;
+
             }
             return result;
         }
