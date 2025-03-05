@@ -88,16 +88,11 @@ namespace Kronosta.Language.Y1
                 static (prep, codeSplit, result, lineIndexR, state) =>
                 {
                     int lineIndex = lineIndexR.Value;
-                    List<string> contents = new List<string>();
                     string name = codeSplit[lineIndex].Split(' ')[1];
                     lineIndex++;
-                    while (codeSplit[lineIndex].Trim() != "?")
-                    {
-                        contents.Add(
-                          codeSplit[lineIndex].Substring(codeSplit[lineIndex].IndexOf(":") + 1).Trim()
-                        );
-                        lineIndex++;
-                    }
+                    List<string> contents =
+                        Preprocessor.QuestionBlock(codeSplit, ref lineIndex, true, false,
+                            s => s.Substring(s.IndexOf(':') + 1));
                     prep.Macros.Add(name, contents);
                     lineIndexR.Value = lineIndex;
                 }
@@ -179,20 +174,10 @@ namespace Kronosta.Language.Y1
                     string trimmed = y1CodeSplit[i].Trim();
                     string? originalFilename = Program.filename;
                     string outputStreamName = trimmed.Split(' ')[1];
-                    List<string> rewriter = new List<string>();
-                    List<string> toRewrite = new List<string>();
                     i++;
-                    while (y1CodeSplit[i].Trim() != "?")
-                    {
-                        rewriter.Add(y1CodeSplit[i].Trim().Replace("?!", "?"));
-                        i++;
-                    }
+                    List<string> rewriter = Preprocessor.QuestionBlock(y1CodeSplit, ref i, false);
                     i++;
-                    while (y1CodeSplit[i].Trim() != "?")
-                    {
-                        toRewrite.Add(y1CodeSplit[i].Trim().Replace("?!", "?"));
-                        i++;
-                    }
+                    List<string> toRewrite = Preprocessor.QuestionBlock(y1CodeSplit, ref i, false);
                     string name = $"__Rewrite__{Program.rand.NextInt64()}.y1";
                     using (var sw = new StreamWriter(name))
                     {
@@ -252,20 +237,10 @@ namespace Kronosta.Language.Y1
                 {
                     int i = ii.Value;
                     string trimmed = y1CodeSplit[i].Trim();
-                    List<string> ifContents = new List<string>();
-                    List<string> elseContents = new List<string>();
                     i++;
-                    while (y1CodeSplit[i].Trim() != "?")
-                    {
-                        ifContents.Add(y1CodeSplit[i].Replace("?!", "?"));
-                        i++;
-                    }
+                    List<string> ifContents = Preprocessor.QuestionBlock(y1CodeSplit, ref i, false);
                     i++;
-                    while (y1CodeSplit[i].Trim() != "?")
-                    {
-                        elseContents.Add(y1CodeSplit[i].Replace("?!", "?"));
-                        i++;
-                    }
+                    List<string> elseContents = Preprocessor.QuestionBlock(y1CodeSplit, ref i, false);
                     if (prep.Macros.ContainsKey(trimmed.Split(' ')[1]))
                         result.AddRange(ifContents);
                     else
@@ -305,13 +280,8 @@ namespace Kronosta.Language.Y1
                 {
                     int i = ii.Value;
                     string trimmed = y1CodeSplit[i].Trim();
-                    List<string> contents = new List<string>();
                     i++;
-                    while (y1CodeSplit[i].Trim() != "?")
-                    {
-                        contents.Add(y1CodeSplit[i].Replace("?!", "?"));
-                        i++;
-                    }
+                    List<string> contents = Preprocessor.QuestionBlock(y1CodeSplit, ref i, false);
                     Preprocessor callee = new Preprocessor();
                     List<string> innerResult = callee.Preprocess(contents);
                     result.AddRange(innerResult);
@@ -363,24 +333,10 @@ namespace Kronosta.Language.Y1
 
                     char inputChar = ((string)prep.customState["input"])[0];
                     char test = Utils.GraveUnescape(trimmed.Split(' ')[1])[0];
-                    List<string> ifContents = new List<string>();
-                    List<string> elseContents = new List<string>();
                     i++;
-                    while (y1CodeSplit[i].Trim() != "?")
-                    {
-                        ifContents.Add(
-                          y1CodeSplit[i].Replace("?!", "?")
-                        );
-                        i++;
-                    }
+                    List<string> ifContents = Preprocessor.QuestionBlock(y1CodeSplit, ref i, false);
                     i++;
-                    while (y1CodeSplit[i].Trim() != "?")
-                    {
-                        elseContents.Add(
-                          y1CodeSplit[i].Replace("?!", "?")
-                        );
-                        i++;
-                    }
+                    List<string> elseContents = Preprocessor.QuestionBlock(y1CodeSplit, ref i, false);
                     if (inputChar == test)
                         result.AddRange(ifContents);
                     else
@@ -401,6 +357,14 @@ namespace Kronosta.Language.Y1
                 }
             );
 
+            Directives.Register(
+                "", "RunPre2Processor",
+                static (prep, y1CodeSplit, result, i, state) =>
+                {
+                    
+                }
+            );
+
 #if Y1_NonexistentSymbol
             // Template for copy-paste
         Directives.Register(
@@ -411,6 +375,26 @@ namespace Kronosta.Language.Y1
             }
         );
 #endif
+        }
+
+        public static List<string> QuestionBlock(
+            List<string> codeSplit,
+            ref int index,
+            bool trim = true,
+            bool escape = true,
+            Func<string, string>? each = null)
+        {
+            List<string> result = new List<string>();
+            while (codeSplit[index].Trim() != "?")
+            {
+                string line = codeSplit[index];
+                if (trim) line = line.Trim();
+                if (escape) line = line.Replace("?!", "?");
+                if (each != null) line = each(line);
+                result.Add(line);
+                index++;
+            }
+            return result;
         }
 
         public List<string> Preprocess(List<string> y1CodeSplit)
