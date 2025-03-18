@@ -1,13 +1,11 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security;
 
 namespace Kronosta.Language.Y1
 {
@@ -16,7 +14,7 @@ namespace Kronosta.Language.Y1
         public CompilerSettings CompilerSettings { get; set; }
         public Preprocessor Preprocessor { get; set; }
         public CSharpConverter Converter { get; set; }
-        public IDictionary<string,string> FakeFiles { get; set; }
+        public IDictionary<string, string> FakeFiles { get; set; }
 
         public Compiler()
         {
@@ -33,15 +31,15 @@ namespace Kronosta.Language.Y1
             Converter = new CSharpConverter() { Compiler = this };
         }
 
-        private string Step_Prepreprocess(string source) =>       
+        private string Step_Prepreprocess(string source) =>
             Preprocessor.Prepreprocess(source);
         private IList<string> Step_SplitLines(string source) =>
-            source.Replace("\r\n","\n").Split('\n', '\r', '\f', '\v').ToList();
+            source.Replace("\r\n", "\n").Split('\n', '\r', '\f', '\v').ToList();
         private IList<string> Step_Preprocess(IList<string> source) =>
             Preprocessor.Preprocess(source.ToList());
         private string Step_Convert(IList<string> source) =>
             Converter.ConvertToCSharp(source.ToList());
-     
+
 
         public Tuple<string, string, CompilerSettings.Step>[] GetDefaultSteps() =>
             new Tuple<string, string, CompilerSettings.Step>[]{

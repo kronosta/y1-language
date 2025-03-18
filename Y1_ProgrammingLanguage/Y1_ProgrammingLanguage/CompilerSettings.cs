@@ -1,9 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using static Kronosta.Language.Y1.CompilerSettings;
 
 namespace Kronosta.Language.Y1
 {
@@ -20,9 +17,9 @@ namespace Kronosta.Language.Y1
         public string LanguageCode = "en-US";
         public string NamespaceSeparator = "~";
         public Registry<Step> AvailableSteps = new Registry<Step>();
-        public IList<ValueTuple<string,string>> StepOrder = new List<ValueTuple<string,string>>();
+        public IList<ValueTuple<string, string>> StepOrder = new List<ValueTuple<string, string>>();
         public FromSource FromSourceFunc =
-            x => ValueTuple.Create(new List<string> { x }, new Dictionary<string,object>());
+            x => ValueTuple.Create(new List<string> { x }, new Dictionary<string, object>());
         public ToCompilation? ToCompilationFunc;
         public string AssemblyName = "TestY1";
         public bool PrintOutCSharp = false;

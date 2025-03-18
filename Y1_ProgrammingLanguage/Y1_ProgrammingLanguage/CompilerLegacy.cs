@@ -1,12 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Kronosta.Language.Y1
 {
@@ -30,7 +27,7 @@ namespace Kronosta.Language.Y1
         public static string sdk = "Microsoft.NET.Sdk";
         [ThreadStatic]
         public static Random rand = new Random((int)DateTime.Now.ToBinary());
-        
+
         public static void Compile(string[] args)
         {
             //Fix old versions having "multiple entry points"

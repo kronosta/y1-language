@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -180,7 +179,8 @@ namespace Y1
                     }
                     trimmed += y1CodeSplit[i].Trim();
                 }
-                try {
+                try
+                {
                     if (mode == "run")
                     {
                         if (trimmed.StartsWith("|/"))

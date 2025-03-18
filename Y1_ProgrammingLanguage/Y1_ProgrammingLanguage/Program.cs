@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Collections.Immutable;
-using System.Text.RegularExpressions;
-using System.Text;
 using Microsoft.CodeAnalysis.Emit;
 
 namespace Kronosta.Language.Y1
@@ -41,7 +37,7 @@ namespace Kronosta.Language.Y1
             {
                 using (StreamReader sw = new StreamReader(args[1]))
                 {
-                    args = sw.ReadToEnd().Replace("\r\n","\n").Split(new char[]{ '\n','\r'});
+                    args = sw.ReadToEnd().Replace("\r\n", "\n").Split(new char[] { '\n', '\r' });
                 }
             }
             var argdict = args.Where(x => x.StartsWith("/"))
@@ -49,7 +45,8 @@ namespace Kronosta.Language.Y1
                 .Select(x => x.Length == 1 ? new string[] { x[0], "" } : new string[] { x[0], x[1] })
                 .Aggregate(
                     new Dictionary<string, List<string>>(),
-                    (x, y) => {
+                    (x, y) =>
+                    {
                         if (x.ContainsKey(y[0])) x[y[0]].Add(y[1]);
                         else x[y[0]] = new List<string> { y[1] };
                         return x;

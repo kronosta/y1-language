@@ -13,7 +13,8 @@ namespace Kronosta.Language.Y1
         internal IDictionary<ValueTuple<string, string>, ValueTuple<T, object?>> Entries;
         internal IDictionary<ValueTuple<string, string>, LocalizedStringProvider?> EntryLocalizers;
 
-        public Registry() {
+        public Registry()
+        {
             Entries =
                 new Dictionary<ValueTuple<string, string>, ValueTuple<T, object?>>();
             EntryLocalizers =
@@ -101,7 +102,7 @@ namespace Kronosta.Language.Y1
         public ImmutableRegistry(
             ImmutableDictionary<Tuple<string, string>, Tuple<T, ImmutableDictionary<string, string>?>> Entries,
             ImmutableDictionary<Tuple<string, string>, LocalizedStringProvider?> EntryLocalizers)
-        { 
+        {
             this.Entries = Entries;
             this.EntryLocalizers = EntryLocalizers;
         }
@@ -161,7 +162,7 @@ namespace Kronosta.Language.Y1
             string @namespace,
             string entry,
             T payload,
-            ImmutableDictionary<string,string>? defaultState = null,
+            ImmutableDictionary<string, string>? defaultState = null,
             LocalizedStringProvider? localizer = null)
         {
             var tuple = Tuple.Create(@namespace, entry);

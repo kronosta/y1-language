@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 
 namespace Kronosta.Language.Y1
@@ -219,7 +218,7 @@ namespace Kronosta.Language.Y1
                     standardIn?.Dispose();
                     process?.WaitForExit();
                     List<string> rewritten =
-                        new List<string>(standardOut?.ReadToEnd()?.Replace("\r\n","\n").Split(
+                        new List<string>(standardOut?.ReadToEnd()?.Replace("\r\n", "\n").Split(
                             new char[] { '\n', '\r', '\v', '\f' }
                         ) ?? new string[] { }
                     );
@@ -409,7 +408,7 @@ namespace Kronosta.Language.Y1
                 "", "PrintPPResults",
                 static (prep, y1CodeSplit, result, ii, state) =>
                 {
-                     result.ForEach(x => Console.WriteLine(x));
+                    result.ForEach(x => Console.WriteLine(x));
                 }
             );
 
@@ -480,7 +479,7 @@ namespace Kronosta.Language.Y1
                 {
                     int spacePos = trimmed.IndexOf(' ');
                     string qualified = spacePos < 1 ? trimmed.Substring(1) : trimmed.Substring(1, spacePos - 1);
-                    ValueTuple<string,string> ID = Directives.GetIDFromLocalizedQualified(
+                    ValueTuple<string, string> ID = Directives.GetIDFromLocalizedQualified(
                         Compiler.CompilerSettings.LanguageCode,
                         Compiler.CompilerSettings.NamespaceSeparator,
                         qualified
