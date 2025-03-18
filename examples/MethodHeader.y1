@@ -1,0 +1,9 @@
+@[Program
+  |/+^public static void%%@Main%%(string[] args)
+    C# - System.Console.WriteLine(Produce(args[0]));
+  \|
+
+  |/+^public static string%%@Produce%%(string input)
+    Return input + "!!!!!"
+  \|
+]@

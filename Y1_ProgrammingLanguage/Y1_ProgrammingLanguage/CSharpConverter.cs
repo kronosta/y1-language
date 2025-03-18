@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Kronosta.Language.Y1
 {
@@ -183,8 +184,36 @@ namespace Y1
                     {
                         if (trimmed.StartsWith("|/"))
                         {
-                            csCode += "public static void " + trimmed.Substring(2) + "() {\n";
-                            csCode = startScope(depth, csCode);
+                            if (trimmed.StartsWith("|/+"))
+                            {
+                                string[] headerParams = trimmed
+                                    .Substring(3)
+                                    .Split("%%")
+                                    .Select(s => s.Trim())
+                                    .ToArray();
+                                string? modifiersAndReturn = 
+                                    (headerParams
+                                    .Where(x => x.StartsWith("^"))
+                                    .FirstOrDefault() ?? "^public static void").Substring(1);
+                                string? name = headerParams
+                                    .Where(x => x.StartsWith("@"))
+                                    .FirstOrDefault() ?? "Main";
+                                string? genericParams = headerParams
+                                    .Where(x => x.StartsWith("<"))
+                                    .FirstOrDefault() ?? "";
+                                string? methodParams = headerParams
+                                    .Where(x => x.StartsWith("("))
+                                    .FirstOrDefault() ?? "()";
+                                string? genericConstraints = headerParams
+                                    .Where(x => x.StartsWith("where"))
+                                    .FirstOrDefault() ?? "";
+                                csCode += $"{modifiersAndReturn} {name} {genericParams} {methodParams} {genericConstraints} {{\n";
+                            }
+                            else
+                            {
+                                csCode += "public static void " + trimmed.Substring(2) + "() {\n";
+                                csCode = startScope(depth, csCode);
+                            }
                         }
                         else if (trimmed == "\\|" || trimmed == "]@" || trimmed == "EndNamespace")
                         {
@@ -759,6 +788,10 @@ namespace Y1
                         else if (trimmed.Split(' ')[0] == "Namespace")
                         {
                             csCode += "namespace " + trimmed.Split(' ')[1] + "{\n";
+                        }
+                        else if (trimmed.Split(' ')[0] == "Return")
+                        {
+                            csCode += "return " + trimmed.Substring(7) + ";\n";
                         }
                         else if (trimmed.StartsWith("C# - "))
                         {

@@ -88,7 +88,23 @@ They are typically ended with `]@`, by convention, but can also be ended with `\
 
 ## Methods
 Methods are started with `|/` followed by the method's name. 
-They are, by convention, ended with `\|`, but can also be ended by `]@`. 
+They are ended with `\|`.
+
+Method headers also have another form for more control.
+```
+|/+[arguments]
+```
+The arguments are separated by double percent signs (`%%`), and follow one of a few accepted forms:
+- If an argument starts with `^`, it specifies the C# access modifiers and return type, such as `^public static string`. The `^` will be removed.
+  This defaults to `public static void`.
+- If an argument starts with `@`, it specifies the name of the method. The `@` stays, so you can use keywords as names without adding an extra `@`.
+  This defaults to `Main`.
+- If an argument starts with `<`, it specifies generic parameters in typical C# syntax. This defaults to the empty string.
+- If an argument starts with `(`, it specifies the normal parameters to the method, in typical C# syntax. This defaults to `()`.
+- If an argument starts with `where`, it specifies generic constraints, in typical C# syntax. This defaults to the empty string.
+
+The defaults are arranged in such a way that `public static void Main()` can be written as just `|/+`, and `public static void Main(string[] args)`
+can be written as just `|/+(string[] args)`. The full form would be `|/+^public static void%%@Main%%(string[] args)`.
 
 ## Variables
 Variables are not normally declared explicitly except by C# calls, however there are some important considerations with names. 
@@ -264,7 +280,12 @@ Followed by a line containing type attributes (`public`, `abstract`, `sealed`, a
 Followed by a list of blocks separated by `KeyCase <ConsoleKeyInfo expression>` lines, ended by `EndListenForKeys`.
 The first block will be run for every key, the rest will be run for the respective `ConsoleKeyInfo`. See `examples/KeyListenerTest.y1`.
 
+#### `Return <expression>`
+Returns the expression from the method.
+
 ### Methodbuilding mode
+Methodbuilding mode also has access to `Condition` and `While` commands.
+
 #### `\/`
 Ends the local scope for the method and goes back to run mode.
 
