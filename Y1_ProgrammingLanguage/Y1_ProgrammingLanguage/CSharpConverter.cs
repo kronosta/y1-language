@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -208,6 +209,7 @@ namespace Y1
                                     .Where(x => x.StartsWith("where"))
                                     .FirstOrDefault() ?? "";
                                 csCode += $"{modifiersAndReturn} {name} {genericParams} {methodParams} {genericConstraints} {{\n";
+                                if (!headerParams.Contains(":no-scope")) csCode = startScope(depth, csCode);
                             }
                             else
                             {
@@ -912,6 +914,22 @@ namespace Y1
                             lines.RemoveAt(lines.Count - 1);
                             csCode += ConvertToCSharp(lines, depth, false, "methodbuild");
                             csCode += "}\n";
+                        }
+                        else if (trimmed == "EscapeMethodBuildMode")
+                        {
+                            i++;
+                            int blockDepth = 1;
+                            List<string> lines = new List<string>();
+                            while (blockDepth > 0)
+                            {
+                                lines.Add(y1CodeSplit[i]);
+                                if (y1CodeSplit[i].Trim() == "EscapeMethodBuildMode") blockDepth++;
+                                if (y1CodeSplit[i].Trim() == "EndEscapeMethodBuildMode") blockDepth--;
+                                i++;
+                            }
+                            i--;
+                            lines.RemoveAt(lines.Count - 1);
+                            csCode += ConvertToCSharp(lines, depth, false, "run");
                         }
                         else
                         {

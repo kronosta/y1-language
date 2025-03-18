@@ -102,6 +102,8 @@ The arguments are separated by double percent signs (`%%`), and follow one of a 
 - If an argument starts with `<`, it specifies generic parameters in typical C# syntax. This defaults to the empty string.
 - If an argument starts with `(`, it specifies the normal parameters to the method, in typical C# syntax. This defaults to `()`.
 - If an argument starts with `where`, it specifies generic constraints, in typical C# syntax. This defaults to the empty string.
+- If an argument is `:no-scope`, the declarations of special variables will be omitted (this will make any command using the stack or 
+  emitting classes/methods not work).
 
 The defaults are arranged in such a way that `public static void Main()` can be written as just `|/+`, and `public static void Main(string[] args)`
 can be written as just `|/+(string[] args)`. The full form would be `|/+^public static void%%@Main%%(string[] args)`.
@@ -335,6 +337,9 @@ Declares the start of a filter block. Remember that it must be ended with the `E
 
 #### `<END>`
 Ends an exception block.
+
+#### `EscapeMethodBuildMode`
+Up until the matching `EndEscapeMethodBuildMode` command, it will temporarily switch to Run mode allowing you to use normal commands.
 
 By convention, the area inside of exception blocks not including the starting and ending instructions themselves should be indented, although it doesn't have to be.
 

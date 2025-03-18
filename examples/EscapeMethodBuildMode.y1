@@ -1,0 +1,24 @@
+<IMPORTS>
+  System
+<END_IMPORTS>
+
+@[Program
+  |/+
+    DefineVariable Message string "I am the original value"
+    PushNew
+    DefineType Test
+    DefineMethod Stuff Test_Stuff
+      \Ldstr, Message
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+      EscapeMethodBuildMode
+        SetVariable Message "I am the new value"
+      EndEscapeMethodBuildMode
+      \Ldstr, Message
+      \Call, typeof(Console).GetMethod("WriteLine", new Type[]{typeof(string)})
+      \Ret
+    \/
+    FinishType
+    CreateObject o
+    CallMethod Stuff o
+  \|
+]@
