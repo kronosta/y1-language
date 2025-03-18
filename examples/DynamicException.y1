@@ -5,7 +5,7 @@
 @[DynamicException
 
 |/Main
-  C# - string input = Console.ReadLine();
+  DefineVariable input string Console.ReadLine()
   PushNew
   DefineType T
     DefineMethod M m
