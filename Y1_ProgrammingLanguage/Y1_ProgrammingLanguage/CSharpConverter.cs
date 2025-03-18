@@ -191,7 +191,7 @@ namespace Y1
                                     .Split("%%")
                                     .Select(s => s.Trim())
                                     .ToArray();
-                                string? modifiersAndReturn = 
+                                string? modifiersAndReturn =
                                     (headerParams
                                     .Where(x => x.StartsWith("^"))
                                     .FirstOrDefault() ?? "^public static void").Substring(1);
@@ -633,6 +633,15 @@ namespace Y1
                         {
                             csCode += trimmed.Split(' ')[2] + " " + trimmed.Split(' ')[1] + " = ";
                             for (int j = 3; j < trimmed.Split(' ').Length; j++)
+                            {
+                                csCode += trimmed.Split(' ')[j] + " ";
+                            }
+                            csCode += ";\n";
+                        }
+                        else if (trimmed.Split(' ')[0] == "SetVariable")
+                        {
+                            csCode += trimmed.Split(' ')[1] + " = ";
+                            for (int j = 2; j < trimmed.Split(' ').Length; j++)
                             {
                                 csCode += trimmed.Split(' ')[j] + " ";
                             }

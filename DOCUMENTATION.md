@@ -258,6 +258,9 @@ This function increments the depth while in the block.
 Declares a variable with the name and the type, and assigns it the expression. 
 There is currently no built-in way to reassign this variable, other than C# calls.
 
+#### `SetVariable <name> <expression>`
+Sets the variable with the name to the expression.
+
 #### `Condition <boolean expression>`
 An if block, defining a block until `EndCondition`. Does not currently support else or else if. 
 This command does not increase the depth.

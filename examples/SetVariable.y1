@@ -1,0 +1,8 @@
+@[Program
+  |/+
+    DefineVariable Str string "Hello"
+    C# - System.Console.WriteLine(Str);
+    SetVariable Str "Goodbye"
+    C# - System.Console.WriteLine(Str);
+  \|
+]@
