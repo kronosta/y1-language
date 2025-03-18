@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Kronosta.Language.Y1
@@ -882,7 +882,7 @@ namespace Y1
                     Console.WriteLine($"Syntax error (specifically with argument number): Line {i}. Contents: {trimmed}");
                 }
             }
-            if (Compiler.CompilerSettings.PrintOutCSharp)
+            if (Compiler?.CompilerSettings?.PrintOutCSharp ?? false)
             {
                 Console.WriteLine("============================================================================");
                 Console.WriteLine(csCode);
