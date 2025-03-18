@@ -372,7 +372,7 @@ W0,0
 #### `?File <filename>`
   Reads the file into the source code for the next cycle. (Somewhat like #include in C/C++).
 
-#### The following command
+#### `?Define <name>`
 ```
 ?Define <name>
 <block>
@@ -437,7 +437,7 @@ Now you can just write something like:
 
 Effectively that replaces your comment with the empty string, as long as you put 4 exclamation points (not two).
 
-#### The following command
+#### `?Rewrite <Out|Err>`
 ```
 ?Rewrite <Out|Err>
 <block>
@@ -453,7 +453,7 @@ Undefines the long macro with the name.
 You cannot undefine a short macro because it's never really defined in the first place,
 it has immediate and permanent effects on the code in the same cycle and then doesn't do anything anymore.
 
-#### The following command
+#### `?IfDefined <name>`
 ```
 ?IfDefined <name>
 <block>
@@ -470,7 +470,7 @@ You can stack these indefinitely.
 #### `?WriteToFile <filename> <macro name>`
 Writes the contents of the macro with the name to the file. No arguments (`?n?`) are substituted.
 
-#### The following command
+#### `?PreprocessorEnclose`
 ```
 ?PreprocessorEnclose
 <block>
@@ -498,7 +498,7 @@ Prints the message to the console, with grave escapes supported.
 #### `?User_Read`
 Reads a single character from the user (at preprocessing time, not runtime) and puts it into a queue.
 
-#### The following command
+#### `?User_IfChar <char>`
 ```
 ?User_IfChar <char>
 <block>
@@ -526,7 +526,7 @@ stacking `?Defers` into horrifically long lines, but it accomplishes the same th
 Simply prints the lines already outputted during the current preprocessor cycle. Thus, it is advised that you put this directive at the bottom of your source code file.
 Also, it only does this for one cycle, so you have to DeferN some copies if you want more (alternatively you could set up some sort of self-replicating thing with ?Rewrite).
 
-#### The following command
+#### `?ConcatLines` and `?ConcatLinesGrave`
 ```
 ?ConcatLines[Grave]
   <block>
