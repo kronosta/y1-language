@@ -1,0 +1,19 @@
+@[Program
+  |/Main
+    ?ConcatLines
+      C# - System
+      .Console
+      .WriteLine(
+        "Hello, this is from a concatenated C# call."
+      );
+    ?
+
+    ?ConcatLinesGrave
+      C# - System
+      .Console
+      .WriteLine(
+        "And`Sthis`Sis`Sfrom`Sa`Sgrave`Sescape`E"
+      );
+    ?
+  \|
+]@

@@ -526,6 +526,15 @@ stacking `?Defers` into horrifically long lines, but it accomplishes the same th
 Simply prints the lines already outputted during the current preprocessor cycle. Thus, it is advised that you put this directive at the bottom of your source code file.
 Also, it only does this for one cycle, so you have to DeferN some copies if you want more (alternatively you could set up some sort of self-replicating thing with ?Rewrite).
 
+#### The following command
+```
+?ConcatLines[Grave]
+  <block>
+?
+```
+
+Concatenates all the lines in the block into one line. If you use `?ConcatLinesGrave`, the lines will each decode grave escape sequences.
+
 # Prepreprocessor
 A prepreprocessor exists that processes the input in terms of strings and regex rather than lines. 
 You can call these functions with the yen symbol (`¥`), followed by any number of symbols other than the closing square bracket (`]`), followed by a closing square bracket. 

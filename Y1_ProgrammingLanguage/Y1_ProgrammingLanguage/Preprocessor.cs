@@ -407,10 +407,34 @@ namespace Kronosta.Language.Y1
 
             Directives.Register(
                 "", "PrintPPResults",
-                 static (prep, y1CodeSplit, result, ii, state) =>
-                 {
+                static (prep, y1CodeSplit, result, ii, state) =>
+                {
                      result.ForEach(x => Console.WriteLine(x));
-                 }
+                }
+            );
+
+            Directives.Register(
+                "", "ConcatLines",
+                static (prep, y1CodeSplit, result, ii, state) =>
+                {
+                    int i = ii.Value;
+                    i++;
+                    List<string> segments = QuestionBlock(y1CodeSplit, ref i);
+                    result.Add(segments.Aggregate((s1, s2) => s1 + s2));
+                    ii.Value = i;
+                }
+            );
+
+            Directives.Register(
+                "", "ConcatLinesGrave",
+                static (prep, y1CodeSplit, result, ii, state) =>
+                {
+                    int i = ii.Value;
+                    i++;
+                    List<string> segments = QuestionBlock(y1CodeSplit, ref i, true, true, s => Utils.GraveUnescape(s));
+                    result.Add(segments.Aggregate((s1, s2) => s1 + s2));
+                    ii.Value = i;
+                }
             );
 
 #if Y1_NonexistentSymbol
@@ -423,7 +447,7 @@ namespace Kronosta.Language.Y1
             }
         );
 #endif
-                 }
+        }
 
         public static List<string> QuestionBlock(
             List<string> codeSplit,
