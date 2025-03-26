@@ -391,11 +391,10 @@ first non-whitespace character of the next line to decide what to do:
 - `G` - The most powerful out of all of them, it uses the rest of the line as a grave-escaped string,
   allowing you to mix tabs, spaces, question marks, odd Unicode characters, etc.
 
-To escape `[<?>]`, you can use W since it treats the third line literally:
+To escape `[<?>]`, you can use the following two lines:
 ```
 [<?>]
-W0,0
-[<?>]
+G[<?>]
 ```
 
 #### `?File <filename>`
