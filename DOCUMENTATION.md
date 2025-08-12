@@ -429,7 +429,7 @@ including within strings and comments.
 One way of deferring a short macro call is to do something like this:
 ```
 ?Define DeferredShort
-    :?!1?!ShortMacro !!argument 1!!argument 2]]
+    :?!1?!DefineShort !!argument 1!!argument 2]]
 ?
 ?Call DeferredShort !![[
 ```
@@ -437,7 +437,7 @@ One way of deferring a short macro call is to do something like this:
 If you want to defer it twice you can just defer all of those likes like this:
 ```
 ?Defer ?Define DeferredShort
-?Defer   :?!1?!ShortMacro !!argument 1!!argument 2]]
+?Defer   :?!1?!DefineShort !!argument 1!!argument 2]]
 ?Defer ?
 ?Defer ?Call DeferredShort !![[
 ```
@@ -446,7 +446,7 @@ Note that these methods will not apply the short macro later (it has already bee
 In order to apply it, you will also need to defer another copy of the `?DefineShort` command.
 The best use of these methods is simply to escape the short macro so it can be used literally in the code.
 
-Also note that `?ShortMacro`, due to the way it works internally, will immediately restart the preprocessor cycle
+Also note that `?DefineShort`, due to the way it works internally, will immediately restart the preprocessor cycle
 with the macro applied to everything after this call, and all directives ignored until the new cycle.
 This means that the short macro can be used in other directives, but it also means that the later directives will effectively have
 one extra `?Defer` and the earlier ones will run again before getting to this point.
