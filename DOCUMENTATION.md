@@ -81,8 +81,6 @@ Comments are processed AFTER the code is already preprocessed. This means you ca
 Top-level classes don't have a ton of native functionality, but using direct C# calls, you can add basically anything that can be in a class in C#. 
 All top-level classes are public.
 
-Note that the class is also implicitly ended, so the class declared last should not be closed explicitly.
-
 Top level classes are started with `@[` followed by the class's name. 
 They are typically ended with `]@`, by convention, but can also be ended with `\|`, just like a method.
 
