@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Text;
 
 namespace Kronosta.Language.Y1
 {
-    internal class Utils
+    public class Utils
     {
         /*
         - `` `E ``, `!`
