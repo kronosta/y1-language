@@ -448,8 +448,9 @@ The best use of these methods is simply to escape the short macro so it can be u
 
 Also note that `?DefineShort`, due to the way it works internally, will immediately restart the preprocessor cycle
 with the macro applied to everything after this call, and all directives ignored until the new cycle.
-This means that the short macro can be used in other directives, but it also means that the later directives will effectively have
-one extra `?Defer` and the earlier ones will run again before getting to this point.
+This means that the short macro can be used in other directives, but it also means that the earlier directives
+will run again before getting back to preprocessing the lines after this directive.
+`?DeferN` is essential for dealing with this.
 
 A weird trick if you want comments on the same line as other code is to use:
 ```
