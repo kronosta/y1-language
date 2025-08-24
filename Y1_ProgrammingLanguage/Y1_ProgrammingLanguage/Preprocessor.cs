@@ -288,6 +288,15 @@ namespace Kronosta.Language.Y1
             );
 
             Directives.Register(
+                "", "WriteToFakeFile",
+                static (prep, y1CodeSplit, result, i, state) =>
+                {
+                    string trimmed = y1CodeSplit[i.Value].Trim();
+                    prep.Compiler.FakeFiles[trimmed.Split(' ')[1]] = string.Join("\n", prep.Macros[trimmed.Split(' ')[2]]);
+                }
+            );
+
+            Directives.Register(
                 "", "PreprocessorEnclose",
                 static (prep, y1CodeSplit, result, ii, state) =>
                 {

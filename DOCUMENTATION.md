@@ -497,6 +497,10 @@ You can stack these indefinitely.
 #### `?WriteToFile <filename> <macro name>`
 Writes the contents of the macro with the name to the file. No arguments (`?n?`) are substituted.
 
+#### `?WriteToFakeFile <filename> <macro name>`
+Writes the contents of the macro with the name a fake, compiler internal file that can be retrieved with ?File later.
+This can achieve data storage. No arguments (`?n?`) are substituted.
+
 #### `?PreprocessorEnclose`
 ```
 ?PreprocessorEnclose
