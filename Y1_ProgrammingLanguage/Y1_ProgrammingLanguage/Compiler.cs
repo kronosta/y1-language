@@ -27,8 +27,9 @@ namespace Kronosta.Language.Y1
                 CompilerSettings.AvailableSteps.Register(i.Item1, i.Item2, i.Item3);
                 CompilerSettings.StepOrder.Add(ValueTuple.Create(i.Item1, i.Item2));
             }
-            Preprocessor = new Preprocessor() { Compiler = this };
-            Converter = new CSharpConverter() { Compiler = this };
+            Preprocessor = new Preprocessor(this);
+            Converter = new CSharpConverter(this);
+            FakeFiles = new Dictionary<string, string>();
         }
 
         private string Step_Prepreprocess(string source) =>

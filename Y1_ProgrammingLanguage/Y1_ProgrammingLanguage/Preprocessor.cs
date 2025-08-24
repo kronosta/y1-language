@@ -47,8 +47,9 @@ namespace Kronosta.Language.Y1
         public readonly Registry<Directive> Directives;
 
 
-        public Preprocessor()
+        public Preprocessor(Compiler compiler)
         {
+            Compiler = compiler;
             Macros = new Dictionary<string, List<string>>();
             Directives = new Registry<Directive>();
             RegisterDefaultDirectives();
@@ -174,8 +175,8 @@ namespace Kronosta.Language.Y1
                 static (prep, y1CodeSplit, result, ii, state) =>
                 {
                     int i = ii.Value;
-                    List<string> sourceFiles = Program.sourceFiles, sourceTexts = Program.sourceTexts;
-                    string assemblyName = Program.AssemblyName;
+                    List<string>? sourceFiles = Program.sourceFiles, sourceTexts = Program.sourceTexts;
+                    string? assemblyName = Program.AssemblyName;
                     string trimmed = y1CodeSplit[i].Trim();
                     string outputStreamName = trimmed.Split(' ')[1];
                     i++;
@@ -294,7 +295,7 @@ namespace Kronosta.Language.Y1
                     string trimmed = y1CodeSplit[i].Trim();
                     i++;
                     List<string> contents = Preprocessor.QuestionBlock(y1CodeSplit, ref i, false);
-                    Preprocessor callee = new Preprocessor();
+                    Preprocessor callee = new Preprocessor(new Compiler());
                     List<string> innerResult = callee.Preprocess(contents);
                     result.AddRange(innerResult);
                     ii.Value = i;

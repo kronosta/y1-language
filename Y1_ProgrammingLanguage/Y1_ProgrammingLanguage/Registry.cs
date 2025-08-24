@@ -29,7 +29,9 @@ namespace Kronosta.Language.Y1
             }
             catch
             {
+#pragma warning disable CS8603 // Possible null reference return.
                 return default(T);
+#pragma warning restore CS8603 // Possible null reference return.
             }
         }
 
@@ -48,12 +50,12 @@ namespace Kronosta.Language.Y1
         public ValueTuple<string, string> GetIDFromLocalized(string langCode, string localizedNamespace, string localizedEntry)
         {
             string? @namespace = Registry.NamespaceLocalizers
-                .Where(pair => pair.Value(langCode) == localizedNamespace)
+                .Where(pair => pair.Value?.Invoke(langCode) == localizedNamespace)
                 .Select(pair => pair.Key)
                 .DefaultIfEmpty(null)
                 .First();
             string? entry = this.EntryLocalizers
-                .Where(pair => pair.Value(langCode) == localizedNamespace && pair.Key.Item1 == @namespace)
+                .Where(pair => pair.Value?.Invoke(langCode) == localizedNamespace && pair.Key.Item1 == @namespace)
                 .Select(pair => pair.Key.Item2)
                 .DefaultIfEmpty(null)
                 .First();
@@ -81,8 +83,8 @@ namespace Kronosta.Language.Y1
             LocalizedStringProvider? localizer = null)
         {
             var tuple = ValueTuple.Create(@namespace, entry);
-            Entries.Add(tuple, ValueTuple.Create(payload, defaultState));
-            if (localizer != null) EntryLocalizers.Add(tuple, localizer);
+            Entries[tuple] = ValueTuple.Create(payload, defaultState);
+            if (localizer != null) EntryLocalizers[tuple] = localizer;
         }
     }
 
@@ -115,7 +117,9 @@ namespace Kronosta.Language.Y1
             }
             catch
             {
+#pragma warning disable CS8603 // Possible null reference return.
                 return default(T);
+#pragma warning restore CS8603 // Possible null reference return.
             }
         }
 
@@ -134,12 +138,12 @@ namespace Kronosta.Language.Y1
         public ValueTuple<string, string> GetIDFromLocalized(string langCode, string localizedNamespace, string localizedEntry)
         {
             string? @namespace = Registry.NamespaceLocalizers
-                .Where(pair => pair.Value(langCode) == localizedNamespace)
+                .Where(pair => pair.Value?.Invoke(langCode) == localizedNamespace)
                 .Select(pair => pair.Key)
                 .DefaultIfEmpty(null)
                 .First();
             string? entry = this.EntryLocalizers
-                .Where(pair => pair.Value(langCode) == localizedNamespace && pair.Key.Item1 == @namespace)
+                .Where(pair => pair.Value?.Invoke(langCode) == localizedNamespace && pair.Key.Item1 == @namespace)
                 .Select(pair => pair.Key.Item2)
                 .DefaultIfEmpty(null)
                 .First();

@@ -211,7 +211,7 @@ namespace Kronosta.Language.Y1
                         contents.Add(y1CodeSplit[i].Replace("?!", "?"));
                         i++;
                     }
-                    Preprocessor callee = new Preprocessor();
+                    Preprocessor callee = new Preprocessor(Compiler);
                     List<string> innerResult = callee.Preprocess(contents);
                     result.AddRange(innerResult);
                 }

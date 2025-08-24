@@ -70,7 +70,8 @@ namespace Kronosta.Language.Y1
                 Environment.Exit(1);
             }
             Encoding.UTF8.GetString(Encoding.Convert(encoding, Encoding.UTF8, encoding.GetBytes(y1Code)));
-            Preprocessor pp = new Preprocessor();
+            Compiler dummyComp = new Compiler();
+            Preprocessor pp = new Preprocessor(dummyComp);
             y1Code = pp.Prepreprocess(y1Code);
             string[] y1CodeSplitBlankLines = y1Code.Split('\n', '\r', '\f', '\v');
             List<string> y1CodeSplitBlankLinesRemoved = new List<string>();
@@ -83,7 +84,7 @@ namespace Kronosta.Language.Y1
             }
 
             if (logging) pp.DoLogging = true;
-            string csCode = new CSharpConverter().ConvertToCSharp(pp.Preprocess(y1CodeSplitBlankLinesRemoved), 0, true);
+            string csCode = new CSharpConverter(dummyComp).ConvertToCSharp(pp.Preprocess(y1CodeSplitBlankLinesRemoved), 0, true);
             int filenameSlashLastIndex = filename.LastIndexOf("/");
             string filenameLast = filename;
             if (filenameSlashLastIndex >= 0 && filename.Length > filenameSlashLastIndex + 1)
