@@ -27,8 +27,11 @@ namespace Kronosta.Language.Y1
         [ThreadStatic]
         public static Random rand = new Random((int)DateTime.Now.ToBinary());
 
+        [ThreadStatic]
         internal static List<string> sourceFiles;
+        [ThreadStatic]
         internal static List<string> sourceTexts;
+        [ThreadStatic]
         internal static string AssemblyName;
 
         public static void Main(string[] args)
