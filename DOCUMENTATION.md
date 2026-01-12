@@ -414,7 +414,9 @@ For example:
 ```
 
 The `?!` -> `?` replacement works a bit differently, as it happens at the `?Call`
-and not at the define. This means that `?!2?!` can be used to encode `?2?`, for example.
+and not at the define. Previously there was an issue where
+?!n?! would substitute to ?n?, making ?n? impossible to encode literally,
+but this has been fixed.
 
 #### `?Call <name> !!arg1!!arg2!!arg3!!etc.`
 Calls the long macro with the name. Grave escapes are supported
