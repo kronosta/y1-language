@@ -596,6 +596,6 @@ Also, if the program begins with `^^$`, any instances of `###Yen;` will be repla
 This is one of the situations where the line continuation feature of grave escapes comes in handy. The preprocessor will run on it and the lines will
 join together with \n in between them.
 
-`¥P2(stuff])` calls the Prepreprocessor (with 2 "pre"s). It's interpreted as one big grave-escaped string which gets prepreprocessed and stuck right back in.
+`¥P2(stuff)]` calls the Prepreprocessor (with 2 "pre"s). It's interpreted as one big grave-escaped string which gets prepreprocessed and stuck right back in.
 
 
