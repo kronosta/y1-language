@@ -431,7 +431,7 @@ including within strings and comments.
 One way of deferring a short macro call is to do something like this:
 ```
 ?Define DeferredShort
-    :?!1?!DefineShort !!argument 1!!argument 2]]
+    :?1?MacroName !!argument 1!!argument 2]]
 ?
 ?Call DeferredShort !![[
 ```
@@ -439,7 +439,7 @@ One way of deferring a short macro call is to do something like this:
 If you want to defer it twice you can just defer all of those likes like this:
 ```
 ?Defer ?Define DeferredShort
-?Defer   :?!1?!DefineShort !!argument 1!!argument 2]]
+?Defer   :?1?MacroName !!argument 1!!argument 2]]
 ?Defer ?
 ?Defer ?Call DeferredShort !![[
 ```
