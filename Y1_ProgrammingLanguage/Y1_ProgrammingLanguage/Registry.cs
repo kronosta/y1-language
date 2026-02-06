@@ -13,6 +13,14 @@ namespace Kronosta.Language.Y1
         internal IDictionary<ValueTuple<string, string>, ValueTuple<T, object?>> Entries;
         internal IDictionary<ValueTuple<string, string>, LocalizedStringProvider?> EntryLocalizers;
 
+        internal Dictionary<string, LocalizedStringProvider?> NamespaceLocalizers =
+            new Dictionary<string, LocalizedStringProvider?>();
+
+        public void RegisterNamespace(string @namespace, LocalizedStringProvider localizer)
+        {
+            NamespaceLocalizers.Add(@namespace, localizer);
+        }
+
         public Registry()
         {
             Entries =
@@ -49,7 +57,7 @@ namespace Kronosta.Language.Y1
 
         public ValueTuple<string, string> GetIDFromLocalized(string langCode, string localizedNamespace, string localizedEntry)
         {
-            string? @namespace = Registry.NamespaceLocalizers
+            string? @namespace = NamespaceLocalizers
                 .Where(pair => pair.Value?.Invoke(langCode) == localizedNamespace)
                 .Select(pair => pair.Key)
                 .DefaultIfEmpty(null)
@@ -90,8 +98,19 @@ namespace Kronosta.Language.Y1
 
     public class ImmutableRegistry<T>
     {
-        internal ImmutableDictionary<Tuple<string, string>, Tuple<T, ImmutableDictionary<string, string>?>> Entries;
-        internal ImmutableDictionary<Tuple<string, string>, LocalizedStringProvider?> EntryLocalizers;
+        internal readonly ImmutableDictionary<Tuple<string, string>, Tuple<T, ImmutableDictionary<string, string>?>> Entries;
+        internal readonly ImmutableDictionary<Tuple<string, string>, LocalizedStringProvider?> EntryLocalizers;
+
+        internal readonly ImmutableDictionary<string, LocalizedStringProvider?> NamespaceLocalizers;
+
+        public ImmutableRegistry<T> RegisterNamespace(string @namespace, LocalizedStringProvider localizer)
+        {
+            return new ImmutableRegistry<T>(
+                Entries,
+                EntryLocalizers,
+                NamespaceLocalizers.Add(@namespace, localizer)
+            );
+        }
 
         public ImmutableRegistry()
         {
@@ -99,14 +118,17 @@ namespace Kronosta.Language.Y1
                 ImmutableDictionary.Create<Tuple<string, string>, Tuple<T, ImmutableDictionary<string, string>?>>();
             this.EntryLocalizers =
                 ImmutableDictionary.Create<Tuple<string, string>, LocalizedStringProvider?>();
+            this.NamespaceLocalizers = ImmutableDictionary.Create<string, LocalizedStringProvider?>();
         }
 
         public ImmutableRegistry(
             ImmutableDictionary<Tuple<string, string>, Tuple<T, ImmutableDictionary<string, string>?>> Entries,
-            ImmutableDictionary<Tuple<string, string>, LocalizedStringProvider?> EntryLocalizers)
+            ImmutableDictionary<Tuple<string, string>, LocalizedStringProvider?> EntryLocalizers,
+            ImmutableDictionary<string, LocalizedStringProvider?> NamespaceLocalizers)
         {
             this.Entries = Entries;
             this.EntryLocalizers = EntryLocalizers;
+            this.NamespaceLocalizers = NamespaceLocalizers;
         }
 
         public T GetEntry(string @namespace, string entry)
@@ -137,7 +159,7 @@ namespace Kronosta.Language.Y1
 
         public ValueTuple<string, string> GetIDFromLocalized(string langCode, string localizedNamespace, string localizedEntry)
         {
-            string? @namespace = Registry.NamespaceLocalizers
+            string? @namespace = NamespaceLocalizers
                 .Where(pair => pair.Value?.Invoke(langCode) == localizedNamespace)
                 .Select(pair => pair.Key)
                 .DefaultIfEmpty(null)
@@ -172,7 +194,8 @@ namespace Kronosta.Language.Y1
             var tuple = Tuple.Create(@namespace, entry);
             return new ImmutableRegistry<T>(
                 Entries.Add(tuple, Tuple.Create(payload, defaultState)),
-                localizer != null ? EntryLocalizers.Add(tuple, localizer) : EntryLocalizers
+                localizer != null ? EntryLocalizers.Add(tuple, localizer) : EntryLocalizers,
+                NamespaceLocalizers
             );
         }
 
@@ -195,14 +218,6 @@ namespace Kronosta.Language.Y1
                 : base(message, inner)
             {
             }
-        }
-
-        internal static readonly Dictionary<string, LocalizedStringProvider?> NamespaceLocalizers =
-            new Dictionary<string, LocalizedStringProvider?>();
-
-        public static void RegisterNamespace(string @namespace, LocalizedStringProvider localizer)
-        {
-            NamespaceLocalizers.Add(@namespace, localizer);
         }
     }
 }

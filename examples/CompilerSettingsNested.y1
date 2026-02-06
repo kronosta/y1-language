@@ -1,0 +1,40 @@
+@@@MOD_COMPILER_SETTINGS
+  @@@MOD_COMPILER_SETTINGS
+    <REFS>
+      'y1c
+    <END_REFS>
+    <IMPORTS>
+      Kronosta.Language.Y1
+    <END_IMPORTS>
+    @[Entry
+      |/+@Func%%(object settingsObj)
+        DefineVariable Settings CompilerSettings (CompilerSettings)settingsObj
+        C# - Settings.PrintOutCSharp = true;
+        C# - Settings.NamespaceSeparator = "NamespaceBeforeThis";
+      \|
+    ]@
+  @@@END_COMPILER_\SETTINGS
+  <REFS>
+    'y1c
+  <END_REFS>
+  <IMPORTS>
+    Kronosta.Language.Y1
+  <END_IMPORTS>
+  @[Entry
+    |/+@Func%%(object settingsObj)
+      NamespaceBeforeThisDefineVariable Settings CompilerSettings (CompilerSettings)settingsObj
+      C# - Settings.PrintOutCSharp = false;
+      C# - Settings.NamespaceSeparator = "##";
+    \|
+  ]@
+@@@END_COMPILER_SETTINGS
+
+?##Define Y
+  :C# - System.Console.WriteLine("hello, it works");
+?
+
+@[Program
+  |/Main
+    ?##Call Y
+  \|
+]@

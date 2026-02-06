@@ -344,7 +344,7 @@ MigrationBackup/
 # End of https://mrkandreev.name/snippets/gitignore-generator/#vs
 
 #run-compiler.bat
-examples/*/
+examples/*/[^_]*
 examples/*.y1.csproj
 examples/*.y1.~cs
 examples/*.dll
