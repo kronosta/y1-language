@@ -102,15 +102,15 @@ namespace Kronosta.Language.Y1
             }
             using (StreamWriter sw = new StreamWriter(Path.Combine(newFolder, AssemblyName + ".runtimeconfig.json")))
             {
-                sw.WriteLine(@"{
-  ""runtimeOptions"": {
-    ""tfm"": ""net6.0"",
-    ""framework"": {
-      ""name"": ""Microsoft.NETCore.App"",
-      ""version"": ""6.0.0""
-    }
-  }
-}");
+                sw.WriteLine($@"{{
+  ""runtimeOptions"": {{
+    ""tfm"": ""{tfm}"",
+    ""framework"": {{
+      ""name"": ""{frameworkName}"",
+      ""version"": ""{frameworkVersion}""
+    }}
+  }}
+}}");
             }
         }
     }
