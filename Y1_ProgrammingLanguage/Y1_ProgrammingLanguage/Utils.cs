@@ -1,10 +1,20 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
 using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 
 namespace Kronosta.Language.Y1
 {
     public class Utils
     {
+        private static long FuncAssemblyCount = 0;
+
         /*
         - `` `E ``, `!`
         - `` `Q ``, `?`
@@ -108,5 +118,44 @@ namespace Kronosta.Language.Y1
             }
             return result;
         }
+
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8603 // Possible null reference return.
+        public static Func<object?, object?> Y1ToFunc(string y1)
+        {
+            Compiler compiler = new Compiler();
+            Stream stream = new MemoryStream();
+            string aName = $"Kronosta.Y1.Special.Utils_Y1ToFunc_{FuncAssemblyCount}";
+            FuncAssemblyCount++;
+            EmitResult result = compiler.Compile(
+                stream,
+                aName,
+                new Dictionary<string, string>(),
+                new List<string> { y1 },
+                OutputKind.DynamicallyLinkedLibrary);
+            if (!result.Success)
+            {
+                throw new SyntaxErrorException("Error when compiling assembly for Utils.Y1ToFunc:\n[\n" +
+                    string.Join("\n,,,\n",
+                        result.Diagnostics.Select(
+                            diag => diag.GetMessage() + ", Location: " +
+                                diag.Location.MetadataModule + ":" + diag.Location.GetLineSpan()))
+                                + "\n]\nSourceCode: " + result.Diagnostics.Where(
+                                    x => x.Location.SourceTree?.ToString() != null
+                                ).FirstOrDefault()?.Location?.SourceTree);
+            }
+            stream.Position = 0;
+            AssemblyLoadContext alc = new AssemblyLoadContext(aName, true);
+            Assembly assem = alc.LoadFromStream(stream);
+            Type type = assem.GetType("Entry");
+
+            MethodInfo method = type.GetMethod("Func", new Type[] { typeof(object) });
+
+            return param => method.Invoke(null, new object?[] { param });
+        }
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8603 // Possible null reference return.
     }
 }

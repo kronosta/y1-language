@@ -41,9 +41,23 @@ namespace Kronosta.Language.Y1
         private string Step_Convert(IList<string> source) =>
             Converter.ConvertToCSharp(source.ToList());
 
+        private string Step_SetCompilerSettings(string source, Compiler compiler)
+        {
+            if (source.Trim().StartsWith("@@@MOD_COMPILER_SETTINGS")) {
+                string newSource = source.Trim().Substring(source.Trim().IndexOf("@@@END_COMPILER_SETTINGS") + 24);
+                string y1Code = source.Trim().Substring(24, source.Trim().IndexOf("@@@END_COMPILER_SETTINGS") - 24);
+                y1Code = y1Code.Replace("@@@END_COMPILER_\\", "@@@END_COMPILER_");
+                CompilerSettings.ModifyFromY1Code(y1Code);
+                return newSource;
+            }
+            else return source;
+        }
+
 
         public Tuple<string, string, CompilerSettings.Step>[] GetDefaultSteps() =>
             new Tuple<string, string, CompilerSettings.Step>[]{
+                Tuple.Create<string, string, CompilerSettings.Step>("", "SetCompilerSettings",
+                    (x,_,_) => ValueTuple.Create(new List<string> { Step_SetCompilerSettings(x.Item1[0], this)}, x.Item2)),
                 Tuple.Create<string, string, CompilerSettings.Step>("", "Prepreprocess",
                     (x,_,_) => ValueTuple.Create(new List<string> { Step_Prepreprocess(x.Item1[0])}, x.Item2)),
                 Tuple.Create<string, string, CompilerSettings.Step>("", "SplitLines",
@@ -80,7 +94,8 @@ namespace Kronosta.Language.Y1
             Stream stream,
             string assemblyName,
             IDictionary<string, string> files,
-            IList<string> startingSources)
+            IList<string> startingSources,
+            OutputKind outputKind = OutputKind.ConsoleApplication)
         {
             CompilerSettings.AssemblyName = assemblyName;
             FakeFiles = files;
@@ -101,6 +116,10 @@ namespace Kronosta.Language.Y1
             Compilation? compilation = CompilerSettings.ToCompilationFunc?.Invoke(processedSources);
             if (compilation == null)
                 throw new NullReferenceException("CompilerSettings.ToCompilationFunc did not produce a compilation or does not exist.");
+
+            compilation = compilation.WithOptions(new CSharpCompilationOptions(outputKind));
+            
+
             return compilation.Emit(stream);
         }
 
