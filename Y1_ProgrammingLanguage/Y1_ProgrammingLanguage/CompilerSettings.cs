@@ -25,6 +25,7 @@ namespace Kronosta.Language.Y1
         public ToCompilation? ToCompilationFunc;
         public string AssemblyName = "TestY1";
         public bool PrintOutCSharp = false;
+        public Compiler Compiler { get; internal set; }
 
         public CompilerSettings() { }
 

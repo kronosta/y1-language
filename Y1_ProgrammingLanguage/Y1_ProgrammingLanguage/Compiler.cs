@@ -20,7 +20,8 @@ namespace Kronosta.Language.Y1
         {
             CompilerSettings = new CompilerSettings()
             {
-                ToCompilationFunc = this.ToCompilation
+                ToCompilationFunc = this.ToCompilation,
+                Compiler = this
             };
             foreach (var i in GetDefaultSteps())
             {
