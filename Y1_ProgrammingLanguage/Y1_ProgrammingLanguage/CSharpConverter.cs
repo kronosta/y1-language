@@ -847,7 +847,7 @@ System.Collections.Generic.Dictionary<string, System.Type>
                 "", "DefineBakedField",
                 (converter, i, depth, mode, modeArg, csCode, trimmed, y1CodeSplit, state) => {
                     string[] headerParams = trimmed
-                                    .Substring(16)
+                                    .Substring(trimmed.IndexOf(' ') + 1)
                                     .Split("%%")
                                     .Select(s => s.Trim())
                                     .ToArray();
@@ -882,7 +882,7 @@ System.Collections.Generic.Dictionary<string, System.Type>
                 (converter, i, depth, mode, modeArg, csCode, trimmed, y1CodeSplit, state) => {
                     int ii = i.Value;
                     string[] headerParams = trimmed
-                                    .Substring(19)
+                                    .Substring(trimmed.IndexOf(' ') + 1)
                                     .Split("%%")
                                     .Select(s => s.Trim())
                                     .ToArray();
