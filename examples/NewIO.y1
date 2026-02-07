@@ -1,0 +1,13 @@
+@[Program
+  |/+:no-scope
+    PrintLine "hello, this is a line"
+    Print "this is "
+    Print "on the same line"
+    PrintLine
+
+    DefineVariable yourFavoriteColor string null
+    Print "Input your favorite color:"
+    ReadLine yourFavoriteColor
+    PrintLine $"yuck! {yourFavoriteColor} is a terrible color!"
+  \|
+]@

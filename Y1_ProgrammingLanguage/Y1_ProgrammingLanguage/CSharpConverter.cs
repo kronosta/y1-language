@@ -930,6 +930,27 @@ System.Collections.Generic.Dictionary<string, System.Type>
                     return csCode;
                 }
             );
+            Commands.Register(
+                "", "PrintLine",
+                (converter, i, depth, mode, modeArg, csCode, trimmed, y1CodeSplit, state) =>
+                {
+                    return csCode + $"System.Console.WriteLine({trimmed.Substring(9)});";
+                }
+            );
+            Commands.Register(
+                "", "Print",
+                (converter, i, depth, mode, modeArg, csCode, trimmed, y1CodeSplit, state) =>
+                {
+                    return csCode + $"System.Console.Write({trimmed.Substring(5)});";
+                }
+            );
+            Commands.Register(
+                "", "ReadLine",
+                (converter, i, depth, mode, modeArg, csCode, trimmed, y1CodeSplit, state) =>
+                {
+                    return csCode + $"{trimmed.Substring(8)} = System.Console.ReadLine();";
+                }
+            );
         }
 
         #endregion

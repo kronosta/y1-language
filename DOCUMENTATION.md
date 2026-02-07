@@ -308,6 +308,15 @@ First line works similarly to `|/+<stuff>`, where it's a series of arguments sep
 - `:no-scope-get` removes the automatic variable from the get method
 - `:no-scope-set` removes the automatic variable from the get method
 
+#### `PrintLine <something>`
+PrintLine calls `Console.WriteLine( )` with its argument
+
+#### `Print <something>`
+Print calls `Console.Write( )` with its argument
+
+#### `ReadLine <variable>`
+ReadLine calls `Console.ReadLine( )` and sets the variable to the result.
+
 This should be followed by a series of commands for the get method (should return the proper type),
 followed by `EndGet`, then a series of commands for the set method, followed by `EndSet`.
 
