@@ -1,0 +1,39 @@
+<IMPORTS>
+  System
+<END_IMPORTS>
+
+@[Program
+  DefineBakedField ^public static%%@myNumber%%$int%%=60
+  
+  '$. 60
+  '$. 42
+  '$. 9
+  '$. 17
+  '$. 0
+  '$. 11
+  |/+:no-scope
+
+    C# - Console.WriteLine(myNumber);
+    C# - myNumber = 42;
+    C# - Console.WriteLine(myNumber);
+
+    DefineVariable container NumberContainer new NumberContainer()
+    C# - Console.WriteLine(container.SecondValue);
+    SetVariable container.SecondValue 17
+    C# - Console.WriteLine(container.SecondValue);
+    C# - Console.WriteLine(container.FirstValue);
+    SetVariable container.FirstValue 11
+    C# - Console.WriteLine(container.FirstValue);
+  \|
+]@
+
+@[NumberContainer
+  DefineBakedField ^private%%@_firstValue%%$int%%=0
+  DefineBakedField ^public%%@SecondValue%%$int%%=9%%:public-property
+
+  DefineBakedProperty ^public%%@FirstValue%%$int%%:no-scope-get%%:no-scope-set
+    Return _firstValue
+  EndGet
+    SetVariable _firstValue value
+  EndSet
+]@

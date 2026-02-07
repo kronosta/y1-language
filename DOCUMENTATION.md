@@ -286,6 +286,33 @@ The first block will be run for every key, the rest will be run for the respecti
 #### `Return <expression>`
 Returns the expression from the method.
 
+#### `DefineBakedField <stuff>`
+Works similarly to `|/+<stuff>`, where it's a series of arguments separated by `%%`.
+- For the following, only the first one counts
+  - `^` starting an argument treats it as the access modifiers (default `public static`)
+  - `@` starting an argument treats it as the name of the field (default `field`)
+  - `$` starting an argument treats it as the type (default `string`)
+  - `=` starting an argument treats it as a value (an initial value is only set if this argument is present)
+- In order of decreasing priority:
+  - `:public-property` makes it an automatically implemented property with `{get; set;}`
+  - `:private-set-property` makes it an automatically implemented property with `{get; private set;}`
+  - `:private-get-property` makes it an automatically implemented property with `{private get; set;}`
+  - `:read-only-property` makes it an automatically implemented property with `{get; init;}`
+
+#### `DefineBakedProperty <stuff>`
+First line works similarly to `|/+<stuff>`, where it's a series of arguments separated by `%%`.
+- For the following, only the first one counts
+  - `^` starting an argument treats it as the access modifiers (default `public static`)
+  - `@` starting an argument treats it as the name of the property (default `Field`)
+  - `$` starting an argument treats it as the type (default `string`)
+- `:no-scope-get` removes the automatic variable from the get method
+- `:no-scope-set` removes the automatic variable from the get method
+
+This should be followed by a series of commands for the get method (should return the proper type),
+followed by `EndGet`, then a series of commands for the set method, followed by `EndSet`.
+
+
+
 ### Methodbuilding mode
 Methodbuilding mode also has access to `Condition` and `While` commands.
 

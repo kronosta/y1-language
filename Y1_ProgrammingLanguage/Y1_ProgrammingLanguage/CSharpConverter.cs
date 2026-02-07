@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Kronosta.Language.Y1
@@ -841,6 +842,93 @@ System.Collections.Generic.Dictionary<string, System.Type>
             Commands.Register(
                 "", "Return",
                 (converter, ii, depth_, mode, modeArg, csCode, trimmed, y1CodeSplit, state) => csCode + "return " + trimmed.Substring(7) + ";\n"
+            );
+            Commands.Register(
+                "", "DefineBakedField",
+                (converter, i, depth, mode, modeArg, csCode, trimmed, y1CodeSplit, state) => {
+                    string[] headerParams = trimmed
+                                    .Substring(16)
+                                    .Split("%%")
+                                    .Select(s => s.Trim())
+                                    .ToArray();
+                    string? modifiers =
+                        (headerParams
+                        .Where(x => x.StartsWith("^"))
+                        .FirstOrDefault() ?? "^public static").Substring(1);
+                    string? name = headerParams
+                        .Where(x => x.StartsWith("@"))
+                        .FirstOrDefault() ?? "field";
+                    string? type = (headerParams
+                        .Where(x => x.StartsWith("$"))
+                        .FirstOrDefault() ?? "$string").Substring(1);
+                    string? value = headerParams
+                        .Where(x => x.StartsWith("="))
+                        .FirstOrDefault();
+                    if (value != null) value = " = " + value.Substring(1);
+                    if (headerParams.Contains(":public-property"))
+                        return csCode + $"{modifiers} {type} {name} {{get; set;}}{value ?? ""};\n";
+                    else if (headerParams.Contains(":private-set-property"))
+                        return csCode + $"{modifiers} {type} {name} {{get; private set;}}{value ?? ""};\n";
+                    else if (headerParams.Contains(":private-get-property"))
+                        return csCode + $"{modifiers} {type} {name} {{private get; set;}}{value ?? ""};\n";
+                    else if (headerParams.Contains(":read-only-property"))
+                        return csCode + $"{modifiers} {type} {name} {{get; init;}}{value ?? ""};\n";
+                    else
+                        return csCode + $"{modifiers} {type} {name}{value ?? ""};\n";
+                }
+            );
+            Commands.Register(
+                "", "DefineBakedProperty",
+                (converter, i, depth, mode, modeArg, csCode, trimmed, y1CodeSplit, state) => {
+                    int ii = i.Value;
+                    string[] headerParams = trimmed
+                                    .Substring(19)
+                                    .Split("%%")
+                                    .Select(s => s.Trim())
+                                    .ToArray();
+                    string? modifiers =
+                        (headerParams
+                        .Where(x => x.StartsWith("^"))
+                        .FirstOrDefault() ?? "^public static").Substring(1);
+                    string? name = headerParams
+                        .Where(x => x.StartsWith("@"))
+                        .FirstOrDefault() ?? "Field";
+                    string? type = (headerParams
+                        .Where(x => x.StartsWith("$"))
+                        .FirstOrDefault() ?? "$string").Substring(1);
+                    
+                    bool noScopeGet = headerParams.Contains(":no-scope-get");
+                    bool noScopeSet = headerParams.Contains(":no-scope-set");
+                    List<string> getLines = new List<string>();
+                    List<string> setLines = new List<string>();
+                    ii++;
+                    while (Commands.GetIDFromLocalizedQualified(
+                            Compiler.CompilerSettings.LanguageCode, Compiler.CompilerSettings.NamespaceSeparator,
+                            y1CodeSplit[ii].Trim().Split(' ')[0]) != new ValueTuple<string, string>("", "EndGet"))
+                    {
+                        getLines.Add(y1CodeSplit[ii]);
+                        ii++;
+                    }
+                    ii++;
+                    while (Commands.GetIDFromLocalizedQualified(
+                        Compiler.CompilerSettings.LanguageCode, Compiler.CompilerSettings.NamespaceSeparator,
+                        y1CodeSplit[ii].Trim().Split(' ')[0]) != new ValueTuple<string, string>("", "EndSet"))
+                    {
+                        setLines.Add(y1CodeSplit[ii]);
+                        ii++;
+                    }
+                    csCode += $"{modifiers} {type} {name} {{\nget {{\n";
+                    if (!noScopeGet)
+                        csCode = startScope(0, csCode);
+                    csCode += ConvertToCSharp(getLines);
+                    csCode += "}\nset {\n";
+                    if (!noScopeSet)
+                        csCode = startScope(0, csCode);
+                    csCode += ConvertToCSharp(setLines);
+                    csCode += "}\n}\n";
+                    i.Value = ii;
+                    return csCode;
+                }
             );
         }
 
