@@ -104,15 +104,17 @@ namespace Kronosta.Language.Y1
                 startingSources
                 .Select(s => CompilerSettings.FromSourceFunc(s))
                 .ToList();
-            for (int i = 0; i < CompilerSettings.StepOrder.Count; i++)
+            var stepOrder = CompilerSettings.StepOrder.ToList();
+            while (stepOrder.Count > 0)
             {
                 for (var j = new FauxRefParameter<int>(0); j.Value < processedSources.Count; j.Value++)
                 {
-                    var stepID = CompilerSettings.StepOrder[i];
+                    var stepID = stepOrder[0];
                     processedSources[j.Value] = CompilerSettings.AvailableSteps.GetEntry(stepID.Item1, stepID.Item2)(
                         processedSources[j.Value], processedSources, j);
 
                 }
+                stepOrder.RemoveAt(0);
             }
             Compilation? compilation = CompilerSettings.ToCompilationFunc?.Invoke(processedSources);
             if (compilation == null)
